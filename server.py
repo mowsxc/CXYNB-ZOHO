@@ -14,6 +14,8 @@ PORT = 8000
 WORKSPACE = os.path.dirname(os.path.abspath(__file__))
 MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 
+_valid_months = {}
+
 
 def load_months():
     if os.path.exists(MONTHS_FILE):
@@ -42,6 +44,45 @@ def default_month(urls):
         return cur
     lst = sorted(urls.keys(), reverse=True)
     return lst[0] if lst else None
+
+
+def validate_month(url, timeout=10):
+    try:
+        data = fetch_sheet(url, timeout=timeout)
+        rows = data.get("daily", [])
+        period_raw = data.get("period", "")
+        period = normalize_period(period_raw)
+        if not period or "-" not in period or len(rows) == 0:
+            return None
+        summary = data.get("summary", {})
+        def is_zero(val):
+            try:
+                return float(val) == 0
+            except (ValueError, TypeError):
+                return True
+        key_fields = ["网费", "售货", "美团", "现金结余"]
+        if all(is_zero(summary.get(f, "")) for f in key_fields):
+            return None
+        return period
+    except Exception:
+        return None
+
+
+def init_valid_months():
+    global _valid_months
+    stored = load_months()
+    valid = {}
+    print("Validating months...")
+    for key, url in stored.items():
+        result = validate_month(url)
+        if result:
+            valid[key] = url
+            print(f"  {key} OK")
+        else:
+            print(f"  {key} SKIP (no data)")
+    _valid_months = valid
+    if not valid:
+        print("WARNING: no valid months!")
 
 
 def serve_static(path, handler):
@@ -82,19 +123,41 @@ def json_response(handler, data, status=200):
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        global _valid_months
         parsed = urlparse(self.path)
         path = parsed.path
         qs = parse_qs(parsed.query)
-        urls = load_months()
-        avail = build_available(urls)
+        avail = build_available(_valid_months)
 
         if path == "/api/months":
-            json_response(self, {"available": avail, "list": sorted(urls.keys(), reverse=True)})
+            # Lazy re-check one skipped month per call
+            stored = load_months()
+            for k, v in stored.items():
+                if k not in _valid_months:
+                    result = validate_month(v)
+                    if result:
+                        _valid_months[k] = v
+                    break
+            avail = build_available(_valid_months)
+            json_response(self, {"available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
             return
 
         if path == "/api/data":
             period = qs.get("period", [None])[0]
-            url = urls.get(period) or urls.get(default_month(urls)) if urls else None
+            targets = _valid_months
+            url = targets.get(period)
+            if not url:
+                stored = load_months()
+                url = stored.get(period)
+                if url:
+                    result = validate_month(url)
+                    if result:
+                        _valid_months[period] = url
+                        url = url
+                    else:
+                        url = None
+            if not url:
+                url = targets.get(default_month(targets)) if targets else None
             if not url:
                 json_response(self, {"error": "无可用数据"}, 404)
                 return
@@ -115,20 +178,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 json_response(self, {"error": "缺少 url 参数"}, 400)
                 return
             url_to_add = url_to_add.split("?")[0]
-            try:
-                data = fetch_sheet(url_to_add)
-                period = normalize_period(data.get("period", ""))
-                if not period or "-" not in period:
-                    json_response(self, {"error": f"无法识别月份: {data.get('period')}"}, 400)
-                    return
-                urls[period] = url_to_add
-                save_months(urls)
-                avail = build_available(urls)
-                json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(urls.keys(), reverse=True)})
-            except urllib.error.URLError as e:
-                json_response(self, {"error": f"抓取失败: {e}"}, 502)
-            except Exception as e:
-                json_response(self, {"error": str(e)}, 500)
+            period = validate_month(url_to_add)
+            if not period:
+                json_response(self, {"error": "链接无有效数据或无法识别月份"}, 400)
+                return
+            stored = load_months()
+            stored[period] = url_to_add
+            save_months(stored)
+            _valid_months[period] = url_to_add
+            avail = build_available(_valid_months)
+            json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
             return
 
         serve_static(self.path, self)
@@ -138,6 +197,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    init_valid_months()
     server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Server running on http://0.0.0.0:{PORT}")
     server.serve_forever()
