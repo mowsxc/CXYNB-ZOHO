@@ -990,6 +990,9 @@ function submitAddMonth(){
 document.getElementById('addModal').addEventListener('click',function(e){
   if(e.target===this) hideAddMonth();
 });
+
+// Preview keepalive heartbeat (every 150s)
+setInterval(function(){ fetch('/api/months',{cache:'no-cache'}); },150000);
 </script>
 
 <div class="add-modal" id="addModal">
