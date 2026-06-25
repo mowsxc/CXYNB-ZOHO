@@ -65,7 +65,10 @@ def _build_data(rows):
     for row in rows[4:]:
         entry = {}
         for j, h in enumerate(headers):
-            entry[h] = row[j] if j < len(row) else ""
+            val = row[j] if j < len(row) else ""
+            if h in ("支出明细", "退款明细") and val and val != "0":
+                val = _split_items(val)
+            entry[h] = val
         daily.append(entry)
 
     return {
@@ -74,6 +77,16 @@ def _build_data(rows):
         "headers": headers,
         "daily": daily,
     }
+
+
+def _split_items(text):
+    """拆分无分隔符拼接的支出项目, 如 '英雄联盟特权2000收款码36' → '英雄联盟特权2000，收款码36'"""
+    import re as _re
+    pattern = _re.compile(r'([\u4e00-\u9fff\d][\u4e00-\u9fff]*)(\d+(?:\.\d+)?)')
+    matches = pattern.findall(text)
+    if not matches:
+        return text
+    return '，'.join(name + price for name, price in matches)
 
 
 def normalize_period(raw):
