@@ -34,14 +34,35 @@ def fetch_sheet(url, timeout=15):
 
 
 def _parse_grid(html):
-    """按行解析 HTML 表格，返回每行的单元格文本列表。"""
+    """按行解析 HTML 表格，通过 left 位置对齐空单元格，返回每行完整列数据。"""
     blocks = re.split(r"<div class='row' style='top:\d+px;", html)[1:]
     rows = []
+    column_positions = None  # list of left pixel values from header row
+
     for block in blocks:
-        cells = re.findall(r"<div class\s*=\s*'w100'>([^<]*)</div>", block)
-        texts = [c.strip() for c in cells if c.strip()]
+        col_divs = re.findall(
+            r"<div style='[^']*left:(\d+)px[^']*'[^>]*>"
+            r"(?:<div class\s*=\s*'w100'>([^<]*)</div>)?"
+            r"</div>",
+            block,
+        )
+        if not col_divs:
+            continue
+
+        if column_positions is None:
+            # First row with content: track position sequence from period row
+            column_positions = [int(p) for p, _ in col_divs]
+
+        # Build position→text map for this row
+        pos_map = {int(p): (v or "").strip() for p, v in col_divs}
+
+        texts = [pos_map.get(pos, "") for pos in column_positions]
+        # Trim trailing empty columns but keep internal empty cells
+        while texts and texts[-1] == "":
+            texts.pop()
         if texts:
             rows.append(texts)
+
     return rows
 
 
