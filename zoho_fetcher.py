@@ -60,6 +60,11 @@ def _build_data(rows):
             summary[labels[j]] = values[j]
 
     headers = rows[3]
+    idx_expense = None
+    for _j, _h in enumerate(headers):
+        if _h == "支出":
+            idx_expense = _j
+            break
 
     daily = []
     for row in rows[4:]:
@@ -67,7 +72,13 @@ def _build_data(rows):
         for j, h in enumerate(headers):
             val = row[j] if j < len(row) else ""
             if h in ("支出明细", "退款明细") and val and val != "0":
-                val = _split_items(val)
+                expected = None
+                if idx_expense is not None and idx_expense < len(row):
+                    try:
+                        expected = float(row[idx_expense])
+                    except (ValueError, TypeError):
+                        pass
+                val = _split_items(val, expected)
             entry[h] = val
         daily.append(entry)
 
@@ -79,14 +90,56 @@ def _build_data(rows):
     }
 
 
-def _split_items(text):
-    """拆分无分隔符拼接的支出项目, 如 '英雄联盟特权2000收款码36' → '英雄联盟特权2000，收款码36'"""
+def _split_items(text, expected=None):
+    """拆分无分隔符拼接的支出项目, 并通过支出总额校验修正"""
     import re as _re
     pattern = _re.compile(r'([\u4e00-\u9fff\d][\u4e00-\u9fff]*)(\d+(?:\.\d+)?)')
     matches = pattern.findall(text)
     if not matches:
         return text
+
+    if expected is not None:
+        matches = _fix_splits(text, matches, expected)
+
     return '，'.join(name + price for name, price in matches)
+
+
+def _fix_splits(text, matches, expected):
+    """校验解析出的价格总和是否匹配支出总额, 不匹配则调整小数点边界"""
+    prices = []
+    for _name, _price in matches:
+        try:
+            prices.append(float(_price))
+        except ValueError:
+            return matches
+
+    total = sum(prices)
+    if abs(total - expected) < 0.005:
+        return matches
+
+    diff = round(total - expected, 2)
+    for i in range(len(matches)):
+        name, price = matches[i]
+        if '.' not in price:
+            continue
+        dot_pos = price.index('.')
+        frac = price[dot_pos + 1:]
+        if len(frac) >= 2:
+            new_price = price[:dot_pos + 2]
+            migrated = price[dot_pos + 2:]
+            try:
+                np = float(new_price)
+            except ValueError:
+                continue
+            new_prices = prices[:]
+            new_prices[i] = np
+            if abs(sum(new_prices) - expected) < 0.005:
+                if i + 1 < len(matches):
+                    matches[i] = (name, new_price)
+                    matches[i + 1] = (migrated + matches[i + 1][0], matches[i + 1][1])
+                return matches
+
+    return matches
 
 
 def normalize_period(raw):
