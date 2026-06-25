@@ -34,6 +34,11 @@
     --accent2-hover: #7c3aed;
     --thead-bg: rgba(7,11,22,.94);
     --stat-icon-bg: rgba(16,185,129,.1);
+    --orb-opacity: .28;
+    --grid-opacity: .025;
+    --grid-stroke: rgba(255,255,255,.6);
+    --card-glow: none;
+    --hint-color: var(--t-tertiary);
     --radius-lg: 18px;
     --radius: 14px;
     --radius-sm: 10px;
@@ -68,6 +73,11 @@
     --accent2-hover: #c2410c;
     --thead-bg: rgba(255,255,255,.94);
     --stat-icon-bg: rgba(5,150,105,.08);
+    --orb-opacity: .08;
+    --grid-opacity: .04;
+    --grid-stroke: rgba(0,0,0,.08);
+    --card-glow: 0 4px 24px rgba(249,115,22,.08);
+    --hint-color: #5a5a7a;
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -88,7 +98,7 @@
   .bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
   .bg-orb {
     position: absolute; border-radius: 50%;
-    filter: blur(140px); opacity: .28;
+    filter: blur(140px); opacity: var(--orb-opacity);
   }
   .bg-orb-1 { width:700px; height:700px; background:radial-gradient(circle, var(--green-glow), transparent); top:-25%; left:-20%; animation:drift1 30s ease-in-out infinite; }
   .bg-orb-2 { width:550px; height:550px; background:radial-gradient(circle, var(--purple-glow), transparent); bottom:-20%; right:-15%; animation:drift2 35s ease-in-out infinite; }
@@ -98,10 +108,10 @@
   @keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-60px,-30px) scale(1.06)} }
 
   .bg-grid {
-    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.025;
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:var(--grid-opacity);
     background-image:
-      linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px);
+      linear-gradient(var(--grid-stroke) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-stroke) 1px, transparent 1px);
     background-size:64px 64px;
   }
 
@@ -256,7 +266,7 @@
   .add-modal.open { display: flex; }
   .add-card {
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 32px; width: 90%; max-width: 480px; box-shadow: 0 16px 64px rgba(0,0,0,.5);
+    padding: 32px; width: 90%; max-width: 480px; box-shadow: 0 16px 64px rgba(0,0,0,.18);
   }
   .add-card h3 { margin: 0 0 16px; font-size: 16px; color: var(--text); }
   .add-card input {
@@ -304,11 +314,12 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     overflow: hidden;
+    box-shadow: var(--card-glow);
     transition: border-color .3s, box-shadow .3s, transform .3s;
   }
   .stat-card:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 8px 36px rgba(0,0,0,.3);
+    box-shadow: 0 8px 36px rgba(0,0,0,.12);
     transform: translateY(-3px);
   }
   .stat-card::before {
@@ -361,7 +372,7 @@
 
   .stat-hint {
     font-size: 12px;
-    color: var(--t-tertiary);
+    color: var(--hint-color);
     margin-top: 6px;
     position: relative; z-index: 1;
     line-height: 1.4;
@@ -384,12 +395,13 @@
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     text-align: center;
+    box-shadow: var(--card-glow);
     transition: border-color .3s, box-shadow .3s, transform .3s;
     overflow: hidden;
   }
   .item-card:hover {
     border-color: var(--border-hover);
-    box-shadow: 0 8px 32px rgba(0,0,0,.28);
+    box-shadow: 0 8px 32px rgba(0,0,0,.1);
     transform: translateY(-2px);
   }
   .item-card::before {
@@ -456,7 +468,7 @@
     -webkit-backdrop-filter: blur(24px);
     overflow: hidden;
     margin-bottom: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    box-shadow: var(--card-glow);
   }
   .cols-2 .panel { margin-bottom: 0; }
 
@@ -578,9 +590,9 @@
     font-size: 13px;
     line-height: 1.7;
     margin-bottom: 20px;
-    background: rgba(245,158,11,.06);
+    background: var(--amber-glow);
     border: 1px solid rgba(245,158,11,.15);
-    color: #fcd34d;
+    color: var(--hint-color);
   }
   .alert svg { flex-shrink: 0; width: 16px; height: 16px; color: var(--amber); margin-top: 2px; }
 
