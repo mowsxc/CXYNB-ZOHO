@@ -43,20 +43,20 @@
 
   [data-theme="light"] {
     --green: #059669;
-    --green-glow: rgba(5,150,105,.15);
+    --green-glow: rgba(5,150,105,.12);
     --amber: #d97706;
-    --amber-glow: rgba(217,119,6,.15);
+    --amber-glow: rgba(217,119,6,.12);
     --red: #dc2626;
-    --red-glow: rgba(220,38,38,.15);
+    --red-glow: rgba(220,38,38,.12);
     --purple: #f97316;
-    --purple-glow: rgba(249,115,22,.2);
-    --bg-deep: #f5f0e8;
-    --surface: rgba(255,255,255,.72);
-    --surface-hover: rgba(255,255,255,.88);
-    --surface-dark: rgba(255,255,255,.9);
-    --surface-card: rgba(255,255,255,.62);
-    --border: rgba(0,0,0,.08);
-    --border-hover: rgba(0,0,0,.14);
+    --purple-glow: rgba(249,115,22,.18);
+    --bg-deep: #ffffff;
+    --surface: rgba(255,255,255,.78);
+    --surface-hover: rgba(255,255,255,.94);
+    --surface-dark: rgba(255,255,255,.95);
+    --surface-card: rgba(255,255,255,.68);
+    --border: rgba(0,0,0,.07);
+    --border-hover: rgba(0,0,0,.13);
     --t-primary: #1a1a2e;
     --t-secondary: #4a4a6a;
     --t-tertiary: #7a7a9a;
@@ -66,23 +66,8 @@
     --accent: var(--green);
     --accent2: var(--purple);
     --accent2-hover: #c2410c;
-    --thead-bg: rgba(245,240,232,.94);
+    --thead-bg: rgba(255,255,255,.94);
     --stat-icon-bg: rgba(5,150,105,.08);
-  }
-    --t-quaternary: #9a9ab8;
-    --muted: #8a8aaa;
-    --text-muted: #7a7a9a;
-    --accent: #f97316;
-    --accent2: #ea580c;
-    --accent2-hover: #c2410c;
-    --green: #059669;
-    --green-glow: rgba(5,150,105,.15);
-    --amber: #d97706;
-    --amber-glow: rgba(217,119,6,.15);
-    --red: #dc2626;
-    --red-glow: rgba(220,38,38,.15);
-    --purple: #f97316;
-    --purple-glow: rgba(249,115,22,.2);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -150,12 +135,11 @@
   .brand-logo svg {
     width: 88px; height: 88px;
     stroke: var(--purple);
-    filter: drop-shadow(0 0 10px rgba(167,139,250,.4));
     animation: logo-pulse 3s ease-in-out infinite;
   }
   @keyframes logo-pulse {
-    0%,100% { filter: drop-shadow(0 0 10px rgba(167,139,250,.4)); }
-    50% { filter: drop-shadow(0 0 20px rgba(167,139,250,.7)) drop-shadow(0 0 40px rgba(139,92,246,.3)); }
+    0%,100% { opacity: .85; }
+    50% { opacity: 1; }
   }
   .brand-logo::after {
     content: '';
@@ -176,7 +160,7 @@
     font-weight: 800;
     letter-spacing: .08em;
     line-height: 1.2;
-    color: #f1f5f9;
+    color: var(--accent2);
   }
   .brand-dot {
     display: inline-block;
