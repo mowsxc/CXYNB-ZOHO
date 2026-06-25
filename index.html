@@ -16,24 +16,73 @@
     --red-glow: rgba(244,63,94,.3);
     --purple: #8b5cf6;
     --purple-glow: rgba(139,92,246,.35);
-
     --bg-deep: #070b16;
     --surface: rgba(15,23,45,.65);
     --surface-hover: rgba(22,33,60,.75);
+    --surface-dark: rgba(7,11,22,.85);
+    --surface-card: rgba(15,23,45,.55);
     --border: rgba(255,255,255,.07);
     --border-hover: rgba(255,255,255,.12);
-
     --t-primary: #f1f5f9;
     --t-secondary: #94a3b8;
     --t-tertiary: #64748b;
     --t-quaternary: #475569;
-
+    --muted: #5a6a80;
+    --text-muted: #64748b;
+    --accent: var(--green);
+    --accent2: var(--purple);
+    --accent2-hover: #7c3aed;
+    --thead-bg: rgba(7,11,22,.94);
+    --stat-icon-bg: rgba(16,185,129,.1);
     --radius-lg: 18px;
     --radius: 14px;
     --radius-sm: 10px;
-
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
     --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", "Consolas", monospace;
+  }
+
+  [data-theme="light"] {
+    --green: #059669;
+    --green-glow: rgba(5,150,105,.15);
+    --amber: #d97706;
+    --amber-glow: rgba(217,119,6,.15);
+    --red: #dc2626;
+    --red-glow: rgba(220,38,38,.15);
+    --purple: #f97316;
+    --purple-glow: rgba(249,115,22,.2);
+    --bg-deep: #f5f0e8;
+    --surface: rgba(255,255,255,.72);
+    --surface-hover: rgba(255,255,255,.88);
+    --surface-dark: rgba(255,255,255,.9);
+    --surface-card: rgba(255,255,255,.62);
+    --border: rgba(0,0,0,.08);
+    --border-hover: rgba(0,0,0,.14);
+    --t-primary: #1a1a2e;
+    --t-secondary: #4a4a6a;
+    --t-tertiary: #7a7a9a;
+    --t-quaternary: #9a9ab8;
+    --muted: #8a8aaa;
+    --text-muted: #7a7a9a;
+    --accent: var(--green);
+    --accent2: var(--purple);
+    --accent2-hover: #c2410c;
+    --thead-bg: rgba(245,240,232,.94);
+    --stat-icon-bg: rgba(5,150,105,.08);
+  }
+    --t-quaternary: #9a9ab8;
+    --muted: #8a8aaa;
+    --text-muted: #7a7a9a;
+    --accent: #f97316;
+    --accent2: #ea580c;
+    --accent2-hover: #c2410c;
+    --green: #059669;
+    --green-glow: rgba(5,150,105,.15);
+    --amber: #d97706;
+    --amber-glow: rgba(217,119,6,.15);
+    --red: #dc2626;
+    --red-glow: rgba(220,38,38,.15);
+    --purple: #f97316;
+    --purple-glow: rgba(249,115,22,.2);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -100,7 +149,7 @@
   }
   .brand-logo svg {
     width: 88px; height: 88px;
-    stroke: #a78bfa;
+    stroke: var(--purple);
     filter: drop-shadow(0 0 10px rgba(167,139,250,.4));
     animation: logo-pulse 3s ease-in-out infinite;
   }
@@ -113,7 +162,7 @@
     position: absolute;
     inset: -12px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,92,246,.15), transparent 70%);
+    background: radial-gradient(circle, var(--purple-glow), transparent 70%);
     animation: logo-halo 3s ease-in-out infinite;
     pointer-events: none;
   }
@@ -241,6 +290,18 @@
   .btn-cancel:hover { color: var(--text); border-color: var(--text-muted)!important; }
   .btn-submit { background: var(--accent2); color: #fff; }
   .btn-submit:hover { background: var(--accent2-hover); }
+
+  .theme-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 100;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all .25s; color: var(--t-secondary);
+  }
+  .theme-toggle:hover { border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 16px var(--purple-glow); }
+  .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
+  .theme-toggle svg { width: 20px; height: 20px; }
 
   /* ---- STAT CARDS ---- */
   .stats {
@@ -398,8 +459,8 @@
     animation: cashGlow 1.8s ease-in-out infinite;
   }
   @keyframes cashGlow {
-    0%,100% { opacity: 1; text-shadow: 0 0 0 transparent; }
-    50% { opacity: .72; text-shadow: 0 0 20px var(--purple-glow), 0 0 40px rgba(139,92,246,.3); }
+     0%,100% { opacity: 1; text-shadow: 0 0 0 transparent; }
+     50% { opacity: .72; text-shadow: 0 0 20px var(--purple-glow), 0 0 40px var(--purple-glow); }
   }
 
   /* ---- GLASS PANEL ---- */
@@ -561,7 +622,7 @@
   .table-scroll thead tr::after {
     content: '';
     position: absolute; inset: 0;
-    background: rgba(7,11,22,.94);
+    background: var(--thead-bg);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     z-index: -1;
@@ -618,12 +679,13 @@
   td.cell-rf { color: var(--green); font-family: var(--font-mono); font-weight: 600; font-size: 12px; }
 
   td.cell-memo {
-    max-width: 140px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    max-width: 220px;
+    overflow: visible;
+    white-space: normal;
+    word-break: break-all;
     color: var(--t-tertiary);
     font-size: 12px;
+    line-height: 1.5;
   }
 
   /* ---- FOOTER ---- */
@@ -702,6 +764,12 @@
 <div class="bg-grid"></div>
 
 <div class="app" id="app">
+
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="切换主题">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
 
   <div class="header">
     <div class="brand" ondblclick="showAddMonth()" title="双击添加月份数据">
@@ -993,6 +1061,18 @@ document.getElementById('addModal').addEventListener('click',function(e){
 
 // Preview keepalive heartbeat (every 150s)
 setInterval(function(){ fetch('/api/months',{cache:'no-cache'}); },150000);
+
+function toggleTheme(){
+  var html=document.documentElement;
+  var btn=document.getElementById('themeBtn');
+  var isLight=html.getAttribute('data-theme')==='light';
+  if(isLight){ html.removeAttribute('data-theme'); btn.classList.remove('sunny'); localStorage.setItem('theme','dark'); }
+  else { html.setAttribute('data-theme','light'); btn.classList.add('sunny'); localStorage.setItem('theme','light'); }
+}
+(function(){
+  var saved=localStorage.getItem('theme')||'dark';
+  if(saved==='light'){ document.documentElement.setAttribute('data-theme','light'); document.getElementById('themeBtn').classList.add('sunny'); }
+})();
 </script>
 
 <div class="add-modal" id="addModal">
