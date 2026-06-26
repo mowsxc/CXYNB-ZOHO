@@ -557,6 +557,15 @@
     color: #ccc; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
   .fs-close:hover, .fs-close:active { background: rgba(255,255,255,.15); color: #fff; }
+  @media (max-width: 768px) {
+    .chart-fs-inner {
+      transform: rotate(90deg);
+      width: 100vh; height: 100vw;
+      padding: 12px;
+      flex-direction: row;
+    }
+    .fs-close { top: 8px; right: 8px; width: 32px; height: 32px; font-size: 14px; }
+  }
 
   /* ---- GLASS PANEL ---- */
   .panel {
@@ -1150,12 +1159,12 @@ function toggleFullscreen() {
     });
     if (maxV===0) maxV=1;
     var isMob=window.innerWidth<768;
-    var barW=isMob?14:20, barGap=isMob?2:5, groupGap=isMob?10:20;
-    var padL=isMob?4:14, padR=isMob?4:14, padT=isMob?36:40, padB=isMob?46:52;
+    var barW=isMob?11:20, barGap=isMob?2:5, groupGap=isMob?8:20;
+    var padL=isMob?4:14, padR=isMob?4:14, padT=isMob?32:40, padB=isMob?44:52;
     var nMetrics=metrics.length, nMonths=months.length;
     var groupW=nMetrics*(barW+barGap)-barGap;
     var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
-    var chartH=isMob?280:360;
+    var chartH=isMob?340:360;
     var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">';
     for (var mi=0;mi<nMonths;mi++) {
       var gx=padL+mi*(groupW+groupGap);
@@ -1168,15 +1177,15 @@ function toggleFullscreen() {
         if (v>=10000) shortVal=(v/10000).toFixed(1)+'w';
         else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
         else shortVal=v.toFixed(0);
-        var fsFont=isMob?9:12;
+        var fsFont=isMob?8:12;
         svg+='<g class="bar-group">';
         svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
         svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+metrics[mj].color+'" opacity=".88" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
-        svg+='<text x="'+(bx+barW/2)+'" y="'+(by-5)+'" text-anchor="middle" font-size="'+fsFont+'" fill="var(--t-secondary)" font-family="var(--font-mono)" font-weight="600">'+shortVal+'</text>';
+        svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="'+fsFont+'" fill="var(--t-secondary)" font-family="var(--font-mono)" font-weight="600">'+shortVal+'</text>';
         svg+='</g>';
       }
       var parts=months[mi].split('-');
-      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-6)+'" text-anchor="middle" font-size="'+(isMob?11:14)+'" fill="var(--t-quaternary)" font-weight="500">'+(parts[1]||'')+'月</text>';
+      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-5)+'" text-anchor="middle" font-size="'+(isMob?10:14)+'" fill="var(--t-quaternary)" font-weight="500">'+(parts[1]||'')+'月</text>';
     }
     svg+='</svg>';
     inner.innerHTML=svg;
