@@ -98,7 +98,8 @@ def _prime_cache():
         try:
             data = fetch_sheet(url, timeout=15)
             data["period"] = normalize_period(data.get("period", ""))
-            _data_cache[period] = {"data": data, "ts": time.time()}
+            h = _data_hash(data)
+            _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             print(f"  cached {period}")
         except Exception as e:
             print(f"  cache fail {period}: {e}")
@@ -112,10 +113,23 @@ def _background_refresh():
             try:
                 data = fetch_sheet(url, timeout=15)
                 data["period"] = normalize_period(data.get("period", ""))
+                h = _data_hash(data)
                 with _cache_lock:
-                    _data_cache[period] = {"data": data, "ts": time.time()}
+                    old = _data_cache.get(period)
+                    if not old or _data_hash(old["data"]) != h:
+                        _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             except Exception:
                 pass
+
+
+def _data_hash(data):
+    """Return a hash of the actual payload (summary + daily) for change detection."""
+    import hashlib
+    s = json.dumps({
+        "summary": data.get("summary", {}),
+        "daily": data.get("daily", []),
+    }, sort_keys=True, ensure_ascii=False)
+    return hashlib.md5(s.encode()).hexdigest()
 
 
 def serve_static(path, handler):
@@ -210,6 +224,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if cached:
                 data = dict(cached["data"])
                 data["_cache_ts"] = cached["ts"]
+                data["_data_hash"] = cached.get("hash", "")
                 data["_cached"] = True
                 data["available"] = avail
                 json_response(self, data)
@@ -219,10 +234,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
             try:
                 data = fetch_sheet(url)
                 data["period"] = normalize_period(data.get("period", ""))
+                h = _data_hash(data)
                 if actual_period:
                     with _cache_lock:
-                        _data_cache[actual_period] = {"data": data, "ts": time.time()}
+                        _data_cache[actual_period] = {"data": data, "ts": time.time(), "hash": h}
                 data["_cache_ts"] = time.time()
+                data["_data_hash"] = h
                 data["_cached"] = False
                 data["available"] = avail
                 json_response(self, data)
@@ -247,8 +264,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             stored[period] = url_to_add
             save_months(stored)
             _valid_months[period] = url_to_add
+            h = _data_hash(data)
             with _cache_lock:
-                _data_cache[period] = {"data": data, "ts": time.time()}
+                _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             avail = build_available(_valid_months)
             json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
             return

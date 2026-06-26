@@ -841,6 +841,8 @@ function hasData(r) {
 }
 
 function render(data) {
+  var sx=window.scrollX||window.pageXOffset;
+  var sy=window.scrollY||window.pageYOffset;
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
   document.getElementById('syncedTime').style.display='block';
@@ -913,6 +915,7 @@ function render(data) {
 
   document.getElementById('syncedTime').textContent='同步时间 '+new Date().toLocaleString('zh-CN');
   document.getElementById('content').innerHTML=h;
+  window.scrollTo(sx, sy);
 }
 
 function buildPeriodOpts() {
@@ -1004,7 +1007,7 @@ function loadMonth(period) {
     .then(function(d){
       if(d.error) throw new Error(d.error);
       clearTimeout(loadingTimer);
-      window._lastCacheTs=d._cache_ts||0;
+      window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
     })
@@ -1025,7 +1028,7 @@ fetch('/api/data')
   .then(function(d){
     if(d.error) throw new Error(d.error);
     window._monthsData=d.available||{};
-    window._lastCacheTs=d._cache_ts||0;
+    window._lastHash=d._data_hash||'';
     render(d);
   })
   .catch(function(err){
@@ -1040,7 +1043,7 @@ setInterval(function(){
   fetch('/api/data?period='+encodeURIComponent(window._curPeriod))
     .then(function(r){ return r.json(); })
     .then(function(d){
-      if(d._cache_ts>window._lastCacheTs){ window._lastCacheTs=d._cache_ts; window._monthsData=d.available||{}; render(d); }
+      if(d._data_hash!==window._lastHash){ window._lastHash=d._data_hash; window._monthsData=d.available||{}; render(d); }
     })
     .catch(function(){});
 },10000);
