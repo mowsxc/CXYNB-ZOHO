@@ -19,7 +19,7 @@ MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
-_refresh_interval = 300  # 5 minutes background refresh
+_refresh_interval = 20  # seconds background refresh
 
 
 def load_months():
@@ -204,12 +204,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         break
 
             # Serve from cache if available
+            avail = build_available(_valid_months)
             with _cache_lock:
                 cached = _data_cache.get(actual_period) if actual_period else None
             if cached:
                 data = dict(cached["data"])
                 data["_cache_ts"] = cached["ts"]
                 data["_cached"] = True
+                data["available"] = avail
                 json_response(self, data)
                 return
 
@@ -222,6 +224,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         _data_cache[actual_period] = {"data": data, "ts": time.time()}
                 data["_cache_ts"] = time.time()
                 data["_cached"] = False
+                data["available"] = avail
                 json_response(self, data)
             except urllib.error.URLError as e:
                 json_response(self, {"error": f"Zoho 请求失败: {e}"}, 502)
