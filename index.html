@@ -16,6 +16,8 @@
     --red-glow: rgba(244,63,94,.3);
     --purple: #8b5cf6;
     --purple-glow: rgba(139,92,246,.35);
+    --pink: #ff1a75;
+    --pink-glow: rgba(255,26,117,.35);
     --bg-deep: #070b16;
     --surface: rgba(15,23,45,.65);
     --surface-hover: rgba(22,33,60,.75);
@@ -55,6 +57,8 @@
     --red-glow: rgba(220,38,38,.12);
     --purple: #f97316;
     --purple-glow: rgba(249,115,22,.18);
+    --pink: #e11d6e;
+    --pink-glow: rgba(225,29,110,.18);
     --bg-deep: #ffffff;
     --surface: rgba(255,255,255,.78);
     --surface-hover: rgba(255,255,255,.94);
@@ -347,7 +351,7 @@
   .s-income .stat-icon { background: rgba(16,185,129,.14); color: var(--green); }
   .s-meituan .stat-icon { background: rgba(245,158,11,.14); color: var(--amber); }
   .s-expense .stat-icon { background: rgba(244,63,94,.14); color: var(--red); }
-  .s-cash .stat-icon { background: rgba(139,92,246,.14); color: var(--purple); }
+  .s-cash .stat-icon { background: rgba(255,26,117,.14); color: var(--pink); }
   .stat-icon svg { width: 16px; height: 16px; }
 
   .stat-label {
@@ -370,7 +374,7 @@
   .s-income .stat-value { color: var(--green); }
   .s-meituan .stat-value { color: var(--amber); }
   .s-expense .stat-value { color: var(--red); }
-  .s-cash .stat-value { color: var(--purple); }
+  .s-cash .stat-value { color: var(--pink); }
 
   .stat-hint {
     font-size: 12px;
@@ -451,14 +455,14 @@
   .ic-green .item-value { color: var(--green); }
   .ic-red .item-value { color: var(--red); }
   .ic-amber .item-value { color: var(--amber); }
-  .ic-purple .item-value { color: var(--purple); }
+  .ic-purple .item-value { color: var(--pink); }
 
   .cash-blink {
-    animation: cashGlow 1.8s ease-in-out infinite;
+    animation: cashBreathe 1.8s ease-in-out infinite;
   }
-  @keyframes cashGlow {
-     0%,100% { opacity: 1; text-shadow: 0 0 0 transparent; }
-     50% { opacity: .72; text-shadow: 0 0 20px var(--purple-glow), 0 0 40px var(--purple-glow); }
+  @keyframes cashBreathe {
+      0%,100% { transform: scale(1); text-shadow: 0 0 8px var(--pink-glow), 0 0 24px var(--pink-glow); }
+      50% { transform: scale(1.08); text-shadow: 0 0 18px var(--pink-glow), 0 0 48px var(--pink-glow); }
   }
 
   /* ---- GLASS PANEL ---- */
