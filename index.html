@@ -474,17 +474,33 @@
     -webkit-backdrop-filter: blur(24px);
     padding: 20px 16px;
     margin-bottom: 28px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
+  .trend-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
   .trend-title {
     font-size: 12px;
     font-weight: 600;
     letter-spacing: .08em;
     color: var(--t-quaternary);
-    margin-bottom: 14px;
-    text-align: center;
+    white-space: nowrap;
   }
+  .trend-ranges { display: flex; gap: 4px; }
+  .range-btn {
+    font-size: 10px; font-family: inherit; color: var(--t-tertiary);
+    background: transparent; border: 1px solid var(--border); border-radius: 5px;
+    padding: 3px 10px; cursor: pointer; transition: all .2s; white-space: nowrap;
+  }
+  .range-btn:active { background: rgba(255,255,255,.05); }
+  .range-btn.sel {
+    color: var(--amber); border-color: var(--amber); background: var(--amber-glow);
+  }
+  .fs-btn {
+    flex-shrink: 0; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;
+    background: transparent; border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
+    color: var(--t-tertiary); transition: all .2s;
+  }
+  .fs-btn svg { width: 14px; height: 14px; }
+  .fs-btn:active { background: rgba(255,255,255,.05); color: var(--amber); }
   .trend-chart { width: 100%; min-width: 360px; }
   .trend-legend {
     display: flex; justify-content: center; gap: 16px;
@@ -520,6 +536,28 @@
     display: inline-block; transition: opacity .2s;
   }
   .trend-tip-wrap { text-align: center; min-height: 28px; }
+
+  /* ---- CHART FULLSCREEN ---- */
+  .chart-fullscreen {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.92); backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: none; align-items: center; justify-content: center;
+  }
+  .chart-fullscreen.open { display: flex; }
+  .chart-fs-inner {
+    width: 96vw; height: 96vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .chart-fs-inner .trend-chart { max-width: 100%; max-height: 92vh; }
+  .fs-close {
+    position: absolute; top: 16px; right: 16px; z-index: 1;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+    color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  @media (max-width: 768px) {
+    .chart-fs-inner { transform: rotate(90deg); width: 96vh; height: 96vw; }
+  }
 
   /* ---- GLASS PANEL ---- */
   .panel {
@@ -646,18 +684,16 @@
   .alert {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 14px 20px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    line-height: 1.7;
-    margin-bottom: 20px;
-    background: var(--amber-glow);
-    border: 1px solid rgba(245,158,11,.15);
+    gap: 8px;
+    padding: 0 4px;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 0;
+    margin-bottom: 16px;
     color: var(--amber);
-    font-weight: 500;
+    font-weight: 400;
   }
-  .alert svg { flex-shrink: 0; width: 16px; height: 16px; color: var(--amber); margin-top: 2px; }
+  .alert svg { flex-shrink: 0; width: 14px; height: 14px; color: var(--amber); margin-top: 1px; opacity: .7; }
 
   /* ---- TABLE ---- */
    .table-scroll {
@@ -790,6 +826,9 @@
     .table-scroll tbody td { padding: 8px 10px; font-size: 12px; }
     .panel-row { padding: 13px 18px; }
     .panel-head { padding: 15px 18px; }
+    .trend-panel { padding: 16px 10px; }
+    .trend-header { flex-wrap: wrap; }
+    .range-btn { font-size: 9px; padding: 3px 8px; }
   }
 
   @media (max-width: 420px) {
@@ -799,6 +838,11 @@
     .stat-card { padding: 16px 14px; }
     .stat-value { font-size: 20px; }
     .stat-value.mono { font-size: 18px; }
+    .trend-panel { padding: 14px 8px; }
+    .trend-header { gap: 6px; }
+    .trend-title { font-size: 11px; }
+    .range-btn { font-size: 9px; padding: 2px 7px; }
+    .fs-btn { width: 26px; height: 26px; }
   }
 </style>
 </head>
@@ -872,6 +916,11 @@
   <div id="content" style="display:none"></div>
 </div>
 
+<div class="chart-fullscreen" id="chartFS" onclick="if(event.target===this)toggleFullscreen()">
+  <button class="fs-close" onclick="toggleFullscreen()">&times;</button>
+  <div class="chart-fs-inner" id="chartFsInner"></div>
+</div>
+
 <script>
 function fm(v) {
   var s=String(v).replace(/[^\d.]/g,'');
@@ -921,9 +970,6 @@ function render(data) {
   h+='<div class="item-card ic-purple"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div></div>';
   h+='</div>';
 
-  /* --- Alert --- */
-   h+='<div class="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>总收 = 网费 + 售货 + 退款，现金 = 总收 &minus; 支出 &minus; 美团（未扣服务费，非实际到账金额）</div></div>';
-
   /* --- Trend chart --- */
   var trends=data.trends||{};
   var tkeys=Object.keys(trends).sort();
@@ -935,58 +981,28 @@ function render(data) {
       {k:'美团',label:'美团',color:'var(--amber)',cls:'amber'},
       {k:'现金结余',label:'现金',color:'var(--pink)',cls:'pink'}
     ];
-    var maxV=0;
-    metrics.forEach(function(m){
-      tkeys.forEach(function(p){
-        var v=parseFloat((trends[p][m.k]||'0').replace(/[^\d.]/g,''))||0;
-        if (v>maxV) maxV=v;
-      });
-    });
-    if (maxV===0) maxV=1;
-    var barW=13, barGap=3, groupGap=16, padL=10, padR=10, padT=22, padB=38;
-    var nMetrics=metrics.length, nMonths=tkeys.length;
-    var groupW=nMetrics*(barW+barGap)-barGap;
-    var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
-    var chartH=200;
-    var barsData=[];
-    for (var mi=0;mi<nMonths;mi++) {
-      for (var mj=0;mj<nMetrics;mj++) {
-        var v=parseFloat((trends[tkeys[mi]][metrics[mj].k]||'0').replace(/[^\d.]/g,''))||0;
-        var bh=Math.max(2,(v/maxV)*(chartH-padT-padB));
-        var gx=padL+mi*(groupW+groupGap);
-        var bx=gx+mj*(barW+barGap);
-        var by=chartH-padB-bh;
-        var shortVal;
-        if (v>=10000) shortVal=(v/10000).toFixed(1)+'w';
-        else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
-        else shortVal=v.toFixed(0);
-        barsData.push({mi:mi, mj:mj, v:v, shortVal:shortVal, bx:bx, by:by, bh:bh, gx:gx, color:metrics[mj].color, label:metrics[mj].label, period:tkeys[mi]});
-      }
-    }
-    var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:100%;height:auto">';
-    for (var bi=0;bi<barsData.length;bi++) {
-      var b=barsData[bi];
-      svg+='<g class="bar-group">';
-      svg+='<rect x="'+b.bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+b.label+'\',\''+b.period+'\',\''+fmY(b.v)+'\')"></rect>';
-      svg+='<rect class="trend-bar" x="'+b.bx+'" y="'+b.by+'" width="'+barW+'" height="'+b.bh+'" rx="2" fill="'+b.color+'" opacity=".78" data-label="'+b.label+'" data-period="'+b.period+'" data-val="'+fmY(b.v)+'" style="pointer-events:none"></rect>';
-      svg+='<text x="'+(b.bx+barW/2)+'" y="'+(b.by-4)+'" text-anchor="middle" font-size="7" fill="var(--t-secondary)" font-family="var(--font-mono)">'+b.shortVal+'</text>';
-      svg+='</g>';
-    }
-    // Month labels
-    for (var mi=0;mi<nMonths;mi++) {
-      var gx=padL+mi*(groupW+groupGap);
-      var parts=tkeys[mi].split('-');
-      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-4)+'" text-anchor="middle" font-size="9" fill="var(--t-quaternary)">'+(parts[1]||'')+'月</text>';
-    }
-    svg+='</svg>';
-    window._chartSvg=svg;
+    window._chartState={trends:trends, tkeys:tkeys, metrics:metrics, rangeN:2};
+
     var leg='<div class="trend-legend">';
     metrics.forEach(function(m){
       leg+='<span class="leg-item" role="button" tabindex="0"><i class="dot '+m.cls+'"></i>'+m.label+'</span>';
     });
     leg+='</div>';
     var tip='<div class="trend-tip-wrap"><span class="trend-tip" id="trendTip" style="display:none"></span></div>';
-    h+='<div class="trend-panel"><div class="trend-chart-wrap"><div class="chart-skeleton" id="chartSkel" style="display:block"></div><div id="chartSvg" style="display:none"></div></div><div class="trend-title">月度趋势</div>'+leg+tip+'</div>';
+    h+='<div class="trend-panel">'
+      +'<div class="trend-header">'
+      +'<span class="trend-title">月度趋势</span>'
+      +'<div class="trend-ranges" id="trendRanges">'
+      +'<button class="range-btn sel" onclick="setChartRange(2,this)">近两月</button>'
+      +'<button class="range-btn" onclick="setChartRange(6,this)">近半年</button>'
+      +'<button class="range-btn" onclick="setChartRange(12,this)">全年</button>'
+      +'</div>'
+      +'<button class="fs-btn" onclick="toggleFullscreen()" title="全屏查看">'
+      +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'
+      +'</button>'
+      +'</div>'
+      +'<div class="trend-chart-wrap"><div class="chart-skeleton" id="chartSkel" style="display:block"></div><div id="chartSvg" style="display:none"></div></div>'
+      +leg+tip+'</div>';
   }
 
   /* --- Daily table --- */
@@ -1027,16 +1043,76 @@ function render(data) {
     h+='</tbody></table></div></div>';
   }
 
+  /* --- Formula hint at bottom --- */
+  h+='<div class="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>总收 = 网费 + 售货 + 退款，现金 = 总收 &minus; 支出 &minus; 美团（未扣服务费，非实际到账金额）</div></div>';
+
   document.getElementById('syncedTime').textContent='同步时间 '+new Date().toLocaleString('zh-CN');
   document.getElementById('content').innerHTML=h;
   var skel=document.getElementById('chartSkel');
   var svgDiv=document.getElementById('chartSvg');
   if (skel&&svgDiv) {
-    svgDiv.innerHTML=window._chartSvg||'';
+    svgDiv.innerHTML=buildChartSvg();
     skel.style.display='none';
     svgDiv.style.display='block';
   }
   window.scrollTo(sx, sy);
+}
+
+function buildChartSvg(rangeN) {
+  var st=window._chartState;
+  if (!st) return '';
+  var trends=st.trends, tkeys=st.tkeys, metrics=st.metrics;
+  var n=rangeN||st.rangeN||2;
+  st.rangeN=n;
+  var months=tkeys.slice(-n);
+  if (months.length<2) months=tkeys.slice(-2);
+
+  var maxV=0;
+  metrics.forEach(function(m){
+    months.forEach(function(p){
+      var v=parseFloat((trends[p][m.k]||'0').replace(/[^\d.]/g,''))||0;
+      if (v>maxV) maxV=v;
+    });
+  });
+  if (maxV===0) maxV=1;
+
+  var barW=13, barGap=3, groupGap=16, padL=10, padR=10, padT=22, padB=38;
+  var nMetrics=metrics.length, nMonths=months.length;
+  var groupW=nMetrics*(barW+barGap)-barGap;
+  var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
+  var chartH=200;
+  var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:100%;height:auto">';
+  for (var mi=0;mi<nMonths;mi++) {
+    var gx=padL+mi*(groupW+groupGap);
+    for (var mj=0;mj<nMetrics;mj++) {
+      var v=parseFloat((trends[months[mi]][metrics[mj].k]||'0').replace(/[^\d.]/g,''))||0;
+      var bh=Math.max(2,(v/maxV)*(chartH-padT-padB));
+      var bx=gx+mj*(barW+barGap);
+      var by=chartH-padB-bh;
+      var shortVal;
+      if (v>=10000) shortVal=(v/10000).toFixed(1)+'w';
+      else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
+      else shortVal=v.toFixed(0);
+      svg+='<g class="bar-group">';
+      svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
+      svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+metrics[mj].color+'" opacity=".78" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
+      svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="7" fill="var(--t-secondary)" font-family="var(--font-mono)">'+shortVal+'</text>';
+      svg+='</g>';
+    }
+    var parts=months[mi].split('-');
+    svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-4)+'" text-anchor="middle" font-size="9" fill="var(--t-quaternary)">'+(parts[1]||'')+'月</text>';
+  }
+  svg+='</svg>';
+  return svg;
+}
+
+function setChartRange(n,btn) {
+  if (!window._chartState) return;
+  var btns=document.querySelectorAll('#trendRanges .range-btn');
+  for (var i=0;i<btns.length;i++) btns[i].classList.remove('sel');
+  btn.classList.add('sel');
+  var svgDiv=document.getElementById('chartSvg');
+  if (svgDiv) svgDiv.innerHTML=buildChartSvg(n);
 }
 
 function trendClick(label,period,val) {
@@ -1048,6 +1124,62 @@ function trendClick(label,period,val) {
     setTimeout(function(){ if (tip) tip.style.opacity='0'; }, 2200);
     setTimeout(function(){ if (tip) tip.style.display='none'; }, 2500);
   }
+}
+
+function toggleFullscreen() {
+  var fs=document.getElementById('chartFS');
+  if (!fs || !window._chartState) return;
+  var isOpen=fs.classList.contains('open');
+  if (isOpen) { fs.classList.remove('open'); document.body.style.overflow=''; return; }
+  document.body.style.overflow='hidden';
+  var inner=document.getElementById('chartFsInner');
+  if (inner) {
+    // Build larger chart for fullscreen
+    var st=window._chartState;
+    var trends=st.trends, tkeys=st.tkeys, metrics=st.metrics;
+    var n=window.innerWidth<768 ? 6 : st.rangeN||2;
+    var months=tkeys.slice(-n);
+    if (months.length<2) months=tkeys.slice(-2);
+    var maxV=0;
+    metrics.forEach(function(m){
+      months.forEach(function(p){
+        var v=parseFloat((trends[p][m.k]||'0').replace(/[^\d.]/g,''))||0;
+        if (v>maxV) maxV=v;
+      });
+    });
+    if (maxV===0) maxV=1;
+    var isMobile=window.innerWidth<768;
+    var barW=isMobile?10:18, barGap=isMobile?2:4, groupGap=isMobile?12:20;
+    var padL=isMobile?6:14, padR=isMobile?6:14, padT=isMobile?28:30, padB=isMobile?42:46;
+    var nMetrics=metrics.length, nMonths=months.length;
+    var groupW=nMetrics*(barW+barGap)-barGap;
+    var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
+    var chartH=isMobile?220:280;
+    var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:100%;height:100%">';
+    for (var mi=0;mi<nMonths;mi++) {
+      var gx=padL+mi*(groupW+groupGap);
+      for (var mj=0;mj<nMetrics;mj++) {
+        var v=parseFloat((trends[months[mi]][metrics[mj].k]||'0').replace(/[^\d.]/g,''))||0;
+        var bh=Math.max(2,(v/maxV)*(chartH-padT-padB));
+        var bx=gx+mj*(barW+barGap);
+        var by=chartH-padB-bh;
+        var shortVal;
+        if (v>=10000) shortVal=(v/10000).toFixed(1)+'w';
+        else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
+        else shortVal=v.toFixed(0);
+        svg+='<g class="bar-group">';
+        svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
+        svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+metrics[mj].color+'" opacity=".85" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
+        svg+='<text x="'+(bx+barW/2)+'" y="'+(by-(isMobile?3:5))+'" text-anchor="middle" font-size="'+(isMobile?8:10)+'" fill="var(--t-secondary)" font-family="var(--font-mono)">'+shortVal+'</text>';
+        svg+='</g>';
+      }
+      var parts=months[mi].split('-');
+      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-(isMobile?3:5))+'" text-anchor="middle" font-size="'+(isMobile?10:12)+'" fill="var(--t-quaternary)">'+(parts[1]||'')+'月</text>';
+    }
+    svg+='</svg>';
+    inner.innerHTML=svg;
+  }
+  fs.classList.add('open');
 }
 
 function buildPeriodOpts() {
