@@ -460,6 +460,16 @@
     position: relative; z-index: 1;
     line-height: 1.2;
   }
+  .item-delta {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    margin-top: 2px;
+    position: relative; z-index: 1;
+    font-family: var(--font-mono);
+  }
+  .item-delta.up { color: var(--green); }
+  .item-delta.down { color: var(--red); }
   .ic-green .item-value { color: var(--green); }
   .ic-red .item-value { color: var(--red); }
   .ic-amber .item-value { color: var(--amber); }
@@ -612,11 +622,12 @@
   .alert svg { flex-shrink: 0; width: 16px; height: 16px; color: var(--amber); margin-top: 2px; }
 
   /* ---- TABLE ---- */
-  .table-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  }
+   .table-scroll {
+     overflow-x: auto;
+     -webkit-overflow-scrolling: touch;
+     overscroll-behavior-x: contain;
+     scroll-behavior: smooth;
+   }
   .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
   .table-scroll::-webkit-scrollbar-track { background: transparent; }
   .table-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 3px; }
@@ -851,6 +862,18 @@ function render(data) {
   buildPeriodOpts();
 
   var s=data.summary||{};
+  var ps=data.prev||{};
+  function dlt(key) {
+    var c=parseFloat((s[key]||'0').replace(/[^\d.]/g,''))||0;
+    var p=parseFloat((ps[key]||'0').replace(/[^\d.]/g,''))||0;
+    if (!p) return '';
+    var d=c-p;
+    if (Math.abs(d)<0.01) return '';
+    var cls=d>0?'up':'down';
+    var sign=d>0?'+':'';
+    var v= sign+new Intl.NumberFormat('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}).format(d);
+    return '<div class="item-delta '+cls+'">'+v+'</div>';
+  }
   var cash=parseFloat((s['现金结余']||'0').replace(/[^\d.]/g,''))||0;
   var mt_=parseFloat((s['美团']||'0').replace(/[^\d.]/g,''))||0;
   var nf=parseFloat((s['网费']||'0').replace(/[^\d.]/g,''))||0;
@@ -864,12 +887,12 @@ function render(data) {
 
   /* --- Item cards --- */
   h+='<div class="items">';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="item-title">网费</div><div class="item-value">'+fmY(nf)+'</div></div>';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div class="item-title">售货</div><div class="item-value">'+fmY(sl)+'</div></div>';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="item-title">退款</div><div class="item-value">'+fmY(rf)+'</div></div>';
-  h+='<div class="item-card ic-red"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">支出</div><div class="item-value">'+fmY(ex)+'</div></div>';
-  h+='<div class="item-card ic-amber"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="item-title">美团</div><div class="item-value">'+fmY(mt_)+'</div></div>';
-  h+='<div class="item-card ic-purple"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div></div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="item-title">网费</div><div class="item-value">'+fmY(nf)+'</div>'+dlt('网费')+'</div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div class="item-title">售货</div><div class="item-value">'+fmY(sl)+'</div>'+dlt('售货')+'</div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="item-title">退款</div><div class="item-value">'+fmY(rf)+'</div>'+dlt('退款')+'</div>';
+  h+='<div class="item-card ic-red"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">支出</div><div class="item-value">'+fmY(ex)+'</div>'+dlt('支出')+'</div>';
+  h+='<div class="item-card ic-amber"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="item-title">美团</div><div class="item-value">'+fmY(mt_)+'</div>'+dlt('美团')+'</div>';
+  h+='<div class="item-card ic-purple"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div>'+dlt('现金结余')+'</div>';
   h+='</div>';
 
   /* --- Alert --- */
