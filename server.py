@@ -144,18 +144,15 @@ def _data_hash(data):
     return hashlib.md5(s.encode()).hexdigest()
 
 
-def _get_prev_summary(period):
-    """Return the previous month's summary for delta comparison."""
-    sorted_months = sorted(_valid_months.keys())
-    for i, p in enumerate(sorted_months):
-        if p == period and i > 0:
-            prev = sorted_months[i - 1]
-            with _cache_lock:
-                cached = _data_cache.get(prev)
-            if cached:
-                return cached["data"].get("summary", {})
-            break
-    return None
+def _build_trends():
+    """Build trends dict for all cached months."""
+    trends = {}
+    with _cache_lock:
+        for p in sorted(_valid_months.keys()):
+            c = _data_cache.get(p)
+            if c:
+                trends[p] = c["data"].get("summary", {})
+    return trends
 
 
 def serve_static(path, handler):
@@ -253,7 +250,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data["_data_hash"] = cached.get("hash", "")
                 data["_cached"] = True
                 data["available"] = avail
-                data["prev"] = _get_prev_summary(actual_period)
+                data["trends"] = _build_trends()
                 json_response(self, data)
                 return
 
@@ -269,7 +266,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data["_data_hash"] = h
                 data["_cached"] = False
                 data["available"] = avail
-                data["prev"] = _get_prev_summary(actual_period)
+                data["trends"] = _build_trends()
                 json_response(self, data)
             except urllib.error.URLError as e:
                 json_response(self, {"error": f"Zoho 请求失败: {e}"}, 502)
@@ -297,6 +294,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             avail = build_available(_valid_months)
             json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
+            return
+
+        if path == "/api/trends":
+            with _cache_lock:
+                trends = {}
+                for p in sorted(_valid_months.keys()):
+                    c = _data_cache.get(p)
+                    if c:
+                        trends[p] = c["data"].get("summary", {})
+            json_response(self, {"trends": trends})
             return
 
         if path == "/api/ping":

@@ -460,28 +460,42 @@
     position: relative; z-index: 1;
     line-height: 1.2;
   }
-  .item-delta {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: .02em;
-    margin-top: 2px;
-    position: relative; z-index: 1;
-    font-family: var(--font-mono);
-  }
-  .item-delta.up { color: var(--green); }
-  .item-delta.down { color: var(--red); }
   .ic-green .item-value { color: var(--green); }
   .ic-red .item-value { color: var(--red); }
   .ic-amber .item-value { color: var(--amber); }
   .ic-purple .item-value { color: var(--pink); }
 
-  .cash-blink {
-    animation: cashBreathe 1.8s ease-in-out infinite;
+  /* ---- TREND PANEL ---- */
+  .trend-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    padding: 20px 16px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  @keyframes cashBreathe {
-      0%,100% { transform: scale(1); text-shadow: 0 0 8px var(--pink-glow), 0 0 24px var(--pink-glow); }
-      50% { transform: scale(1.08); text-shadow: 0 0 18px var(--pink-glow), 0 0 48px var(--pink-glow); }
+  .trend-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--t-quaternary);
+    margin-bottom: 14px;
+    text-align: center;
   }
+  .trend-chart { width: 100%; min-width: 360px; }
+  .trend-legend {
+    display: flex; justify-content: center; gap: 16px;
+    margin-top: 10px; font-size: 10px; color: var(--t-tertiary);
+  }
+  .trend-legend span { display: flex; align-items: center; gap: 5px; }
+  .trend-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+  .trend-legend .dot.pink { background: var(--pink); }
+  .trend-legend .dot.green { background: var(--green); }
+  .trend-legend .dot.red { background: var(--red); }
+  .trend-legend .dot.amber { background: var(--amber); }
 
   /* ---- GLASS PANEL ---- */
   .panel {
@@ -862,18 +876,6 @@ function render(data) {
   buildPeriodOpts();
 
   var s=data.summary||{};
-  var ps=data.prev||{};
-  function dlt(key) {
-    var c=parseFloat((s[key]||'0').replace(/[^\d.]/g,''))||0;
-    var p=parseFloat((ps[key]||'0').replace(/[^\d.]/g,''))||0;
-    if (!p) return '';
-    var d=c-p;
-    if (Math.abs(d)<0.01) return '';
-    var cls=d>0?'up':'down';
-    var sign=d>0?'+':'';
-    var v= sign+new Intl.NumberFormat('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}).format(d);
-    return '<div class="item-delta '+cls+'">'+v+'</div>';
-  }
   var cash=parseFloat((s['现金结余']||'0').replace(/[^\d.]/g,''))||0;
   var mt_=parseFloat((s['美团']||'0').replace(/[^\d.]/g,''))||0;
   var nf=parseFloat((s['网费']||'0').replace(/[^\d.]/g,''))||0;
@@ -887,16 +889,61 @@ function render(data) {
 
   /* --- Item cards --- */
   h+='<div class="items">';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="item-title">网费</div><div class="item-value">'+fmY(nf)+'</div>'+dlt('网费')+'</div>';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div class="item-title">售货</div><div class="item-value">'+fmY(sl)+'</div>'+dlt('售货')+'</div>';
-  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="item-title">退款</div><div class="item-value">'+fmY(rf)+'</div>'+dlt('退款')+'</div>';
-  h+='<div class="item-card ic-red"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">支出</div><div class="item-value">'+fmY(ex)+'</div>'+dlt('支出')+'</div>';
-  h+='<div class="item-card ic-amber"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="item-title">美团</div><div class="item-value">'+fmY(mt_)+'</div>'+dlt('美团')+'</div>';
-  h+='<div class="item-card ic-purple"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div>'+dlt('现金结余')+'</div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="item-title">网费</div><div class="item-value">'+fmY(nf)+'</div></div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div class="item-title">售货</div><div class="item-value">'+fmY(sl)+'</div></div>';
+  h+='<div class="item-card ic-green"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="item-title">退款</div><div class="item-value">'+fmY(rf)+'</div></div>';
+  h+='<div class="item-card ic-red"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">支出</div><div class="item-value">'+fmY(ex)+'</div></div>';
+  h+='<div class="item-card ic-amber"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="item-title">美团</div><div class="item-value">'+fmY(mt_)+'</div></div>';
+  h+='<div class="item-card ic-purple"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div></div>';
   h+='</div>';
 
   /* --- Alert --- */
    h+='<div class="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div>总收 = 网费 + 售货 + 退款，现金 = 总收 &minus; 支出 &minus; 美团（未扣服务费，非实际到账金额）</div></div>';
+
+  /* --- Trend chart --- */
+  var trends=data.trends||{};
+  var tkeys=Object.keys(trends).sort();
+  if (tkeys.length>1) {
+    var metrics=[
+      {k:'现金结余',label:'现金',color:'var(--pink)',cls:'pink'},
+      {k:'网费',label:'网费',color:'var(--green)',cls:'green'},
+      {k:'支出',label:'支出',color:'var(--red)',cls:'red'},
+      {k:'美团',label:'美团',color:'var(--amber)',cls:'amber'}
+    ];
+    var maxV=0;
+    metrics.forEach(function(m){
+      tkeys.forEach(function(p){
+        var v=parseFloat((trends[p][m.k]||'0').replace(/[^\d.]/g,''))||0;
+        if (v>maxV) maxV=v;
+      });
+    });
+    if (maxV===0) maxV=1;
+    var barW=14, barGap=4, groupGap=14, padL=10, padR=10, padT=20, padB=34;
+    var nMetrics=metrics.length, nMonths=tkeys.length;
+    var groupW=nMetrics*(barW+barGap)-barGap;
+    var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
+    var chartH=180;
+    var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:100%;height:auto">';
+    for (var mi=0;mi<nMonths;mi++) {
+      var gx=padL+mi*(groupW+groupGap);
+      var parts=tkeys[mi].split('-');
+      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-4)+'" text-anchor="middle" font-size="9" fill="var(--t-quaternary)">'+(parts[1]||'')+'月</text>';
+      for (var mj=0;mj<nMetrics;mj++) {
+        var v=parseFloat((trends[tkeys[mi]][metrics[mj].k]||'0').replace(/[^\d.]/g,''))||0;
+        var bh=(v/maxV)*(chartH-padT-padB);
+        var bx=gx+mj*(barW+barGap);
+        var by=chartH-padB-bh;
+        svg+='<rect x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+metrics[mj].color+'" opacity=".85"><title>'+metrics[mj].label+' '+tkeys[mi]+': '+fmY(v)+'</title></rect>';
+      }
+    }
+    svg+='</svg>';
+    var leg='<div class="trend-legend">';
+    metrics.forEach(function(m){
+      leg+='<span><i class="dot '+m.cls+'"></i>'+m.label+'</span>';
+    });
+    leg+='</div>';
+    h+='<div class="trend-panel"><div class="trend-title">月度趋势</div>'+svg+leg+'</div>';
+  }
 
   /* --- Daily table --- */
   var daily=(data.daily||[]).slice().reverse();
