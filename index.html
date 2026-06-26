@@ -414,37 +414,68 @@
   }
 
   .item-card {
-    position: relative;
+    position: relative; perspective: 800px;
+    border-radius: var(--radius);
+    overflow: visible;
+  }
+  .card-inner {
+    position: relative; width: 100%; height: 100%;
+    transition: transform .5s cubic-bezier(.4,0,.2,1);
+    transform-style: preserve-3d;
+    cursor: pointer;
+    will-change: transform;
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-face {
+    width: 100%; min-height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 14px;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--card-glow);
     contain: layout style paint;
     text-align: center;
-    box-shadow: var(--card-glow);
-    transition: border-color .3s, box-shadow .3s, transform .3s;
-    will-change: transform;
     overflow: hidden;
+    position: relative;
   }
-  .item-card:hover {
+  .card-front { padding: 18px 14px; }
+  .card-back {
+    position: absolute; inset: 0;
+    transform: rotateY(180deg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 18px 10px;
+    background: linear-gradient(160deg, var(--surface), rgba(255,255,255,.02));
+  }
+  .card-back .fb-label { font-size: 9px; font-weight: 600; letter-spacing: .1em; color: var(--t-quaternary); text-transform: uppercase; }
+  .card-back .fb-cur { font-size: 22px; font-family: var(--font-mono); font-weight: 700; color: var(--t-primary); }
+  .card-back .fb-prev { font-size: 11px; color: var(--t-quaternary); }
+  .card-back .fb-prev span { font-family: var(--font-mono); color: var(--t-secondary); }
+  .card-back .fb-delta { font-size: 18px; font-family: var(--font-mono); font-weight: 700; margin-top: 2px; }
+  .card-back .fb-delta.up { color: var(--green); }
+  .card-back .fb-delta.down { color: var(--red); }
+  .card-back .fb-arrow { font-size: 14px; margin-left: 2px; }
+  .card-back .fb-sep { width: 24px; height: 1px; background: var(--border); margin: 4px 0; }
+
+  .card-inner:not(.flipped):hover .card-front {
     border-color: var(--border-hover);
     box-shadow: 0 8px 32px rgba(0,0,0,.1);
     transform: translateY(-2px);
   }
-  .item-card::before {
+  .card-front::before {
     content: '';
     position: absolute; inset: 0;
     border-radius: var(--radius);
     opacity: 0; transition: opacity .3s;
     pointer-events: none;
   }
-  .ic-green::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--green-glow), transparent); }
-  .ic-red::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--red-glow), transparent); }
-  .ic-amber::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--amber-glow), transparent); }
-  .ic-purple::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--purple-glow), transparent); }
-  .item-card:hover::before { opacity: 1; }
+  .ic-green .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--green-glow), transparent); }
+  .ic-red .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--red-glow), transparent); }
+  .ic-amber .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--amber-glow), transparent); }
+  .ic-purple .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--purple-glow), transparent); }
+  .card-inner:not(.flipped):hover .card-front::before { opacity: 1; }
 
   .item-icon {
     width: 32px; height: 32px;
@@ -490,26 +521,8 @@
   }
 
   .card-tooltip {
-    position: absolute; z-index: 100;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 18px; min-width: 180px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 12px 48px rgba(0,0,0,.35);
-    font-size: 13px; display: none;
-    transition: opacity .15s;
+    display: none;
   }
-  .card-tooltip.show { display: block; }
-  .card-tooltip .tt-row { display: flex; justify-content: space-between; gap: 20px; margin-bottom: 8px; align-items: center; }
-  .card-tooltip .tt-row:last-of-type { margin-bottom: 0; }
-  .card-tooltip .tt-label { color: var(--t-tertiary); font-size: 12px; }
-  .card-tooltip .tt-val { font-family: var(--font-mono); color: var(--t-primary); font-weight: 600; }
-  .card-tooltip .tt-delta { font-family: var(--font-mono); font-weight: 700; font-size: 15px; }
-  .card-tooltip .tt-delta.up { color: var(--green); }
-  .card-tooltip .tt-delta.down { color: var(--red); }
-  .card-tooltip .tt-sep { border-top: 1px solid var(--border); margin: 8px -4px; }
 
   /* ---- TREND PANEL ---- */
   .trend-panel {
@@ -970,7 +983,6 @@
   <div class="error-state" id="error" style="display:none"></div>
 
   <div id="content" style="display:none"></div>
-  <div class="card-tooltip" id="cardTip"></div>
 </div>
 
 <div class="chart-fullscreen" id="chartFS" onclick="if(event.target===this)toggleFullscreen()">
@@ -1028,13 +1040,30 @@ function render(data) {
   var h='';
 
   /* --- Item cards --- */
+  var cardDefs=[
+    {key:'网费', cls:'ic-green', cur:nf, icon:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>'},
+    {key:'售货', cls:'ic-green', cur:sl, icon:'<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>'},
+    {key:'退款', cls:'ic-green', cur:rf, icon:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>'},
+    {key:'支出', cls:'ic-red', cur:ex, icon:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>'},
+    {key:'美团', cls:'ic-amber', cur:mt_, icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
+    {key:'现金', cls:'ic-purple', cur:cash, icon:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>', blink:true}
+  ];
   h+='<div class="items">';
-  h+='<div class="item-card ic-green" onclick="event.stopPropagation();showCardTip(this,\'网费\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div><div class="item-title">网费</div><div class="item-value">'+fmY(nf)+'</div></div>';
-  h+='<div class="item-card ic-green" onclick="event.stopPropagation();showCardTip(this,\'售货\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div><div class="item-title">售货</div><div class="item-value">'+fmY(sl)+'</div></div>';
-  h+='<div class="item-card ic-green" onclick="event.stopPropagation();showCardTip(this,\'退款\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></div><div class="item-title">退款</div><div class="item-value">'+fmY(rf)+'</div></div>';
-  h+='<div class="item-card ic-red" onclick="event.stopPropagation();showCardTip(this,\'支出\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">支出</div><div class="item-value">'+fmY(ex)+'</div></div>';
-  h+='<div class="item-card ic-amber" onclick="event.stopPropagation();showCardTip(this,\'美团\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="item-title">美团</div><div class="item-value">'+fmY(mt_)+'</div></div>';
-  h+='<div class="item-card ic-purple" onclick="event.stopPropagation();showCardTip(this,\'现金\')"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="item-title">现金</div><div class="item-value cash-blink">'+fmY(cash)+'</div></div>';
+  for (var ci=0;ci<cardDefs.length;ci++) {
+    var cd=cardDefs[ci];
+    var ck=cd.key==='现金'?'现金结余':cd.key;
+    var prevVal=prevSum?parseFloat((prevSum[ck]||'0').replace(/[^\d.]/g,''))||0:0;
+    var delta=cd.cur-prevVal;
+    var dSign=delta>=0?'+':''; var dCls=delta>=0?'up':'down';
+    var pLabel=prevPeriod||'-';
+    var blinkCls=cd.blink?' cash-blink':'';
+    var back=prevSum
+      ?'<div class="card-face card-back"><div class="fb-label">'+cd.key+' 月环比</div><div class="fb-sep"></div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+pLabel+' <span>'+fmY(prevVal)+'</span></div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+      :'<div class="card-face card-back"><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
+    h+='<div class="item-card '+cd.cls+'"><div class="card-inner" onclick="event.stopPropagation();flipCard(this)">'
+      +'<div class="card-face card-front"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">'+cd.icon+'</svg></div><div class="item-title">'+cd.key+'</div><div class="item-value'+blinkCls+'">'+fmY(cd.cur)+'</div></div>'
+      +back+'</div></div>';
+  }
   h+='</div>';
 
   /* --- Trend chart --- */
@@ -1196,34 +1225,23 @@ function trendClick(label,period,val) {
   }
 }
 
-function showCardTip(el, key) {
-  var cc=window._cardCompare;
-  if (!cc) return;
-  var cur=parseFloat((cc.now[key==='现金'?'现金结余':key]||'0').replace(/[^\d.]/g,''))||0;
-  var prev_=0;
-  if (cc.prev) {
-    var pk=key==='现金'?'现金结余':key;
-    prev_=parseFloat((cc.prev[pk]||'0').replace(/[^\d.]/g,''))||0;
+var _flipTimer=null, _flippedCard=null;
+
+function flipCard(inner) {
+  if (inner===_flippedCard) {
+    unflip(); return;
   }
-  var delta=cur-prev_;
-  var dSign=delta>=0?'+':'';
-  var dCls=delta>=0?'up':'down';
-  var prevLabel=cc.prevPeriod?cc.prevPeriod:'-';
-  var h='<div class="tt-row"><span class="tt-label">'+key+' &nbsp;'+cc.curPeriod+'</span><span class="tt-val">'+fmY(cur)+'</span></div>';
-  if (cc.prev) h+='<div class="tt-sep"></div><div class="tt-row"><span class="tt-label">'+prevLabel+'</span><span class="tt-val">'+fmY(prev_)+'</span></div>';
-  h+='<div class="tt-sep"></div><div class="tt-row"><span class="tt-label">月环比</span><span class="tt-delta '+dCls+'">'+dSign+fmY(delta)+'</span></div>';
-  var tip=document.getElementById('cardTip');
-  if (!tip) return;
-  var rect=el.getBoundingClientRect();
-  tip.style.top=(rect.bottom+window.scrollY+4)+'px';
-  tip.style.left=Math.min(Math.max(8, rect.left+window.scrollX+rect.width/2-100), window.innerWidth-216)+'px';
-  tip.innerHTML=h;
-  tip.classList.add('show');
+  if (_flippedCard) unflip();
+  if (_flipTimer) clearTimeout(_flipTimer);
+  inner.classList.add('flipped');
+  _flippedCard=inner;
+  _flipTimer=setTimeout(unflip, 12000);
 }
 
-function hideCardTip() {
-  var tip=document.getElementById('cardTip');
-  if (tip) tip.classList.remove('show');
+function unflip() {
+  if (_flippedCard) _flippedCard.classList.remove('flipped');
+  if (_flipTimer) { clearTimeout(_flipTimer); _flipTimer=null; }
+  _flippedCard=null;
 }
 
 function toggleFullscreen() {
@@ -1385,8 +1403,7 @@ function loadMonth(period) {
 document.addEventListener('click',function(e){
   var pill=document.getElementById('periodPill');
   if (pill && !pill.contains(e.target)) closeAll();
-  var tip=document.getElementById('cardTip');
-  if (tip && !e.target.closest('.item-card') && !e.target.closest('#cardTip')) hideCardTip();
+  if (!e.target.closest('.card-inner')) unflip();
 });
 
 fetch('/api/data')
