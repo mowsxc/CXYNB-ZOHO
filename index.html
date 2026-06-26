@@ -265,6 +265,14 @@
     .period-pill.pick-mo .per-opt.mo.hide { max-width: 30px; padding-left: 6px; padding-right: 6px; }
   }
 
+  .sync-time {
+    text-align: center;
+    font-size: 11px;
+    color: var(--t-quaternary);
+    margin-top: 8px;
+    letter-spacing: .03em;
+  }
+
   .add-modal {
     display: none; position: fixed; inset: 0; z-index: 9999;
     background: rgba(0,0,0,.7); align-items: center; justify-content: center;
@@ -688,15 +696,6 @@
     font-size: 12px;
   }
 
-  /* ---- FOOTER ---- */
-  .footer {
-    text-align: center;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-  .footer-main { font-size: 11px; color: var(--t-quaternary); letter-spacing: .04em; }
-  .footer-time { font-size: 10px; color: rgba(71,85,105,.6); margin-top: 4px; }
-
   /* ---- LOADING ---- */
   .loading-state {
     display: flex;
@@ -815,17 +814,13 @@
         <span id="moOpts"></span>
       </div>
     </div>
+    <div class="sync-time" id="syncedTime" style="display:none"></div>
   </div>
 
    <div class="loading-state" id="loading" style="display:none"><span class="loading-ring"></span>正在同步 Zoho Sheet 数据...</div>
   <div class="error-state" id="error" style="display:none"></div>
 
   <div id="content" style="display:none"></div>
-
-  <div class="footer" id="footer" style="display:none">
-    <div class="footer-main">数据实时同步自 Zoho Sheet</div>
-    <div class="footer-time" id="syncedTime"></div>
-  </div>
 </div>
 
 <script>
@@ -848,7 +843,7 @@ function hasData(r) {
 function render(data) {
   document.getElementById('loading').style.display='none';
   document.getElementById('content').style.display='block';
-  document.getElementById('footer').style.display='block';
+  document.getElementById('syncedTime').style.display='block';
   var curPeriod=data.period||'----/--';
   window._curPeriod=curPeriod;
   buildPeriodOpts();
@@ -916,7 +911,7 @@ function render(data) {
     h+='</tbody></table></div></div>';
   }
 
-  document.getElementById('syncedTime').textContent='同步时间：'+new Date().toLocaleString('zh-CN');
+  document.getElementById('syncedTime').textContent='同步时间 '+new Date().toLocaleString('zh-CN');
   document.getElementById('content').innerHTML=h;
 }
 
@@ -1002,7 +997,7 @@ function loadMonth(period) {
   var loadingTimer = setTimeout(function(){
     document.getElementById('loading').style.display='block';
     document.getElementById('content').style.display='none';
-    document.getElementById('footer').style.display='none';
+    document.getElementById('syncedTime').style.display='none';
   }, 200);
   fetch('/api/data?period='+encodeURIComponent(period))
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
