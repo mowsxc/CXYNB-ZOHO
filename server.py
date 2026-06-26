@@ -4,6 +4,8 @@
 import http.server
 import json
 import os
+import threading
+import time
 import urllib.error
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -15,6 +17,9 @@ WORKSPACE = os.path.dirname(os.path.abspath(__file__))
 MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 
 _valid_months = {}
+_data_cache = {}       # {period: {"data": {...}, "ts": float}}
+_cache_lock = threading.Lock()
+_refresh_interval = 300  # 5 minutes background refresh
 
 
 def load_months():
@@ -83,6 +88,34 @@ def init_valid_months():
     _valid_months = valid
     if not valid:
         print("WARNING: no valid months!")
+    _prime_cache()
+
+
+def _prime_cache():
+    """Pre-load all valid months into cache on startup."""
+    global _data_cache
+    for period, url in _valid_months.items():
+        try:
+            data = fetch_sheet(url, timeout=15)
+            data["period"] = normalize_period(data.get("period", ""))
+            _data_cache[period] = {"data": data, "ts": time.time()}
+            print(f"  cached {period}")
+        except Exception as e:
+            print(f"  cache fail {period}: {e}")
+
+
+def _background_refresh():
+    """Continuously refresh all cached months from Zoho."""
+    while True:
+        time.sleep(_refresh_interval)
+        for period, url in list(_valid_months.items()):
+            try:
+                data = fetch_sheet(url, timeout=15)
+                data["period"] = normalize_period(data.get("period", ""))
+                with _cache_lock:
+                    _data_cache[period] = {"data": data, "ts": time.time()}
+            except Exception:
+                pass
 
 
 def serve_static(path, handler):
@@ -116,6 +149,7 @@ def json_response(handler, data, status=200):
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Cache-Control", "no-cache")
     handler.send_header("Content-Length", str(len(body)))
     handler.end_headers()
     handler.wfile.write(body)
@@ -143,6 +177,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         if path == "/api/data":
+            global _data_cache
             period = qs.get("period", [None])[0]
             targets = _valid_months
             url = targets.get(period)
@@ -153,7 +188,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     result = validate_month(url)
                     if result:
                         _valid_months[period] = url
-                        url = url
                     else:
                         url = None
             if not url:
@@ -161,10 +195,33 @@ class Handler(http.server.BaseHTTPRequestHandler):
             if not url:
                 json_response(self, {"error": "无可用数据"}, 404)
                 return
+
+            actual_period = period
+            if not actual_period:
+                for k, v in targets.items():
+                    if v == url:
+                        actual_period = k
+                        break
+
+            # Serve from cache if available
+            with _cache_lock:
+                cached = _data_cache.get(actual_period) if actual_period else None
+            if cached:
+                data = dict(cached["data"])
+                data["_cache_ts"] = cached["ts"]
+                data["_cached"] = True
+                json_response(self, data)
+                return
+
+            # Cache miss — fetch synchronously
             try:
                 data = fetch_sheet(url)
-                raw = data.get("period", "")
-                data["period"] = normalize_period(raw)
+                data["period"] = normalize_period(data.get("period", ""))
+                if actual_period:
+                    with _cache_lock:
+                        _data_cache[actual_period] = {"data": data, "ts": time.time()}
+                data["_cache_ts"] = time.time()
+                data["_cached"] = False
                 json_response(self, data)
             except urllib.error.URLError as e:
                 json_response(self, {"error": f"Zoho 请求失败: {e}"}, 502)
@@ -178,16 +235,25 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 json_response(self, {"error": "缺少 url 参数"}, 400)
                 return
             url_to_add = url_to_add.split("?")[0]
-            period = validate_month(url_to_add)
-            if not period:
+            data = fetch_sheet(url_to_add)
+            period = normalize_period(data.get("period", ""))
+            if not period or "-" not in period or len(data.get("daily", [])) == 0:
                 json_response(self, {"error": "链接无有效数据或无法识别月份"}, 400)
                 return
             stored = load_months()
             stored[period] = url_to_add
             save_months(stored)
             _valid_months[period] = url_to_add
+            with _cache_lock:
+                _data_cache[period] = {"data": data, "ts": time.time()}
             avail = build_available(_valid_months)
             json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
+            return
+
+        if path == "/api/ping":
+            with _cache_lock:
+                ts_map = {p: c["ts"] for p, c in _data_cache.items()}
+            json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map})
             return
 
         serve_static(self.path, self)
@@ -198,6 +264,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     init_valid_months()
+    t = threading.Thread(target=_background_refresh, daemon=True)
+    t.start()
     server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Server running on http://0.0.0.0:{PORT}")
     server.serve_forever()
