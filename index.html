@@ -1006,7 +1006,7 @@ function isReallyZero(v) { return !isZero(v) && parseFloat(String(v).replace(/[^
 function fmOrBlank(v) { if (isZero(v)||isReallyZero(v)) return ''; return fm(v); }
 function txtOrBlank(v) { return (!v||v==='0'||v==='0.00')?'':v; }
 function hasData(r) {
-  var ks=['美团','网费','售货','支出','退款金额'];
+  var ks=['美团','网费','售货','支出','退款'];
   for (var k=0;k<ks.length;k++) { if (!isZero(r[ks[k]])&&!isReallyZero(r[ks[k]])) return true; }
   return false;
 }
@@ -1139,7 +1139,7 @@ function render(data) {
       h+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
       h+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
       h+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
-      h+='<td class="cell-rf align-right">'+fmOrBlank(r['退款金额'])+'</td>';
+      h+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
       h+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
       h+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
       h+='</tr>';
