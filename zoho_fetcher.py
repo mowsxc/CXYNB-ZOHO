@@ -57,10 +57,8 @@ def _parse_grid(html):
         pos_map = {int(p): (v or "").strip() for p, v in col_divs}
 
         texts = [pos_map.get(pos, "") for pos in column_positions]
-        # Trim trailing empty columns but keep internal empty cells
-        while texts and texts[-1] == "":
-            texts.pop()
-        if texts:
+        # Keep internal empty cells; only add row if it has at least one non-empty cell
+        if any(t != "" for t in texts):
             rows.append(texts)
 
     return rows
@@ -80,11 +78,11 @@ def _build_data(rows):
         for j in range(min(len(labels), len(values))):
             label = labels[j]
             # Normalize variant labels to consistent key
-            if label in ("退货", "入账"):
+            if label in ("退货", "入账", "退款金额"):
                 label = "退款"
             summary[label] = values[j]
 
-    headers = rows[3]
+    headers = [("退款" if h in ("退货", "入账", "退款金额") else h) for h in rows[3]]
 
     daily = []
     for row in rows[4:]:

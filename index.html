@@ -446,36 +446,40 @@
     position: absolute; inset: 0;
     transform: rotateY(180deg);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; padding: 18px 10px;
-    background: linear-gradient(160deg, var(--surface), rgba(255,255,255,.02));
+    gap: 4px; padding: 14px 8px;
+    background: linear-gradient(160deg, var(--surface), rgba(255,255,255,.03));
   }
-  .card-back .fb-label { font-size: 9px; font-weight: 600; letter-spacing: .1em; color: var(--t-quaternary); text-transform: uppercase; }
-  .card-back .fb-cur { font-size: 22px; font-family: var(--font-mono); font-weight: 700; color: var(--t-primary); }
-  .card-back .fb-prev { font-size: 11px; color: var(--t-quaternary); }
+  .card-back .fb-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--t-quaternary); }
+  .card-back .fb-sep { width: 28px; height: 1px; background: var(--border); margin: 4px 0 6px; }
+  .card-back .fb-cur { font-size: 16px; font-family: var(--font-mono); font-weight: 700; letter-spacing: -.02em; line-height: 1.2; display: inline-block; animation: cash-pulse 2s ease-in-out infinite; }
+  .card-back .fb-prev { font-size: 10px; color: var(--t-quaternary); }
   .card-back .fb-prev span { font-family: var(--font-mono); color: var(--t-secondary); }
-  .card-back .fb-delta { font-size: 18px; font-family: var(--font-mono); font-weight: 700; margin-top: 2px; }
+  .card-back .fb-delta { font-size: 16px; font-family: var(--font-mono); font-weight: 700; margin-top: 2px; letter-spacing: -.02em; }
   .card-back .fb-delta.up { color: var(--green); }
   .card-back .fb-delta.down { color: var(--red); }
-  .card-back .fb-arrow { font-size: 14px; margin-left: 2px; }
-  .card-back .fb-sep { width: 24px; height: 1px; background: var(--border); margin: 4px 0; }
+  .card-back .fb-arrow { font-size: 12px; margin-left: 2px; }
 
   .card-inner:not(.flipped):hover .card-front {
     border-color: var(--border-hover);
     box-shadow: 0 8px 32px rgba(0,0,0,.1);
     transform: translateY(-2px);
   }
-  .card-front::before {
+  .card-inner.flipped:hover .card-back {
+    border-color: var(--border-hover);
+  }
+  .card-front::before, .card-back::before {
     content: '';
     position: absolute; inset: 0;
     border-radius: var(--radius);
     opacity: 0; transition: opacity .3s;
     pointer-events: none;
   }
-  .ic-green .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--green-glow), transparent); }
-  .ic-red .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--red-glow), transparent); }
-  .ic-amber .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--amber-glow), transparent); }
-  .ic-purple .card-front::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--purple-glow), transparent); }
+  .ic-green .card-front::before, .ic-green .card-back::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--green-glow), transparent); }
+  .ic-red .card-front::before, .ic-red .card-back::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--red-glow), transparent); }
+  .ic-amber .card-front::before, .ic-amber .card-back::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--amber-glow), transparent); }
+  .ic-purple .card-front::before, .ic-purple .card-back::before { background: radial-gradient(ellipse 60% 60% at 50% 0%, var(--purple-glow), transparent); }
   .card-inner:not(.flipped):hover .card-front::before { opacity: 1; }
+  .card-inner.flipped:hover .card-back::before { opacity: 1; }
 
   .item-icon {
     width: 32px; height: 32px;
@@ -1023,7 +1027,8 @@ function render(data) {
   var nf=parseFloat((s['网费']||'0').replace(/[^\d.]/g,''))||0;
   var sl=parseFloat((s['售货']||'0').replace(/[^\d.]/g,''))||0;
   var ex=parseFloat((s['支出']||'0').replace(/[^\d.]/g,''))||0;
-  var rf=parseFloat((s['退款']||'0').replace(/[^\d.]/g,''))||0;
+  var getV=function(obj,key){return obj[key]||(key==='退款'?obj['退款金额']:'')||'0';};
+  var rf=parseFloat(getV(s,'退款').replace(/[^\d.]/g,''))||0;
   var rev=nf+sl+rf;
   var M=' mono';
 
@@ -1052,7 +1057,7 @@ function render(data) {
   for (var ci=0;ci<cardDefs.length;ci++) {
     var cd=cardDefs[ci];
     var ck=cd.key==='现金'?'现金结余':cd.key;
-    var prevVal=prevSum?parseFloat((prevSum[ck]||'0').replace(/[^\d.]/g,''))||0:0;
+    var prevVal=prevSum?parseFloat(getV(prevSum,ck).replace(/[^\d.]/g,''))||0:0;
     var delta=cd.cur-prevVal;
     var dSign=delta>=0?'+':''; var dCls=delta>=0?'up':'down';
     var pLabel=prevPeriod||'-';
