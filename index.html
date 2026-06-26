@@ -540,24 +540,23 @@
   /* ---- CHART FULLSCREEN ---- */
   .chart-fullscreen {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,.92); backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: #0a0a0f;
     display: none; align-items: center; justify-content: center;
   }
   .chart-fullscreen.open { display: flex; }
   .chart-fs-inner {
-    width: 96vw; height: 96vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 16px; box-sizing: border-box;
   }
-  .chart-fs-inner .trend-chart { max-width: 100%; max-height: 92vh; }
+  .chart-fs-inner .trend-chart { max-width: 100%; max-height: 100%; }
   .fs-close {
     position: absolute; top: 16px; right: 16px; z-index: 1;
-    width: 36px; height: 36px; border-radius: 50%;
-    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-    color: #fff; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    color: #ccc; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
-  @media (max-width: 768px) {
-    .chart-fs-inner { transform: rotate(90deg); width: 96vh; height: 96vw; }
-  }
+  .fs-close:hover, .fs-close:active { background: rgba(255,255,255,.15); color: #fff; }
 
   /* ---- GLASS PANEL ---- */
   .panel {
@@ -981,7 +980,9 @@ function render(data) {
       {k:'美团',label:'美团',color:'var(--amber)',cls:'amber'},
       {k:'现金结余',label:'现金',color:'var(--pink)',cls:'pink'}
     ];
-    window._chartState={trends:trends, tkeys:tkeys, metrics:metrics, rangeN:2};
+    var isMobile=window.innerWidth<768;
+    var defaultR=isMobile?3:6;
+    window._chartState={trends:trends, tkeys:tkeys, metrics:metrics, rangeN:defaultR};
 
     var leg='<div class="trend-legend">';
     metrics.forEach(function(m){
@@ -989,13 +990,14 @@ function render(data) {
     });
     leg+='</div>';
     var tip='<div class="trend-tip-wrap"><span class="trend-tip" id="trendTip" style="display:none"></span></div>';
+    var btnQtr='<button class="range-btn'+(defaultR===3?' sel':'')+'" onclick="setChartRange(3,this)">季度</button>';
+    var btnHalf='<button class="range-btn'+(defaultR===6?' sel':'')+'" onclick="setChartRange(6,this)">半年</button>';
+    var btnYear='<button class="range-btn'+(defaultR===12?' sel':'')+'" onclick="setChartRange(12,this)">全年</button>';
     h+='<div class="trend-panel">'
       +'<div class="trend-header">'
       +'<span class="trend-title">月度趋势</span>'
       +'<div class="trend-ranges" id="trendRanges">'
-      +'<button class="range-btn sel" onclick="setChartRange(2,this)">近两月</button>'
-      +'<button class="range-btn" onclick="setChartRange(6,this)">近半年</button>'
-      +'<button class="range-btn" onclick="setChartRange(12,this)">全年</button>'
+      +btnQtr+btnHalf+btnYear
       +'</div>'
       +'<button class="fs-btn" onclick="toggleFullscreen()" title="全屏查看">'
       +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'
@@ -1134,10 +1136,9 @@ function toggleFullscreen() {
   document.body.style.overflow='hidden';
   var inner=document.getElementById('chartFsInner');
   if (inner) {
-    // Build larger chart for fullscreen
     var st=window._chartState;
     var trends=st.trends, tkeys=st.tkeys, metrics=st.metrics;
-    var n=window.innerWidth<768 ? 6 : st.rangeN||2;
+    var n=12;
     var months=tkeys.slice(-n);
     if (months.length<2) months=tkeys.slice(-2);
     var maxV=0;
@@ -1148,14 +1149,14 @@ function toggleFullscreen() {
       });
     });
     if (maxV===0) maxV=1;
-    var isMobile=window.innerWidth<768;
-    var barW=isMobile?10:18, barGap=isMobile?2:4, groupGap=isMobile?12:20;
-    var padL=isMobile?6:14, padR=isMobile?6:14, padT=isMobile?28:30, padB=isMobile?42:46;
+    var isMob=window.innerWidth<768;
+    var barW=isMob?14:20, barGap=isMob?2:5, groupGap=isMob?10:20;
+    var padL=isMob?4:14, padR=isMob?4:14, padT=isMob?36:40, padB=isMob?46:52;
     var nMetrics=metrics.length, nMonths=months.length;
     var groupW=nMetrics*(barW+barGap)-barGap;
     var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
-    var chartH=isMobile?220:280;
-    var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:100%;height:100%">';
+    var chartH=isMob?280:360;
+    var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">';
     for (var mi=0;mi<nMonths;mi++) {
       var gx=padL+mi*(groupW+groupGap);
       for (var mj=0;mj<nMetrics;mj++) {
@@ -1167,14 +1168,15 @@ function toggleFullscreen() {
         if (v>=10000) shortVal=(v/10000).toFixed(1)+'w';
         else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
         else shortVal=v.toFixed(0);
+        var fsFont=isMob?9:12;
         svg+='<g class="bar-group">';
         svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
-        svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+metrics[mj].color+'" opacity=".85" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
-        svg+='<text x="'+(bx+barW/2)+'" y="'+(by-(isMobile?3:5))+'" text-anchor="middle" font-size="'+(isMobile?8:10)+'" fill="var(--t-secondary)" font-family="var(--font-mono)">'+shortVal+'</text>';
+        svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+metrics[mj].color+'" opacity=".88" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
+        svg+='<text x="'+(bx+barW/2)+'" y="'+(by-5)+'" text-anchor="middle" font-size="'+fsFont+'" fill="var(--t-secondary)" font-family="var(--font-mono)" font-weight="600">'+shortVal+'</text>';
         svg+='</g>';
       }
       var parts=months[mi].split('-');
-      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-(isMobile?3:5))+'" text-anchor="middle" font-size="'+(isMobile?10:12)+'" fill="var(--t-quaternary)">'+(parts[1]||'')+'月</text>';
+      svg+='<text x="'+(gx+groupW/2)+'" y="'+(chartH-6)+'" text-anchor="middle" font-size="'+(isMob?11:14)+'" fill="var(--t-quaternary)" font-weight="500">'+(parts[1]||'')+'月</text>';
     }
     svg+='</svg>';
     inner.innerHTML=svg;
