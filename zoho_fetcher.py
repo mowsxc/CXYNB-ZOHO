@@ -78,7 +78,11 @@ def _build_data(rows):
         labels = rows[1]
         values = rows[2]
         for j in range(min(len(labels), len(values))):
-            summary[labels[j]] = values[j]
+            label = labels[j]
+            # Normalize variant labels to consistent key
+            if label in ("退货", "入账"):
+                label = "退款"
+            summary[label] = values[j]
 
     headers = rows[3]
 

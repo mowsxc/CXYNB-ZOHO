@@ -855,7 +855,7 @@ function render(data) {
   var nf=parseFloat((s['网费']||'0').replace(/[^\d.]/g,''))||0;
   var sl=parseFloat((s['售货']||'0').replace(/[^\d.]/g,''))||0;
   var ex=parseFloat((s['支出']||'0').replace(/[^\d.]/g,''))||0;
-  var rf=parseFloat((s['退款']||s['退货']||'0').replace(/[^\d.]/g,''))||0;
+  var rf=parseFloat((s['退款']||'0').replace(/[^\d.]/g,''))||0;
   var rev=nf+sl+rf;
   var M=' mono';
 
