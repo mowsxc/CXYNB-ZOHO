@@ -102,10 +102,11 @@
 
   /* ---- Ambient BG ---- */
   .bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
-  .bg-orb {
-    position: absolute; border-radius: 50%;
-    filter: blur(140px); opacity: var(--orb-opacity);
-  }
+.bg-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(80px); opacity: var(--orb-opacity);
+  will-change: transform, opacity; backface-visibility: hidden;
+}
   .bg-orb-1 { width:700px; height:700px; background:radial-gradient(circle, var(--green-glow), transparent); top:-25%; left:-20%; animation:drift1 30s ease-in-out infinite; }
   .bg-orb-2 { width:550px; height:550px; background:radial-gradient(circle, var(--purple-glow), transparent); bottom:-20%; right:-15%; animation:drift2 35s ease-in-out infinite; }
   .bg-orb-3 { width:450px; height:450px; background:radial-gradient(circle, var(--amber-glow), transparent); top:40%; right:-25%; animation:drift3 25s ease-in-out infinite; }
@@ -190,9 +191,19 @@
     position: relative;
     top: -1px;
   }
+  .brand-dot::after {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    background: var(--green-glow); opacity: 0;
+    animation: liveGlow 2.2s ease-in-out infinite;
+    will-change: opacity;
+  }
   @keyframes livePulse {
-    0%,100% { box-shadow: 0 0 6px var(--green-glow); }
-    50% { box-shadow: 0 0 18px var(--green-glow), 0 0 36px var(--green-glow); }
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+  }
+  @keyframes liveGlow {
+    0%,100% { opacity: 0; }
+    50% { opacity: .45; }
   }
 
   /* ---- PERIOD SELECTOR ---- */
@@ -292,7 +303,7 @@
   .add-status { display: block; margin-top: 8px; font-size: 13px; color: #888; min-height: 20px; }
   .add-acts { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
   .add-acts button {
-    padding: 10px 22px; border-radius: var(--radius); font-size: 14px; cursor: pointer; border: none; transition: all .2s;
+    padding: 10px 22px; border-radius: var(--radius); font-size: 14px; cursor: pointer; border: none; transition: background .2s, color .2s, opacity .2s;
   }
   .btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--border)!important; }
   .btn-cancel:hover { color: var(--text); border-color: var(--text-muted)!important; }
@@ -305,7 +316,7 @@
     background: var(--surface); border: 1px solid var(--border);
     backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all .25s; color: var(--t-secondary);
+    transition: background .25s, color .25s, border-color .25s, box-shadow .25s; color: var(--t-secondary);
   }
   .theme-toggle:hover { border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 16px var(--purple-glow); }
   .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
@@ -325,11 +336,13 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 24px 22px;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    contain: layout style paint;
     overflow: hidden;
     box-shadow: var(--card-glow);
     transition: border-color .3s, box-shadow .3s, transform .3s;
+    will-change: transform;
   }
   .stat-card:hover {
     border-color: var(--border-hover);
@@ -406,11 +419,13 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 18px 14px;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    contain: layout style paint;
     text-align: center;
     box-shadow: var(--card-glow);
     transition: border-color .3s, box-shadow .3s, transform .3s;
+    will-change: transform;
     overflow: hidden;
   }
   .item-card:hover {
@@ -470,11 +485,12 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     padding: 20px 16px;
     margin-bottom: 28px;
     overflow: hidden;
+    contain: layout style paint;
   }
   .trend-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
   .trend-title {
@@ -488,7 +504,7 @@
   .range-btn {
     font-size: 10px; font-family: inherit; color: var(--t-tertiary);
     background: transparent; border: 1px solid var(--border); border-radius: 5px;
-    padding: 3px 10px; cursor: pointer; transition: all .2s; white-space: nowrap;
+    padding: 3px 10px; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
   }
   .range-btn:active { background: rgba(255,255,255,.05); }
   .range-btn.sel {
@@ -497,7 +513,7 @@
   .fs-btn {
     flex-shrink: 0; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;
     background: transparent; border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
-    color: var(--t-tertiary); transition: all .2s;
+    color: var(--t-tertiary); transition: color .2s, background .2s, border-color .2s;
   }
   .fs-btn svg { width: 14px; height: 14px; }
   .fs-btn:active { background: rgba(255,255,255,.05); color: var(--amber); }
@@ -572,11 +588,12 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     overflow: hidden;
     margin-bottom: 16px;
     box-shadow: var(--card-glow);
+    contain: layout style paint;
   }
   .cols-2 .panel { margin-bottom: 0; }
 
