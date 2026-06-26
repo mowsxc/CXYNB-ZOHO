@@ -19,7 +19,8 @@ MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
-_refresh_interval = 20  # seconds background refresh
+_refresh_interval = 20     # seconds — current month cadence
+_historical_period = 15   # refresh historical every N cycles (15*20s=5min)
 
 
 def load_months():
@@ -106,10 +107,21 @@ def _prime_cache():
 
 
 def _background_refresh():
-    """Continuously refresh all cached months from Zoho."""
+    """Two-tier refresh: current month every cycle, historical every N cycles."""
+    cycle = 0
+    current_month = datetime.now().strftime("%Y-%m")
     while True:
         time.sleep(_refresh_interval)
+        cycle += 1
+        cur = datetime.now().strftime("%Y-%m")
+        if cur != current_month:
+            current_month = cur
+            cycle = 0  # force full refresh on month rollover
+
         for period, url in list(_valid_months.items()):
+            is_current = (period == current_month)
+            if not is_current and cycle % _historical_period != 0:
+                continue
             try:
                 data = fetch_sheet(url, timeout=15)
                 data["period"] = normalize_period(data.get("period", ""))
