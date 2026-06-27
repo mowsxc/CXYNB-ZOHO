@@ -125,8 +125,12 @@
   body.is-scrolling .glassOrbs,
   body.is-scrolling .barBreathe,
   body.is-scrolling .cash-blink,
-  body.is-scrolling .syncIconSpin { animation-play-state: paused !important; }
+  body.is-scrolling .syncIconSpin,
+  body.is-scrolling .card-face::after { animation-play-state: paused !important; }
   body.is-scrolling .card-back .fb-cur { animation-play-state: paused !important; }
+  body.is-scrolling .bg-orb { filter: blur(8px) !important; opacity: .15 !important; }
+  body.is-scrolling .bg-particle { opacity: 0 !important; }
+  body.is-scrolling .bg-grid { opacity: 0 !important; }
 .bg-orb {
   position: absolute; border-radius: 50%;
   filter: blur(40px); opacity: var(--orb-opacity);
@@ -2097,7 +2101,7 @@ window.addEventListener('resize',function(){
 (function(){
   var container=document.getElementById('bgParticles');
   if(!container) return;
-  var count=12;
+  var count=6;
   var frag=document.createDocumentFragment();
   for(var i=0;i<count;i++){
     var dot=document.createElement('div');
