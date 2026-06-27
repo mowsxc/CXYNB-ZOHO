@@ -21,8 +21,11 @@ MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
+_months_lock = threading.Lock()
 _refresh_interval = 20     # seconds — current month cadence
 _historical_period = 15   # refresh historical every N cycles (15*20s=5min)
+_available_cache = None
+_available_version = 0
 
 
 def load_months():
@@ -38,12 +41,25 @@ def save_months(data):
 
 
 def build_available(urls):
-    av = {}
-    for k in urls:
-        parts = k.split("-")
-        if len(parts) == 2:
-            av.setdefault(parts[0], []).append(parts[1])
-    return av
+    global _available_cache, _available_version
+    with _months_lock:
+        cur_ver = _available_version
+        if cur_ver >= 0 and _available_cache is not None:
+            return _available_cache
+        av = {}
+        for k in urls:
+            parts = k.split("-")
+            if len(parts) == 2:
+                av.setdefault(parts[0], []).append(parts[1])
+        _available_cache = av
+        return av
+
+
+def _invalidate_available():
+    global _available_cache, _available_version
+    with _months_lock:
+        _available_cache = None
+        _available_version += 1
 
 
 def default_month(urls):
@@ -88,7 +104,9 @@ def init_valid_months():
             print(f"  {key} OK")
         else:
             print(f"  {key} SKIP (no data)")
-    _valid_months = valid
+    with _months_lock:
+        _valid_months = valid
+        _invalidate_available()
     if not valid:
         print("WARNING: no valid months!")
     _prime_cache()
@@ -120,7 +138,9 @@ def _background_refresh():
             current_month = cur
             cycle = 0  # force full refresh on month rollover
 
-        for period, url in list(_valid_months.items()):
+        with _months_lock:
+            snapshot = list(_valid_months.items())
+        for period, url in snapshot:
             is_current = (period == current_month)
             if not is_current and cycle % _historical_period != 0:
                 continue
@@ -148,8 +168,10 @@ def _data_hash(data):
 def _build_trends():
     """Build trends dict for all cached months."""
     trends = {}
+    with _months_lock:
+        keys = sorted(_valid_months.keys())
     with _cache_lock:
-        for p in sorted(_valid_months.keys()):
+        for p in keys:
             c = _data_cache.get(p)
             if c:
                 trends[p] = c["data"].get("summary", {})
@@ -223,12 +245,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if path == "/api/months":
             # Lazy re-check one skipped month per call
             stored = load_months()
-            for k, v in stored.items():
-                if k not in _valid_months:
-                    result = validate_month(v)
-                    if result:
+            to_validate = None
+            with _months_lock:
+                for k, v in stored.items():
+                    if k not in _valid_months:
+                        to_validate = (k, v)
+                        break
+            if to_validate:
+                k, v = to_validate
+                result = validate_month(v)
+                if result:
+                    with _months_lock:
                         _valid_months[k] = v
-                    break
+                        _invalidate_available()
             avail = build_available(_valid_months)
             json_response(self, {"available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
             return
@@ -243,7 +272,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if url:
                     result = validate_month(url)
                     if result:
-                        _valid_months[period] = url
+                        with _months_lock:
+                            _valid_months[period] = url
+                            _invalidate_available()
                     else:
                         url = None
             if not url:
@@ -307,7 +338,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
             stored = load_months()
             stored[period] = url_to_add
             save_months(stored)
-            _valid_months[period] = url_to_add
+            with _months_lock:
+                _valid_months[period] = url_to_add
+                _invalidate_available()
             h = _data_hash(data)
             with _cache_lock:
                 _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
