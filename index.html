@@ -353,7 +353,8 @@
 
   .add-modal {
     position: fixed; inset: 0; z-index: 9999;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding-top: 80px;
     visibility: hidden; opacity: 0; pointer-events: none;
     transition: visibility 0s .3s, opacity .3s ease-out;
     -webkit-tap-highlight-color: transparent;
@@ -361,65 +362,80 @@
   .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; transition: visibility 0s 0s, opacity .3s ease-out; }
   .add-modal::before {
     content: ''; position: absolute; inset: 0;
-    background: rgba(0,0,0,.6);
+    background: rgba(0,0,0,.5);
     opacity: 0; transition: opacity .35s ease-out;
   }
   .add-modal.open::before { opacity: 1; }
-  .add-card {
+  .capsule {
     position: relative; z-index: 1;
-    background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 28px 24px; width: 90%; max-width: 400px;
-    box-shadow: 0 16px 64px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.04) inset;
-    opacity: 0;
-    transform: scale(0);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface-dark); border: 1px solid var(--border); border-radius: 40px;
+    padding: 6px 8px 6px 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04) inset;
+    opacity: 0; transform: scale(0);
     transform-origin: var(--modal-ox, 50%) var(--modal-oy, 50%);
-    transition: transform .4s cubic-bezier(.4,0,.2,1), opacity .25s ease-out;
+    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .2s ease-out, width .3s cubic-bezier(.4,0,.2,1);
     will-change: transform, opacity;
+    max-width: 92vw;
   }
-  .add-modal.open .add-card { transform: scale(1); opacity: 1; }
-  .add-card h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; color: var(--t-primary); }
-  .add-card-header {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  .add-modal.open .capsule { transform: scale(1); opacity: 1; }
+  .capsule-icon {
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: rgba(139,92,246,.12); color: var(--accent2);
   }
-  .add-card-header h3 { margin: 0; }
-  .add-icon { width: 20px; height: 20px; color: var(--accent2); flex-shrink: 0; }
-  .add-card input {
-    width: 100%; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border);
-    background: var(--surface); color: var(--t-primary); font-size: 14px; outline: none; box-sizing: border-box;
-    transition: border-color .25s, box-shadow .25s;
+  .capsule-icon svg { width: 16px; height: 16px; }
+  .capsule input {
+    flex: 1; min-width: 120px;
+    border: none; background: transparent; color: var(--t-primary);
+    font-size: 14px; outline: none; padding: 8px 0;
+    font-family: var(--font-mono);
   }
-  .add-card input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
-  .add-card input::placeholder { color: var(--t-quaternary); }
-  .add-status { display: block; margin-top: 8px; font-size: 13px; color: var(--t-tertiary); min-height: 20px; }
-  .add-acts { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-  .add-acts button {
-    padding: 10px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500;
-    cursor: pointer; border: none; transition: background .2s, color .2s, transform .15s;
-    display: flex; align-items: center; gap: 6px;
+  .capsule input::placeholder { color: var(--t-quaternary); font-family: var(--font-sans); }
+  .capsule input[type="number"] { font-size: 20px; font-weight: 700; letter-spacing: .15em; text-align: center; min-width: 50px; max-width: 60px; }
+  .capsule-btn {
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(255,255,255,.06); color: var(--t-tertiary);
+    transition: background .2s, color .2s, transform .15s;
   }
-  .add-acts button:active { transform: scale(.96); }
-  .btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--border)!important; }
-  .btn-cancel:hover { color: var(--t-primary); border-color: var(--t-tertiary)!important; background: rgba(255,255,255,.03); }
-  .btn-submit { background: var(--accent2); color: #fff; }
-  .btn-submit:hover { background: var(--accent2-hover); }
-  .pin-card { text-align: center; max-width: 360px; }
-  .pin-icon { margin: 0 auto 16px; width: 48px; height: 48px; color: var(--accent2); }
-  .pin-icon svg { width: 100%; height: 100%; }
-  .pin-input-group { display: flex; justify-content: center; }
-  .pin-input-group input {
-    width: 80px; text-align: center; font-size: 28px; font-family: var(--font-mono);
-    font-weight: 700; letter-spacing: .2em; padding: 12px; border-radius: var(--radius);
-    background: var(--surface); border: 2px solid var(--border); color: var(--t-primary);
-    outline: none; transition: border-color .25s, box-shadow .25s;
-    -webkit-text-security: disc;
-    caret-color: var(--accent2);
+  .capsule-btn:active { transform: scale(.88); }
+  .capsule-btn:hover { background: rgba(255,255,255,.1); color: var(--t-primary); }
+  .capsule-btn svg { width: 16px; height: 16px; }
+  .capsule-btn.btn-go { background: var(--accent2); color: #fff; }
+  .capsule-btn.btn-go:hover { background: var(--accent2-hover); }
+  .capsule-btn.btn-paste { background: rgba(139,92,246,.15); color: var(--accent2); }
+  .capsule-status {
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    margin-top: 8px; font-size: 12px; color: var(--t-tertiary);
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity .2s;
   }
-  .pin-input-group input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
-  @media (max-width: 480px) {
-    .add-card { padding: 24px 20px; width: 92%; }
-    .pin-card { max-width: 300px; }
-    .pin-input-group input { width: 72px; font-size: 24px; padding: 10px; }
+  .capsule-status.show { opacity: 1; }
+  .capsule-preview {
+    position: absolute; top: calc(100% + 36px); left: 50%; transform: translateX(-50%);
+    background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; min-width: 280px; max-width: 90vw;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    font-size: 12px; color: var(--t-secondary);
+    opacity: 0; transform: translateX(-50%) translateY(-4px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+    display: none;
   }
+  .capsule-preview.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .capsule-preview .prev-label { color: var(--t-quaternary); font-size: 11px; margin-bottom: 4px; }
+  .capsule-preview .prev-val { font-family: var(--font-mono); font-weight: 600; color: var(--t-primary); }
+  .capsule-preview .prev-acts { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+  .capsule-preview .prev-acts button {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: none; transition: background .2s, transform .15s;
+  }
+  .capsule-preview .prev-acts button:active { transform: scale(.94); }
+  .prev-cancel { background: rgba(255,255,255,.06); color: var(--t-tertiary); }
+  .prev-confirm { background: var(--accent2); color: #fff; }
+  .prev-confirm:hover { background: var(--accent2-hover); }
 
   .theme-toggle {
     position: fixed; top: 16px; right: 20px; z-index: 100;
@@ -1771,20 +1787,21 @@ setInterval(function(){
     .catch(function(){});
 },10000);
 
-function showAddMonth(e){
+function showAddMonth(){
   var modal=document.getElementById('pinModal');
-  var card=modal.querySelector('.add-card');
+  var capsule=document.getElementById('pinCapsule');
   var logo=document.querySelector('.brand-logo');
   if(logo){
     var lr=logo.getBoundingClientRect();
     var ox=((lr.left+lr.right)/2/window.innerWidth*100).toFixed(1)+'%';
-    var oy=((lr.top+lr.bottom)/2/window.innerHeight*100).toFixed(1)+'%';
-    card.style.setProperty('--modal-ox',ox);
-    card.style.setProperty('--modal-oy',oy);
+    var oy=(lr.bottom/window.innerHeight*100).toFixed(1)+'%';
+    capsule.style.setProperty('--modal-ox',ox);
+    capsule.style.setProperty('--modal-oy',oy);
   }
   modal.classList.add('open');
   var pinInput=document.getElementById('pinInput');
   pinInput.value='';
+  document.getElementById('pinStatus').className='capsule-status';
   document.getElementById('pinStatus').textContent='';
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){pinInput.focus();});
@@ -1795,40 +1812,79 @@ function hidePinModal(){
 }
 function autoVerifyPin(){
   var pin=document.getElementById('pinInput').value;
-  if(pin.length>=1) verifyPin();
-}
-function verifyPin(){
-  var pin=document.getElementById('pinInput').value;
-  var st=document.getElementById('pinStatus');
-  if(pin==='3'){
-    document.getElementById('pinInput').blur();
-    hidePinModal();
-    setTimeout(function(){
-      var addModal=document.getElementById('addModal');
-      var card=addModal.querySelector('.add-card');
-      var logo=document.querySelector('.brand-logo');
-      if(logo){
-        var lr=logo.getBoundingClientRect();
-        var ox=((lr.left+lr.right)/2/window.innerWidth*100).toFixed(1)+'%';
-        var oy=((lr.top+lr.bottom)/2/window.innerHeight*100).toFixed(1)+'%';
-        card.style.setProperty('--modal-ox',ox);
-        card.style.setProperty('--modal-oy',oy);
-      }
-      addModal.classList.add('open');
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
-      });
-    },200);
-  } else {
-    st.textContent='密码错误';
-    st.style.color='var(--red)';
-    var inp=document.getElementById('pinInput');
-    inp.value='';
-    inp.focus();
+  if(pin.length>=1){
+    if(pin==='3'){
+      var st=document.getElementById('pinStatus');
+      st.textContent='✓';st.className='capsule-status show';st.style.color='var(--green)';
+      document.getElementById('pinInput').blur();
+      setTimeout(function(){openAddCapsule();},300);
+    } else {
+      var st=document.getElementById('pinStatus');
+      st.textContent='×';st.className='capsule-status show';st.style.color='var(--red)';
+      setTimeout(function(){
+        document.getElementById('pinInput').value='';
+        st.className='capsule-status';
+      },600);
+    }
   }
+}
+function openAddCapsule(){
+  hidePinModal();
+  setTimeout(function(){
+    var modal=document.getElementById('addModal');
+    var capsule=document.getElementById('addCapsule');
+    var logo=document.querySelector('.brand-logo');
+    if(logo){
+      var lr=logo.getBoundingClientRect();
+      var ox=((lr.left+lr.right)/2/window.innerWidth*100).toFixed(1)+'%';
+      var oy=(lr.bottom/window.innerHeight*100).toFixed(1)+'%';
+      capsule.style.setProperty('--modal-ox',ox);
+      capsule.style.setProperty('--modal-oy',oy);
+    }
+    modal.classList.add('open');
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
+    });
+  },200);
 }
 function hideAddMonth(){
   document.getElementById('addModal').classList.remove('open');
+  document.getElementById('addPreview').className='capsule-preview';
+  document.getElementById('addUrlInput').value='';
+  document.getElementById('addStatus').className='capsule-status';
+}
+function pasteUrl(){
+  if(navigator.clipboard){
+    navigator.clipboard.readText().then(function(t){
+      document.getElementById('addUrlInput').value=t;
+      document.getElementById('addUrlInput').focus();
+    }).catch(function(){});
+  }
+}
+function previewAddMonth(){
+  var url=document.getElementById('addUrlInput').value.trim();
+  var st=document.getElementById('addStatus');
+  var prev=document.getElementById('addPreview');
+  if(!url){st.textContent='请输入链接';st.className='capsule-status show';st.style.color='var(--red)';return;}
+  st.textContent='解析中...';st.className='capsule-status show';st.style.color='var(--t-tertiary)';
+  fetch('/api/add-month?url='+encodeURIComponent(url))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.error){st.textContent=d.error;st.className='capsule-status show';st.style.color='var(--red)';return;}
+    st.className='capsule-status';
+    document.getElementById('prevPeriod').textContent=d.period||'-';
+    prev.className='capsule-preview show';
+    prev._data=d;
+  })
+  .catch(function(e){st.textContent=e.message;st.className='capsule-status show';st.style.color='var(--red)';});
+}
+function confirmAddMonth(){
+  var prev=document.getElementById('addPreview');
+  var d=prev._data;
+  if(!d)return;
+  window._monthsData=d;
+  rebuildPeriodOpts();
+  hideAddMonth();
 }
 
 document.getElementById('addModal').addEventListener('click',function(e){
@@ -1928,41 +1984,49 @@ window.addEventListener('resize',function(){
 </script>
 
 <div class="add-modal" id="pinModal" role="dialog" aria-modal="true">
-  <div class="add-card pin-card">
-    <div class="pin-icon">
+  <div class="capsule" id="pinCapsule">
+    <div class="capsule-icon">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
     </div>
-    <h3>输入访问密码</h3>
-    <div class="pin-input-group">
-      <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
-    </div>
-    <span class="add-status" id="pinStatus"></span>
-    <div class="add-acts">
-      <button class="btn-cancel" onclick="hidePinModal()">取消</button>
-    </div>
+    <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
+    <button class="capsule-btn" onclick="hidePinModal()" aria-label="取消">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="capsule-status" id="pinStatus"></span>
   </div>
 </div>
 
 <div class="add-modal" id="addModal" role="dialog" aria-modal="true">
-  <div class="add-card">
-    <div class="add-card-header">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="add-icon">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+  <div class="capsule" id="addCapsule">
+    <div class="capsule-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
       </svg>
-      <h3>添加月份数据</h3>
     </div>
-    <input id="addUrlInput" type="url" placeholder="粘贴 Zoho Sheet 发布链接..." onkeydown="if(event.key==='Enter')submitAddMonth()" />
-    <span class="add-status" id="addStatus"></span>
-    <div class="add-acts">
-      <button class="btn-cancel" onclick="hideAddMonth()">取消</button>
-      <button class="btn-submit" onclick="submitAddMonth()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px">
-          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-        </svg>
-        解析并添加
-      </button>
+    <input id="addUrlInput" type="url" placeholder="粘贴 Zoho 链接..." autocomplete="off" />
+    <button class="capsule-btn btn-paste" onclick="pasteUrl()" aria-label="粘贴">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+      </svg>
+    </button>
+    <button class="capsule-btn btn-go" onclick="previewAddMonth()" aria-label="解析">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button class="capsule-btn" onclick="hideAddMonth()" aria-label="取消">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <span class="capsule-status" id="addStatus"></span>
+    <div class="capsule-preview" id="addPreview">
+      <div class="prev-label">预览月份</div>
+      <div class="prev-val" id="prevPeriod">-</div>
+      <div class="prev-acts">
+        <button class="prev-cancel" onclick="hideAddMonth()">取消</button>
+        <button class="prev-confirm" onclick="confirmAddMonth()">确认添加</button>
+      </div>
     </div>
   </div>
 </div>
