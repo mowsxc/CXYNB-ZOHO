@@ -1996,11 +1996,13 @@ function startCapsuleTimer(){
 function stopCapsuleTimer(){
   if(_capsuleTimer){clearTimeout(_capsuleTimer);_capsuleTimer=null;}
 }
-document.getElementById('addModal').addEventListener('click',function(e){
-  if(!e.target.closest('.hp-box')){hideAddMonth();stopCapsuleTimer();}
-});
-document.getElementById('pinModal').addEventListener('click',function(e){
-  if(!e.target.closest('.hp-box')){hidePinModal();stopCapsuleTimer();}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('addModal').addEventListener('click',function(e){
+    if(!e.target.closest('.hp-box')){hideAddMonth();stopCapsuleTimer();}
+  });
+  document.getElementById('pinModal').addEventListener('click',function(e){
+    if(!e.target.closest('.hp-box')){hidePinModal();stopCapsuleTimer();}
+  });
 });
 
 // Preview keepalive heartbeat + cache ts sync
