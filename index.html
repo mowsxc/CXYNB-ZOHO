@@ -1894,7 +1894,6 @@ function hideAddMonth(){
     modal.classList.remove('open','dismissing');
     document.querySelector('.brand-logo').classList.remove('hide-logo');
   },350);
-  document.getElementById('addPreview').className='hp-preview';
   document.getElementById('addUrlInput').value='';
   document.getElementById('addStatus').className='hp-status';
 }
@@ -1909,27 +1908,18 @@ function pasteUrl(){
 function previewAddMonth(){
   var url=document.getElementById('addUrlInput').value.trim();
   var st=document.getElementById('addStatus');
-  var prev=document.getElementById('addPreview');
   if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
   st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
   fetch('/api/add-month?url='+encodeURIComponent(url))
   .then(function(r){return r.json();})
   .then(function(d){
     if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
-    st.className='hp-status';
-    document.getElementById('prevPeriod').textContent=d.period||'-';
-    prev.className='hp-preview show';
-    prev._data=d;
+    st.textContent='✓ '+d.period;st.className='hp-status show';st.style.color='var(--green)';
+    window._monthsData=d;
+    rebuildPeriodOpts();
+    setTimeout(function(){hideAddMonth();},800);
   })
   .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
-}
-function confirmAddMonth(){
-  var prev=document.getElementById('addPreview');
-  var d=prev._data;
-  if(!d)return;
-  window._monthsData=d;
-  rebuildPeriodOpts();
-  hideAddMonth();
 }
 
 var _capsuleTimer=null;
@@ -2068,18 +2058,7 @@ window.addEventListener('resize',function(){
         <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
       </svg>
     </button>
-    <button class="hp-icon" onclick="previewAddMonth()" aria-label="解析" style="cursor:pointer;border:none;background:var(--accent2);color:#fff">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
     <span class="hp-status" id="addStatus"></span>
-    <div class="hp-preview" id="addPreview">
-      <div class="prev-label">预览月份</div>
-      <div class="prev-val" id="prevPeriod">-</div>
-      <div class="prev-acts">
-        <button class="prev-cancel" onclick="hideAddMonth()">取消</button>
-        <button class="prev-confirm" onclick="confirmAddMonth()">确认添加</button>
-      </div>
-    </div>
   </div>
 </div>
 
