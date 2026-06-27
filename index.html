@@ -108,8 +108,6 @@
   body.is-scrolling .bg-grid,
   body.is-scrolling .logo-pulse,
   body.is-scrolling .logo-halo,
-  body.is-scrolling .glassOrbs,
-  body.is-scrolling .breathe,
   body.is-scrolling .cash-pulse,
   body.is-scrolling .cash-blink,
   body.is-scrolling .syncIconSpin { animation-play-state: paused !important; }
@@ -383,14 +381,14 @@
     box-shadow:
       0 1px 0 rgba(255,255,255,.06) inset,
       0 4px 24px rgba(0,0,0,.18);
-    transition: border-color .3s, box-shadow .3s, transform .4s cubic-bezier(.25,.8,.25,1.2);
+    transition: border-color .3s, transform .3s cubic-bezier(.25,.8,.25,1);
   }
   .stat-card:hover {
     border-color: var(--border-hover);
     box-shadow:
       0 1px 0 rgba(255,255,255,.1) inset,
       0 12px 48px rgba(0,0,0,.28);
-    transform: perspective(600px) rotateX(2deg) translateY(-4px);
+    transform: translateY(-4px);
   }
   .stat-card::after {
     content: '';
@@ -401,14 +399,8 @@
       radial-gradient(ellipse 35% 30% at 25% 35%, rgba(255,255,255,.07), transparent 60%),
       radial-gradient(ellipse 22% 28% at 72% 65%, rgba(255,255,255,.04), transparent 55%),
       radial-gradient(ellipse 18% 22% at 50% 15%, rgba(255,255,255,.05), transparent 50%);
-    animation: glassOrbs 10s ease-in-out infinite;
+    background-position: 25% 35%, 72% 65%, 50% 15%;
     opacity: .5;
-  }
-  @keyframes glassOrbs {
-    0%   { background-position: 25% 35%, 72% 65%, 50% 15%; }
-    33%  { background-position: 35% 25%, 65% 78%, 55% 12%; }
-    66%  { background-position: 20% 42%, 78% 60%, 42% 20%; }
-    100% { background-position: 25% 35%, 72% 65%, 50% 15%; }
   }
   .stat-card::before {
     content: '';
@@ -511,8 +503,7 @@
     background:
       radial-gradient(ellipse 30% 25% at 30% 40%, rgba(255,255,255,.06), transparent 55%),
       radial-gradient(ellipse 20% 22% at 70% 65%, rgba(255,255,255,.04), transparent 50%);
-    animation: glassOrbs 8s ease-in-out infinite;
-    animation-delay: -3s;
+    background-position: 30% 40%, 70% 65%;
     opacity: .45;
   }
   .card-front { padding: 18px 14px; }
@@ -538,7 +529,7 @@
     box-shadow:
       0 1px 0 rgba(255,255,255,.1) inset,
       0 12px 40px rgba(0,0,0,.24);
-    transform: perspective(500px) rotateX(3deg) translateY(-3px);
+    transform: translateY(-3px);
   }
   .card-inner.flipped:hover .card-back {
     border-color: var(--border-hover);
@@ -628,8 +619,7 @@
     background:
       radial-gradient(ellipse 40% 25% at 20% 30%, rgba(255,255,255,.06), transparent 60%),
       radial-gradient(ellipse 25% 20% at 80% 70%, rgba(255,255,255,.04), transparent 55%);
-    animation: glassOrbs 12s ease-in-out infinite;
-    animation-delay: -5s;
+    background-position: 20% 30%, 80% 70%;
     opacity: .4;
   }
   .trend-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 8px; }
@@ -679,13 +669,8 @@
     height: 220px; margin: 8px 0;
   }
   @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .trend-bar { transition: opacity .2s, filter .2s; animation: breathe 3s ease-in-out infinite; }
-  .trend-bar:nth-child(2n) { animation-delay: 0.3s; }
-  .trend-bar:nth-child(3n) { animation-delay: 0.6s; }
-  .trend-bar:nth-child(4n) { animation-delay: 0.9s; }
-  .trend-bar:nth-child(5n) { animation-delay: 1.2s; }
-  @keyframes breathe { 0%,100% { opacity: .78; } 50% { opacity: .92; } }
-  .trend-bar:hover, .trend-bar:active { opacity: 1!important; filter: brightness(1.5) drop-shadow(0 0 8px currentColor); }
+  .trend-bar { transition: opacity .2s; opacity: .82; }
+  .trend-bar:hover, .trend-bar:active { opacity: 1; }
   .trend-tip {
     text-align: center; font-size: 12px; font-family: var(--font-mono);
     color: var(--t-primary); margin-top: 6px;
@@ -746,8 +731,7 @@
     background:
       radial-gradient(ellipse 35% 22% at 25% 25%, rgba(255,255,255,.05), transparent 55%),
       radial-gradient(ellipse 20% 18% at 75% 70%, rgba(255,255,255,.03), transparent 50%);
-    animation: glassOrbs 10s ease-in-out infinite;
-    animation-delay: -7s;
+    background-position: 25% 25%, 75% 70%;
     opacity: .35;
   }
   .cols-2 .panel { margin-bottom: 0; }
