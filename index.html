@@ -205,7 +205,9 @@
     width: 88px; height: 88px;
     stroke: var(--purple);
     animation: logo-pulse 3s ease-in-out infinite;
+    transition: opacity .2s, transform .3s;
   }
+  .brand-logo.hide-logo svg { opacity: 0; transform: scale(.6); animation: none; }
   @keyframes logo-pulse {
     0%,100% { opacity: .85; }
     50% { opacity: 1; }
@@ -368,30 +370,31 @@
     position: absolute; z-index: 1;
     display: flex; align-items: center; gap: 8px;
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: 40px;
-    padding: 6px 10px 6px 14px;
+    padding: 6px 10px 6px 6px;
     box-shadow:
       0 1px 0 rgba(255,255,255,.06) inset,
       0 0 0 1px rgba(255,255,255,.03) inset,
       0 8px 32px rgba(0,0,0,.3),
       0 0 60px rgba(139,92,246,.08);
-    opacity: 0; transform: scale(0);
-    transform-origin: var(--modal-ox, 50%) var(--modal-oy, 100%);
-    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .2s ease-out;
+    opacity: 0; transform: scaleX(0) scaleY(0);
+    transform-origin: var(--modal-ox, 50%) var(--modal-oy, 50%);
+    transition: transform .45s cubic-bezier(.34,1.56,.64,1), opacity .2s ease-out;
     will-change: transform, opacity;
     max-width: 92vw;
     left: var(--modal-left, 50%); top: var(--modal-top, 50%);
-    transform: translate(-50%, 0) scale(0);
+    transform: translate(-50%, -50%) scaleX(0) scaleY(0);
   }
-  .add-modal.open .capsule { transform: translate(-50%, 0) scale(1); opacity: 1; }
+  .add-modal.open .capsule { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 1; }
   .capsule-icon {
-    width: 32px; height: 32px; flex-shrink: 0;
+    width: 36px; height: 36px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(139,92,246,.15), rgba(139,92,246,.05));
+    background: linear-gradient(135deg, rgba(139,92,246,.18), rgba(139,92,246,.06));
     color: var(--accent2);
-    box-shadow: 0 0 0 1px rgba(139,92,246,.1);
+    box-shadow: 0 0 0 1px rgba(139,92,246,.12);
+    transition: transform .3s;
   }
-  .capsule-icon svg { width: 16px; height: 16px; }
+  .capsule-icon svg { width: 18px; height: 18px; }
   .capsule input {
     flex: 1; min-width: 100px;
     border: none; background: transparent; color: var(--t-primary);
@@ -1238,8 +1241,8 @@
   </button>
 
   <div class="header">
-    <div class="brand" ondblclick="showAddMonth()" title="双击添加月份数据">
-      <div class="brand-logo">
+    <div class="brand">
+      <div class="brand-logo" ondblclick="showAddMonth()" title="双击添加月份数据">
         <svg viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
           <!-- outer ring -->
           <circle cx="44" cy="44" r="40" stroke="currentColor" stroke-width="1.2" opacity="0.25"/>
@@ -1785,14 +1788,17 @@ function positionCapsule(capsuleId){
   var logo=document.querySelector('.brand-logo');
   if(logo&&capsule){
     var lr=logo.getBoundingClientRect();
-    capsule.style.setProperty('--modal-left',(lr.left+lr.right/2)+'px');
-    capsule.style.setProperty('--modal-top',(lr.bottom+4)+'px');
+    var cx=lr.left+lr.width/2;
+    var cy=lr.top+lr.height/2;
+    capsule.style.setProperty('--modal-left',cx+'px');
+    capsule.style.setProperty('--modal-top',cy+'px');
     capsule.style.setProperty('--modal-ox','50%');
-    capsule.style.setProperty('--modal-oy','0%');
+    capsule.style.setProperty('--modal-oy','50%');
   }
 }
 function showAddMonth(){
   positionCapsule('pinCapsule');
+  document.querySelector('.brand-logo').classList.add('hide-logo');
   document.getElementById('pinModal').classList.add('open');
   var pinInput=document.getElementById('pinInput');
   pinInput.value='';
@@ -1804,6 +1810,7 @@ function showAddMonth(){
 }
 function hidePinModal(){
   document.getElementById('pinModal').classList.remove('open');
+  document.querySelector('.brand-logo').classList.remove('hide-logo');
 }
 function autoVerifyPin(){
   var pin=document.getElementById('pinInput').value;
@@ -1827,6 +1834,7 @@ function openAddCapsule(){
   hidePinModal();
   setTimeout(function(){
     positionCapsule('addCapsule');
+    document.querySelector('.brand-logo').classList.add('hide-logo');
     document.getElementById('addModal').classList.add('open');
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
@@ -1835,6 +1843,7 @@ function openAddCapsule(){
 }
 function hideAddMonth(){
   document.getElementById('addModal').classList.remove('open');
+  document.querySelector('.brand-logo').classList.remove('hide-logo');
   document.getElementById('addPreview').className='capsule-preview';
   document.getElementById('addUrlInput').value='';
   document.getElementById('addStatus').className='capsule-status';
