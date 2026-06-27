@@ -1499,7 +1499,6 @@ function render(data) {
 
 
   document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
-  document.getElementById('versionLink').textContent='v'+(window._appVersion||'dev');
   var contentEl=document.getElementById('content');
   contentEl.style.opacity='0';
   contentEl.innerHTML=h;
@@ -1907,7 +1906,7 @@ function pasteUrl(){
   if(navigator.clipboard){
     navigator.clipboard.readText().then(function(t){
       document.getElementById('addUrlInput').value=t;
-      document.getElementById('addUrlInput').focus();
+      if(t.trim()) previewAddMonth();
     }).catch(function(){});
   }
 }
