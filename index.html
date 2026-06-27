@@ -352,20 +352,30 @@
   }
 
   .add-modal {
-    display: none; position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    align-items: center; justify-content: center;
-    animation: fadeIn .2s ease-out;
+    position: fixed; inset: 0; z-index: 9999;
+    display: flex; align-items: center; justify-content: center;
+    visibility: hidden; opacity: 0; pointer-events: none;
+    transition: visibility 0s .25s, opacity .25s ease-out;
+    -webkit-tap-highlight-color: transparent;
   }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .add-modal.open { display: flex; }
+  .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; transition: visibility 0s 0s, opacity .25s ease-out; }
+  .add-modal::before {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(0,0,0,.55);
+    opacity: 0; transition: opacity .3s ease-out;
+  }
+  .add-modal.open::before { opacity: 1; }
   .add-card {
+    position: relative; z-index: 1;
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 32px; width: 90%; max-width: 440px;
+    padding: 28px 24px; width: 90%; max-width: 400px;
     box-shadow: 0 16px 64px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.04) inset;
-    animation: modalIn .3s cubic-bezier(.4,0,.2,1);
+    transform: scale(.92) translateY(20px);
+    opacity: 0;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .25s ease-out;
+    will-change: transform, opacity;
   }
-  @keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .add-modal.open .add-card { transform: scale(1) translateY(0); opacity: 1; }
   .add-card h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; color: var(--t-primary); }
   .add-card-header {
     display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
@@ -401,8 +411,14 @@
     background: var(--surface); border: 2px solid var(--border); color: var(--t-primary);
     outline: none; transition: border-color .25s, box-shadow .25s;
     -webkit-text-security: disc;
+    caret-color: var(--accent2);
   }
   .pin-input-group input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
+  @media (max-width: 480px) {
+    .add-card { padding: 24px 20px; width: 92%; }
+    .pin-card { max-width: 300px; }
+    .pin-input-group input { width: 72px; font-size: 24px; padding: 10px; }
+  }
 
   .theme-toggle {
     position: fixed; top: 16px; right: 20px; z-index: 100;
@@ -1755,22 +1771,38 @@ setInterval(function(){
 },10000);
 
 function showAddMonth(){
-  document.getElementById('pinModal').classList.add('open');
+  var modal=document.getElementById('pinModal');
+  modal.classList.add('open');
   var pinInput=document.getElementById('pinInput');
   pinInput.value='';
   document.getElementById('pinStatus').textContent='';
-  setTimeout(function(){pinInput.focus();},100);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',function vk(){
+      if(!modal.classList.contains('open')){window.visualViewport.removeEventListener('resize',vk);return;}
+      modal.style.transform='translateY(0)';
+    },{passive:true});
+  }
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){pinInput.focus();});
+  });
 }
 function hidePinModal(){
-  document.getElementById('pinModal').classList.remove('open');
+  var modal=document.getElementById('pinModal');
+  modal.classList.remove('open');
+  if(window.visualViewport) modal.style.transform='';
 }
 function verifyPin(){
   var pin=document.getElementById('pinInput').value;
   var st=document.getElementById('pinStatus');
   if(pin==='3'){
     hidePinModal();
-    document.getElementById('addModal').classList.add('open');
-    setTimeout(function(){document.getElementById('addUrlInput').focus();},100);
+    setTimeout(function(){
+      var addModal=document.getElementById('addModal');
+      addModal.classList.add('open');
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
+      });
+    },150);
   } else {
     st.textContent='密码错误';
     st.style.color='var(--red)';
