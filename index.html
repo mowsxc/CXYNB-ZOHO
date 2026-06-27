@@ -1948,16 +1948,20 @@ function startCapsuleTimer(){
   stopCapsuleTimer();
   _capsuleTimer=setTimeout(function(){
     hidePinModal();hideAddMonth();
-  },10000);
+  },5000);
 }
 function stopCapsuleTimer(){
   if(_capsuleTimer){clearTimeout(_capsuleTimer);_capsuleTimer=null;}
 }
+function isInsideModal(e,modal){
+  var r=modal.getBoundingClientRect();
+  return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
+}
 document.getElementById('addModal').addEventListener('click',function(e){
-  if(e.target===this||e.target===this.querySelector('::before')){hideAddMonth();stopCapsuleTimer();}
+  if(!e.target.closest('.headphone-input')){hideAddMonth();stopCapsuleTimer();}
 });
 document.getElementById('pinModal').addEventListener('click',function(e){
-  if(e.target===this||e.target===this.querySelector('::before')){hidePinModal();stopCapsuleTimer();}
+  if(!e.target.closest('.headphone-input')){hidePinModal();stopCapsuleTimer();}
 });
 
 // Preview keepalive heartbeat + cache ts sync
