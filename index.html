@@ -127,7 +127,7 @@
   body.is-scrolling .card-back .fb-cur { animation-play-state: paused !important; }
 .bg-orb {
   position: absolute; border-radius: 50%;
-  filter: blur(60px); opacity: var(--orb-opacity);
+  filter: blur(40px); opacity: var(--orb-opacity);
   backface-visibility: hidden;
 }
   .bg-orb-1 { width:700px; height:700px; background:radial-gradient(circle, var(--green-glow), transparent 70%); top:-25%; left:-20%; animation:drift1 32s ease-in-out infinite; }
@@ -362,7 +362,6 @@
     opacity: 0; transform: scaleX(0) scaleY(0);
     transform-origin: var(--modal-ox, 50%) var(--modal-oy, 50%);
     transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .2s ease-out;
-    will-change: transform, opacity;
     left: var(--modal-left, 50%); top: var(--modal-top, 50%);
     transform: translate(-50%, -50%) scaleX(0) scaleY(0);
   }
@@ -680,8 +679,6 @@
     color: var(--t-primary);
     white-space: nowrap;
     z-index: 2;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
   }
   .card-back .fb-cur {
     font-size: 22px; font-family: var(--font-mono); font-weight: 800;
