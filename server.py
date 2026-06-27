@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """创新意电竞馆 财务报表 Web 服务"""
 
+import hashlib
 import http.server
 import json
 import os
@@ -137,7 +138,6 @@ def _background_refresh():
 
 def _data_hash(data):
     """Return a hash of the actual payload (summary + daily) for change detection."""
-    import hashlib
     s = json.dumps({
         "summary": data.get("summary", {}),
         "daily": data.get("daily", []),
@@ -169,7 +169,12 @@ except Exception:
 def serve_static(path, handler):
     if path in ("/", ""):
         path = "/index.html"
-    filepath = os.path.join(WORKSPACE, path.lstrip("/"))
+    filepath = os.path.realpath(os.path.join(WORKSPACE, path.lstrip("/")))
+    if not filepath.startswith(os.path.realpath(WORKSPACE)):
+        handler.send_response(403)
+        handler.end_headers()
+        handler.wfile.write(b"Forbidden")
+        return
     if os.path.isfile(filepath):
         with open(filepath, "rb") as f:
             content = f.read()
@@ -210,7 +215,6 @@ def json_response(handler, data, status=200):
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        global _valid_months
         parsed = urlparse(self.path)
         path = parsed.path
         qs = parse_qs(parsed.query)
@@ -230,7 +234,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         if path == "/api/data":
-            global _data_cache
             period = qs.get("period", [None])[0]
             targets = _valid_months
             url = targets.get(period)

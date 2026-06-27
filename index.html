@@ -1834,7 +1834,7 @@ function loadMonth(requestedPeriod) {
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
-      try{ localStorage.setItem('cache_'+requestedPeriod, JSON.stringify(d)); }catch(e){}
+      try{ localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
     })
     .catch(function(err){
       if(loadingTimer) clearTimeout(loadingTimer);
@@ -1966,7 +1966,7 @@ function previewAddMonth(){
   if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
   st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
   fetch('/api/add-month?url='+encodeURIComponent(url))
-  .then(function(r){return r.json();})
+  .then(function(r){if(!r.ok) return r.json().then(function(e){throw new Error(e.error||'HTTP '+r.status)}); return r.json();})
   .then(function(d){
     if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
     st.textContent='✓ '+d.period;st.className='hp-status show';st.style.color='var(--green)';
@@ -1986,10 +1986,6 @@ function startCapsuleTimer(){
 }
 function stopCapsuleTimer(){
   if(_capsuleTimer){clearTimeout(_capsuleTimer);_capsuleTimer=null;}
-}
-function isInsideModal(e,modal){
-  var r=modal.getBoundingClientRect();
-  return e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom;
 }
 document.getElementById('addModal').addEventListener('click',function(e){
   if(!e.target.closest('.hp-box')){hideAddMonth();stopCapsuleTimer();}
