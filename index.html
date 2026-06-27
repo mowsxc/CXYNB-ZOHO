@@ -216,14 +216,7 @@
     50% { opacity: 1; }
   }
   .brand-logo::after {
-    content: '';
-    position: absolute;
-    inset: -12px;
-    border-radius: 50%;
-    background: radial-gradient(circle, var(--purple-glow), transparent 70%);
-    opacity: .6;
-    pointer-events: none;
-    transition: opacity .3s;
+    display: none;
   }
   @keyframes logo-halo {
     0%,100% { opacity: .6; transform: scale(1); }
@@ -1234,8 +1227,7 @@
     animation: spin .65s linear infinite;
     box-shadow: 0 0 14px rgba(139,92,246,.25), 0 0 4px rgba(139,92,246,.4) inset;
   }
-  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  #content { animation: fadeInUp .4s ease-out; transition: opacity .15s ease-out; }
+  #content { transition: opacity .15s ease-out; }
   #content.fading-out { opacity: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -1831,10 +1823,13 @@ function loadMonth(requestedPeriod) {
   var cached=null;
   try{ cached=JSON.parse(localStorage.getItem('cache_'+requestedPeriod)); }catch(e){}
   var loadingTimer=null;
-  if(cached){
+  if(cached&&cached._data_hash!==window._lastRenderHash){
     window._lastHash=cached._data_hash||'';
     window._monthsData=cached.available||{};
     render(cached);
+  } else if(cached){
+    window._lastHash=cached._data_hash||'';
+    window._monthsData=cached.available||{};
   } else {
     loadingTimer=setTimeout(function(){
       document.getElementById('loading').style.display='block';
