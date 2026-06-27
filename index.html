@@ -221,8 +221,9 @@
     inset: -12px;
     border-radius: 50%;
     background: radial-gradient(circle, var(--purple-glow), transparent 70%);
-    animation: logo-halo 3s ease-in-out infinite;
+    opacity: .6;
     pointer-events: none;
+    transition: opacity .3s;
   }
   @keyframes logo-halo {
     0%,100% { opacity: .6; transform: scale(1); }
@@ -1539,10 +1540,12 @@ function render(data) {
   document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
   var contentEl=document.getElementById('content');
   var newHash=data._data_hash||'';
-  if(contentEl.innerHTML&&window._lastRenderHash===newHash){
+  var curPeriod=data.period||'';
+  if(contentEl.innerHTML&&window._lastRenderHash===newHash&&window._lastRenderPeriod===curPeriod){
     window.scrollTo(sx, sy); return;
   }
   window._lastRenderHash=newHash;
+  window._lastRenderPeriod=curPeriod;
   var doSwap=function(){
     contentEl.innerHTML=h;
     var skel=document.getElementById('chartSkel');
