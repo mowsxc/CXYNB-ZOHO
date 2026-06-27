@@ -366,73 +366,115 @@
     opacity: 0; transition: opacity .35s ease-out;
   }
   .add-modal.open::before { opacity: 1; }
-  .capsule {
+  .headphone-input {
     position: absolute; z-index: 1;
-    display: flex; align-items: center; gap: 8px;
-    background: var(--surface-dark); border: 1px solid var(--border); border-radius: 40px;
-    padding: 6px 10px 6px 6px;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.06) inset,
-      0 0 0 1px rgba(255,255,255,.03) inset,
-      0 8px 32px rgba(0,0,0,.3),
-      0 0 60px rgba(139,92,246,.08);
+    display: flex; align-items: center; gap: 0;
     opacity: 0; transform: scaleX(0) scaleY(0);
     transform-origin: var(--modal-ox, 50%) var(--modal-oy, 50%);
     transition: transform .45s cubic-bezier(.34,1.56,.64,1), opacity .2s ease-out;
     will-change: transform, opacity;
-    max-width: 92vw;
     left: var(--modal-left, 50%); top: var(--modal-top, 50%);
     transform: translate(-50%, -50%) scaleX(0) scaleY(0);
   }
-  .add-modal.open .capsule { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 1; }
-  .add-modal.dismissing .capsule {
+  .add-modal.open .headphone-input { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 1; }
+  .add-modal.dismissing .headphone-input {
     transform: translate(-50%, -50%) scaleX(1.1) scaleY(.3);
     opacity: 0; filter: blur(8px);
     transition: transform .4s cubic-bezier(.4,0,1,1), opacity .35s ease-in, filter .35s ease-in;
   }
-  .capsule-icon {
-    width: 36px; height: 36px; flex-shrink: 0;
+  .hp-ear {
+    width: 36px; height: 44px;
+    background: var(--surface-dark); border: 1px solid var(--border);
+    border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 50%;
-    background: linear-gradient(135deg, rgba(139,92,246,.18), rgba(139,92,246,.06));
-    color: var(--accent2);
-    box-shadow: 0 0 0 1px rgba(139,92,246,.12);
-    transition: transform .3s;
+    color: var(--accent2); flex-shrink: 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.05);
   }
-  .capsule-icon svg { width: 18px; height: 18px; }
-  .capsule input {
-    flex: 1; min-width: 100px;
-    border: none; background: transparent; color: var(--t-primary);
-    font-size: 14px; outline: none; padding: 8px 4px;
+  .hp-ear svg { width: 16px; height: 16px; }
+  .hp-band {
+    position: relative;
+    display: flex; align-items: center;
+    background: var(--surface-dark); border: 1px solid var(--border);
+    border-radius: 22px; padding: 0 12px;
+    height: 44px; min-width: 120px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.05);
+    overflow: hidden;
   }
-  .capsule input::placeholder { color: var(--t-quaternary); }
-  .capsule input[type="number"] { font-size: 22px; font-weight: 700; letter-spacing: .15em; text-align: center; min-width: 44px; max-width: 56px; font-family: var(--font-mono); }
-  .capsule-status {
-    position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  .hp-band::before {
+    content: ''; position: absolute; top: -8px; left: 20%; right: 20%;
+    height: 16px;
+    border-radius: 0 0 50% 50%;
+    border: 1px solid var(--border); border-top: none;
+    opacity: .4;
+  }
+  .hp-band input {
+    flex: 1; border: none; background: transparent;
+    color: var(--t-primary); font-size: 14px; outline: none;
+    padding: 0 4px; min-width: 80px;
+  }
+  .hp-band input::placeholder { color: var(--t-quaternary); }
+  .hp-band input[type="number"] {
+    font-size: 22px; font-weight: 700; letter-spacing: .15em;
+    text-align: center; font-family: var(--font-mono);
+  }
+  .hp-band .hp-underline {
+    position: absolute; bottom: 10px; left: 12px; right: 12px;
+    height: 2px; border-radius: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    opacity: .3;
+  }
+  .hp-mic {
+    position: absolute; bottom: -14px; left: 14px;
+    width: 18px; height: 18px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent2); opacity: .6;
+  }
+  .hp-mic svg { width: 12px; height: 12px; }
+  .hp-status {
+    position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
     font-size: 12px; font-weight: 600;
     white-space: nowrap; pointer-events: none;
     opacity: 0; transition: opacity .2s;
   }
-  .capsule-status.show { opacity: 1; }
-  .capsule-preview {
-    position: absolute; top: calc(100% + 28px); left: 50%; transform: translateX(-50%);
+  .hp-status.show { opacity: 1; }
+  .hp-actions {
+    position: absolute; top: 50%; right: -44px; transform: translateY(-50%);
+    display: flex; gap: 4px;
+  }
+  .hp-btn {
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; border: none; cursor: pointer;
+    background: var(--surface-dark); border: 1px solid var(--border);
+    color: var(--t-tertiary);
+    transition: background .2s, color .2s, transform .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  }
+  .hp-btn:active { transform: scale(.88); }
+  .hp-btn:hover { background: var(--surface-hover); color: var(--t-primary); }
+  .hp-btn svg { width: 14px; height: 14px; }
+  .hp-btn.btn-go { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+  .hp-btn.btn-go:hover { background: var(--accent2-hover); }
+  .hp-btn.btn-paste { background: rgba(139,92,246,.12); color: var(--accent2); border-color: rgba(139,92,246,.2); }
+  .hp-preview {
+    position: absolute; top: calc(100% + 32px); left: 50%; transform: translateX(-50%);
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 18px; min-width: 260px; max-width: 90vw;
+    padding: 14px 18px; min-width: 240px; max-width: 90vw;
     box-shadow: 0 8px 24px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.03) inset;
     font-size: 13px; color: var(--t-secondary);
     opacity: 0; transform: translateX(-50%) translateY(-6px);
     transition: opacity .25s, transform .25s;
     pointer-events: none; display: none;
   }
-  .capsule-preview.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-  .capsule-preview .prev-label { color: var(--t-quaternary); font-size: 11px; margin-bottom: 4px; letter-spacing: .05em; }
-  .capsule-preview .prev-val { font-family: var(--font-mono); font-weight: 600; color: var(--t-primary); font-size: 15px; }
-  .capsule-preview .prev-acts { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
-  .capsule-preview .prev-acts button {
+  .hp-preview.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .hp-preview .prev-label { color: var(--t-quaternary); font-size: 11px; margin-bottom: 4px; letter-spacing: .05em; }
+  .hp-preview .prev-val { font-family: var(--font-mono); font-weight: 600; color: var(--t-primary); font-size: 15px; }
+  .hp-preview .prev-acts { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
+  .hp-preview .prev-acts button {
     padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
     cursor: pointer; border: none; transition: background .2s, transform .15s;
   }
-  .capsule-preview .prev-acts button:active { transform: scale(.94); }
+  .hp-preview .prev-acts button:active { transform: scale(.94); }
   .prev-cancel { background: rgba(255,255,255,.06); color: var(--t-tertiary); }
   .prev-cancel:hover { background: rgba(255,255,255,.1); }
   .prev-confirm { background: var(--accent2); color: #fff; }
@@ -1788,27 +1830,27 @@ setInterval(function(){
     .catch(function(){});
 },10000);
 
-function positionCapsule(capsuleId){
-  var capsule=document.getElementById(capsuleId);
+function positionHP(hpId){
+  var hp=document.getElementById(hpId);
   var logo=document.querySelector('.brand-logo');
-  if(logo&&capsule){
+  if(logo&&hp){
     var lr=logo.getBoundingClientRect();
     var cx=lr.left+lr.width/2;
     var cy=lr.top+lr.height/2;
-    capsule.style.setProperty('--modal-left',cx+'px');
-    capsule.style.setProperty('--modal-top',cy+'px');
-    capsule.style.setProperty('--modal-ox','50%');
-    capsule.style.setProperty('--modal-oy','50%');
+    hp.style.setProperty('--modal-left',cx+'px');
+    hp.style.setProperty('--modal-top',cy+'px');
+    hp.style.setProperty('--modal-ox','50%');
+    hp.style.setProperty('--modal-oy','50%');
   }
 }
 function showAddMonth(){
-  positionCapsule('pinCapsule');
+  positionHP('pinHP');
   document.querySelector('.brand-logo').classList.add('hide-logo');
   document.getElementById('pinModal').classList.add('open');
   var pinInput=document.getElementById('pinInput');
   pinInput.value='';
   var st=document.getElementById('pinStatus');
-  st.className='capsule-status';st.textContent='';
+  st.className='hp-status';st.textContent='';
   startCapsuleTimer();
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){pinInput.focus();});
@@ -1829,24 +1871,24 @@ function autoVerifyPin(){
     stopCapsuleTimer();
     if(pin==='3'){
       var st=document.getElementById('pinStatus');
-      st.textContent='✓';st.className='capsule-status show';st.style.color='var(--green)';
+      st.textContent='✓';st.className='hp-status show';st.style.color='var(--green)';
       document.getElementById('pinInput').blur();
-      setTimeout(function(){openAddCapsule();},350);
+      setTimeout(function(){openAddHP();},350);
     } else {
       var st=document.getElementById('pinStatus');
-      st.textContent='×';st.className='capsule-status show';st.style.color='var(--red)';
+      st.textContent='×';st.className='hp-status show';st.style.color='var(--red)';
       setTimeout(function(){
         document.getElementById('pinInput').value='';
-        st.className='capsule-status';
+        st.className='hp-status';
         startCapsuleTimer();
       },600);
     }
   }
 }
-function openAddCapsule(){
+function openAddHP(){
   hidePinModal();
   setTimeout(function(){
-    positionCapsule('addCapsule');
+    positionHP('addHP');
     document.querySelector('.brand-logo').classList.add('hide-logo');
     document.getElementById('addModal').classList.add('open');
     startCapsuleTimer();
@@ -1863,9 +1905,9 @@ function hideAddMonth(){
     modal.classList.remove('open','dismissing');
     document.querySelector('.brand-logo').classList.remove('hide-logo');
   },400);
-  document.getElementById('addPreview').className='capsule-preview';
+  document.getElementById('addPreview').className='hp-preview';
   document.getElementById('addUrlInput').value='';
-  document.getElementById('addStatus').className='capsule-status';
+  document.getElementById('addStatus').className='hp-status';
 }
 function pasteUrl(){
   if(navigator.clipboard){
@@ -1879,18 +1921,18 @@ function previewAddMonth(){
   var url=document.getElementById('addUrlInput').value.trim();
   var st=document.getElementById('addStatus');
   var prev=document.getElementById('addPreview');
-  if(!url){st.textContent='请输入链接';st.className='capsule-status show';st.style.color='var(--red)';return;}
-  st.textContent='解析中...';st.className='capsule-status show';st.style.color='var(--t-tertiary)';
+  if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
+  st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
   fetch('/api/add-month?url='+encodeURIComponent(url))
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.error){st.textContent=d.error;st.className='capsule-status show';st.style.color='var(--red)';return;}
-    st.className='capsule-status';
+    if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
+    st.className='hp-status';
     document.getElementById('prevPeriod').textContent=d.period||'-';
-    prev.className='capsule-preview show';
+    prev.className='hp-preview show';
     prev._data=d;
   })
-  .catch(function(e){st.textContent=e.message;st.className='capsule-status show';st.style.color='var(--red)';});
+  .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
 }
 function confirmAddMonth(){
   var prev=document.getElementById('addPreview');
@@ -2008,37 +2050,48 @@ window.addEventListener('resize',function(){
 </script>
 
 <div class="add-modal" id="pinModal" role="dialog" aria-modal="true">
-  <div class="capsule" id="pinCapsule">
-    <div class="capsule-icon">
+  <div class="headphone-input" id="pinHP">
+    <div class="hp-ear">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
     </div>
-    <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
-    <span class="capsule-status" id="pinStatus"></span>
+    <div class="hp-band">
+      <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
+      <div class="hp-underline"></div>
+      <div class="hp-mic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="5"/><circle cx="12" cy="9" r="3"/></svg>
+      </div>
+    </div>
+    <span class="hp-status" id="pinStatus"></span>
   </div>
 </div>
 
 <div class="add-modal" id="addModal" role="dialog" aria-modal="true">
-  <div class="capsule" id="addCapsule">
-    <div class="capsule-icon">
+  <div class="headphone-input" id="addHP">
+    <div class="hp-ear">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
       </svg>
     </div>
-    <input id="addUrlInput" type="url" placeholder="粘贴 Zoho 链接..." autocomplete="off" />
-    <button class="capsule-btn btn-paste" onclick="pasteUrl()" aria-label="粘贴">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-      </svg>
-    </button>
-    <button class="capsule-btn btn-go" onclick="previewAddMonth()" aria-label="解析">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-    <span class="capsule-status" id="addStatus"></span>
-    <div class="capsule-preview" id="addPreview">
+    <div class="hp-band">
+      <input id="addUrlInput" type="url" placeholder="粘贴 Zoho 链接..." autocomplete="off" />
+      <div class="hp-underline"></div>
+    </div>
+    <div class="hp-actions">
+      <button class="hp-btn btn-paste" onclick="pasteUrl()" aria-label="粘贴">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+      </button>
+      <button class="hp-btn btn-go" onclick="previewAddMonth()" aria-label="解析">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <span class="hp-status" id="addStatus"></span>
+    <div class="hp-preview" id="addPreview">
       <div class="prev-label">预览月份</div>
       <div class="prev-val" id="prevPeriod">-</div>
       <div class="prev-acts">
