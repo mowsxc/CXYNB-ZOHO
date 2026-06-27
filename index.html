@@ -341,12 +341,9 @@
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--t-tertiary);
-    text-decoration: none;
     background: rgba(255,255,255,.04);
     border: 1px solid rgba(255,255,255,.06);
-    transition: color .2s, background .2s, border-color .2s;
   }
-  .version-link:hover { color: var(--accent2); background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.2); }
   }
   @keyframes syncIconSpin {
     0% { transform: rotate(0deg); }
@@ -1902,9 +1899,9 @@ function hideAddMonth(){
     modal.classList.remove('open','dismissing');
     document.querySelector('.brand-logo').classList.remove('hide-logo');
   },350);
-  document.getElementById('addPreview').className='add-preview';
+  document.getElementById('addPreview').className='hp-preview';
   document.getElementById('addUrlInput').value='';
-  document.getElementById('addStatus').textContent='';
+  document.getElementById('addStatus').className='hp-status';
 }
 function pasteUrl(){
   if(navigator.clipboard){
@@ -1918,18 +1915,18 @@ function previewAddMonth(){
   var url=document.getElementById('addUrlInput').value.trim();
   var st=document.getElementById('addStatus');
   var prev=document.getElementById('addPreview');
-  if(!url){st.textContent='请输入链接';st.style.color='var(--red)';return;}
-  st.textContent='解析中...';st.style.color='var(--t-tertiary)';
+  if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
+  st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
   fetch('/api/add-month?url='+encodeURIComponent(url))
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.error){st.textContent=d.error;st.style.color='var(--red)';return;}
-    st.textContent='';
+    if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
+    st.className='hp-status';
     document.getElementById('prevPeriod').textContent=d.period||'-';
-    prev.className='add-preview show';
+    prev.className='hp-preview show';
     prev._data=d;
   })
-  .catch(function(e){st.textContent=e.message;st.style.color='var(--red)';});
+  .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
 }
 function confirmAddMonth(){
   var prev=document.getElementById('addPreview');
@@ -2063,33 +2060,29 @@ window.addEventListener('resize',function(){
 </div>
 
 <div class="add-modal" id="addModal" role="dialog" aria-modal="true">
-  <div class="hp-box add-mode" id="addBox">
-    <div class="add-head">
-      <div class="hp-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-        </svg>
-      </div>
-      <span class="add-title">添加月份数据</span>
+  <div class="hp-box" id="addBox">
+    <div class="hp-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
     </div>
-    <div class="add-input-row">
-      <input id="addUrlInput" type="url" placeholder="粘贴 Zoho Sheet 发布链接..." autocomplete="off" />
-      <button class="add-btn paste" onclick="pasteUrl()" aria-label="粘贴">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-        </svg>
-      </button>
-      <button class="add-btn go" onclick="previewAddMonth()" aria-label="解析">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-    <div class="add-status" id="addStatus"></div>
-    <div class="add-preview" id="addPreview">
-      <div class="pv-row"><span>月份</span><span class="pv-val" id="prevPeriod">-</span></div>
-      <div class="pv-acts">
-        <button class="pv-cancel" onclick="hideAddMonth()">取消</button>
-        <button class="pv-confirm" onclick="confirmAddMonth()">确认添加</button>
+    <input class="hp-input" id="addUrlInput" type="url" placeholder="Zoho Sheet" autocomplete="off" />
+    <button class="hp-icon" onclick="pasteUrl()" aria-label="粘贴" style="cursor:pointer;border:none;background:rgba(139,92,246,.1);color:var(--accent2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+      </svg>
+    </button>
+    <button class="hp-icon" onclick="previewAddMonth()" aria-label="解析" style="cursor:pointer;border:none;background:var(--accent2);color:#fff">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <span class="hp-status" id="addStatus"></span>
+    <div class="hp-preview" id="addPreview">
+      <div class="prev-label">预览月份</div>
+      <div class="prev-val" id="prevPeriod">-</div>
+      <div class="prev-acts">
+        <button class="prev-cancel" onclick="hideAddMonth()">取消</button>
+        <button class="prev-confirm" onclick="confirmAddMonth()">确认添加</button>
       </div>
     </div>
   </div>
@@ -2102,7 +2095,7 @@ window.addEventListener('resize',function(){
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
   </svg>
   <span id="syncLabel">数据同步</span>
-  <a href="https://github.com/mowsxc/CXYNB-ZOHO" target="_blank" rel="noopener" class="version-link" id="versionLink">v--</a>
+  <span class="version-link">@MOWSXC</span>
 </div>
 
 </body>
