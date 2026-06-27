@@ -665,46 +665,49 @@
     position: absolute; inset: 0;
     transform: rotateY(180deg);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 4px; padding: 18px 12px;
+    gap: 0; padding: 16px 10px;
     background: linear-gradient(160deg, var(--surface), rgba(255,255,255,.03));
     border-radius: var(--radius);
     overflow: hidden;
   }
   .card-back .fb-watermark {
-    position: absolute; inset: -10%;
+    position: absolute; inset: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-size: 36px; font-weight: 900; line-height: .85;
+    font-size: 44px; font-weight: 900; line-height: .8;
     font-family: var(--font-mono);
-    color: rgba(255,255,255,.08);
-    letter-spacing: -.03em;
+    color: rgba(255,255,255,.12);
+    letter-spacing: -.04em;
     pointer-events: none; user-select: none;
     text-align: center;
-    transform: rotate(-8deg);
   }
   .card-back .fb-label {
-    font-size: 12px; font-weight: 700; letter-spacing: .15em;
+    font-size: 10px; font-weight: 700; letter-spacing: .1em;
     color: var(--accent2); text-transform: uppercase;
     position: relative; z-index: 1;
-    background: var(--surface-dark);
-    padding: 3px 10px; border-radius: 20px;
-    border: 1px solid rgba(139,92,246,.2);
+    margin-bottom: 6px;
   }
-  .card-back .fb-sep { width: 0; height: 0; position: relative; z-index: 1; }
   .card-back .fb-cur {
     font-size: 22px; font-family: var(--font-mono); font-weight: 800;
-    letter-spacing: -.03em; line-height: 1.1;
+    letter-spacing: -.03em; line-height: 1;
     animation: cashBreathe 2s ease-in-out infinite;
     position: relative; z-index: 1;
+    color: var(--t-primary);
   }
-  .card-back .fb-delta {
-    font-size: 15px; font-family: var(--font-mono); font-weight: 700;
-    display: flex; align-items: center; gap: 3px;
+  .card-back .fb-prev {
+    font-size: 10px; color: var(--t-tertiary);
     position: relative; z-index: 1;
-    background: var(--surface-dark);
+    margin-top: 6px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .card-back .fb-prev span { font-family: var(--font-mono); color: var(--t-secondary); font-weight: 600; }
+  .card-back .fb-delta {
+    font-size: 14px; font-family: var(--font-mono); font-weight: 700;
+    margin-top: 6px; display: flex; align-items: center; gap: 3px;
+    position: relative; z-index: 1;
     padding: 2px 8px; border-radius: 12px;
   }
-  .card-back .fb-delta.up { color: var(--green); border: 1px solid rgba(16,185,129,.15); }
-  .card-back .fb-delta.down { color: var(--red); border: 1px solid rgba(244,63,94,.15); }
+  .card-back .fb-delta.up { color: var(--green); background: rgba(16,185,129,.08); }
+  .card-back .fb-delta.down { color: var(--red); background: rgba(244,63,94,.08); }
   .card-back .fb-arrow { font-size: 10px; }
 
   .card-inner:not(.flipped):hover .card-front {
@@ -1270,11 +1273,12 @@
     .item-icon svg { width: 13px; height: 13px; }
     .item-title { font-size: 10px; margin-bottom: 2px; letter-spacing: .03em; }
     .item-value { font-size: 14px; }
-    .card-back { padding: 14px 6px; gap: 3px; }
-    .card-back .fb-watermark { font-size: 28px; }
-    .card-back .fb-label { font-size: 10px; padding: 2px 8px; }
-    .card-back .fb-cur { font-size: 18px; }
-    .card-back .fb-delta { font-size: 13px; padding: 1px 6px; }
+    .card-back { padding: 14px 6px; }
+    .card-back .fb-watermark { font-size: 34px; }
+    .card-back .fb-label { font-size: 9px; margin-bottom: 4px; }
+    .card-back .fb-cur { font-size: 17px; }
+    .card-back .fb-prev { font-size: 9px; margin-top: 4px; }
+    .card-back .fb-delta { font-size: 12px; padding: 1px 6px; margin-top: 4px; }
     .stat-card { padding: 16px 14px; }
     .stat-value { font-size: 20px; }
     .stat-value.mono { font-size: 18px; }
@@ -1445,7 +1449,7 @@ function render(data) {
     var pLabel=prevPeriod||'-';
     var blinkCls=cd.blink?' cash-blink':'';
     var back=prevSum
-      ?'<div class="card-face card-back"><div class="fb-watermark">'+pLabel.split('-').join('<br>')+'</div><div class="fb-label">'+cd.key+'</div><div class="fb-sep"></div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+      ?'<div class="card-face card-back"><div class="fb-watermark">'+pLabel.split('-').join('</br>')+'</div><div class="fb-label">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+pLabel+' <span>'+fmY(prevVal)+'</span></div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
       :'<div class="card-face card-back"><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
     h+='<div class="item-card '+cd.cls+'"><div class="card-inner" onclick="event.stopPropagation();flipCard(this)">'
       +'<div class="card-face card-front"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+cd.icon+'</svg></div><div class="item-title">'+cd.key+'</div><div class="item-value'+blinkCls+'">'+fmY(cd.cur)+'</div></div>'
