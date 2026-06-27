@@ -1531,6 +1531,11 @@ function render(data) {
 
   document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
   var contentEl=document.getElementById('content');
+  var newHash=d._data_hash||'';
+  if(contentEl.innerHTML&&window._lastRenderHash===newHash){
+    window.scrollTo(sx, sy); return;
+  }
+  window._lastRenderHash=newHash;
   contentEl.style.opacity='0';
   contentEl.innerHTML=h;
   requestAnimationFrame(function(){
@@ -1542,7 +1547,10 @@ function render(data) {
   var skel=document.getElementById('chartSkel');
   var svgDiv=document.getElementById('chartSvg');
   if (skel&&svgDiv) {
-    svgDiv.innerHTML=buildChartSvg();
+    if(window._lastChartHash!==newHash){
+      svgDiv.innerHTML=buildChartSvg();
+      window._lastChartHash=newHash;
+    }
     skel.style.display='none';
     svgDiv.style.display='block';
   }
