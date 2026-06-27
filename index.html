@@ -1966,8 +1966,8 @@ function previewAddMonth(){
   .then(function(d){
     if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
     st.textContent='✓ '+d.period;st.className='hp-status show';st.style.color='var(--green)';
-    window._monthsData=d;
-    rebuildPeriodOpts();
+    window._monthsData=d.available||{};
+    buildPeriodOpts();
     setTimeout(function(){hideAddMonth();},800);
   })
   .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
