@@ -1793,10 +1793,15 @@ function showAddMonth(e){
 function hidePinModal(){
   document.getElementById('pinModal').classList.remove('open');
 }
+function autoVerifyPin(){
+  var pin=document.getElementById('pinInput').value;
+  if(pin.length>=1) verifyPin();
+}
 function verifyPin(){
   var pin=document.getElementById('pinInput').value;
   var st=document.getElementById('pinStatus');
   if(pin==='3'){
+    document.getElementById('pinInput').blur();
     hidePinModal();
     setTimeout(function(){
       var addModal=document.getElementById('addModal');
@@ -1813,12 +1818,13 @@ function verifyPin(){
       requestAnimationFrame(function(){
         requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
       });
-    },150);
+    },200);
   } else {
     st.textContent='密码错误';
     st.style.color='var(--red)';
-    document.getElementById('pinInput').value='';
-    document.getElementById('pinInput').focus();
+    var inp=document.getElementById('pinInput');
+    inp.value='';
+    inp.focus();
   }
 }
 function hideAddMonth(){
@@ -1930,12 +1936,11 @@ window.addEventListener('resize',function(){
     </div>
     <h3>输入访问密码</h3>
     <div class="pin-input-group">
-      <input id="pinInput" type="password" inputmode="numeric" maxlength="1" placeholder="*" onkeydown="if(event.key==='Enter')verifyPin()" autocomplete="off" />
+      <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
     </div>
     <span class="add-status" id="pinStatus"></span>
     <div class="add-acts">
       <button class="btn-cancel" onclick="hidePinModal()">取消</button>
-      <button class="btn-submit" onclick="verifyPin()">验证</button>
     </div>
   </div>
 </div>
