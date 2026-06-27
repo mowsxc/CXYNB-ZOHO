@@ -1533,14 +1533,7 @@ function render(data) {
     window.scrollTo(sx, sy); return;
   }
   window._lastRenderHash=newHash;
-  contentEl.style.opacity='0';
   contentEl.innerHTML=h;
-  requestAnimationFrame(function(){
-    requestAnimationFrame(function(){
-      contentEl.style.transition='opacity .3s ease-out';
-      contentEl.style.opacity='1';
-    });
-  });
   var skel=document.getElementById('chartSkel');
   var svgDiv=document.getElementById('chartSvg');
   if (skel&&svgDiv) {
@@ -1666,7 +1659,7 @@ function toggleFullscreen() {
   var fs=document.getElementById('chartFS');
   if (!fs || !window._chartState) return;
   var isOpen=fs.classList.contains('open');
-  if (isOpen) { fs.classList.remove('open'); document.body.style.overflow=''; return; }
+  if (isOpen) { fs.classList.remove('open'); document.body.style.overflow=''; if(inner) inner.innerHTML=''; return; }
   document.body.style.overflow='hidden';
   var inner=document.getElementById('chartFsInner');
   if (inner) {
@@ -1740,7 +1733,8 @@ function buildPeriodOpts() {
   if (!curY||!curM) return;
   var years=Object.keys(data).sort();
   if (years.length===0) years=[curY];
-  if (!data[curY]) data[curY]=[curM];
+  var localData=data;
+  if (!data[curY]) {localData={}; for(var k in data) localData[k]=data[k]; localData[curY]=[curM];}
 
   var yBefore=[], yAfter=[];
   for (var i=0;i<years.length;i++) {
@@ -1761,7 +1755,7 @@ function buildPeriodOpts() {
     yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+ay+'\')">'+ay+'</span>';
   }
 
-  var months=data[curY].slice().sort();
+  var months=localData[curY].slice().sort();
   var mBefore=[], mAfter=[];
   for (var j=0;j<months.length;j++) {
     var m=months[j];
@@ -1852,10 +1846,23 @@ document.addEventListener('click',function(e){
   if (!e.target.closest('.card-inner')) unflip();
 });
 
-fetch('/api/data')
-  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-  .then(function(d){
+function fetchWithRetry(url,retries,delay){
+  return fetch(url).then(function(r){
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return r.json();
+  }).then(function(d){
     if(d.error) throw new Error(d.error);
+    return d;
+  }).catch(function(err){
+    if(retries<=0) throw err;
+    return new Promise(function(resolve,reject){
+      setTimeout(function(){ fetchWithRetry(url,retries-1,delay*2).then(resolve).catch(reject); },delay);
+    });
+  });
+}
+
+fetchWithRetry('/api/data',3,1000)
+  .then(function(d){
     window._monthsData=d.available||{};
     window._lastHash=d._data_hash||'';
     render(d);
@@ -1863,7 +1870,7 @@ fetch('/api/data')
   .catch(function(err){
     document.getElementById('loading').style.display='none';
     document.getElementById('error').style.display='block';
-    document.getElementById('error').textContent=err.message;
+    document.getElementById('error').textContent=err.message+'，请刷新页面重试';
   });
 
 // Background silent refresh: poll cache timestamp, re-render if newer
