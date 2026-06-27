@@ -1873,6 +1873,28 @@ fetchWithRetry('/api/data',3,1000)
   });
 
 // Eagerly render from localStorage cache before network resolves
+(function(){
+  var now=new Date();
+  var cur=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  var cachedKey=localStorage.getItem('cache_'+cur) ? cur : null;
+  if(!cachedKey){
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.startsWith('cache_')){ cachedKey=k.slice(6); break; }
+    }
+  }
+  if(cachedKey){
+    try{
+      var d=JSON.parse(localStorage.getItem('cache_'+cachedKey));
+      if(d&&d._data_hash){
+        window._monthsData=d.available||{};
+        window._lastHash=d._data_hash||'';
+        render(d);
+      }
+    }catch(e){}
+  }
+})();
+
 // Preview keepalive heartbeat + cache ts sync
 setInterval(function(){ fetch('/api/ping',{cache:'no-cache'}); },150000);
 
@@ -1900,23 +1922,133 @@ window.addEventListener('resize',function(){
     }
   },250);
 });
-(function(){
-  var container=document.getElementById('bgParticles');
-  if(!container) return;
-  var count=12;
-  var frag=document.createDocumentFragment();
-  for(var i=0;i<count;i++){
-    var dot=document.createElement('div');
-    dot.className='bg-particle';
-    dot.style.left=(Math.random()*100)+'%';
-    dot.style.animationDuration=(12+Math.random()*16)+'s';
-    dot.style.animationDelay=(Math.random()*16)+'s';
-    dot.style.width=(1+Math.random()*2)+'px';
-    dot.style.height=dot.style.width;
-    frag.appendChild(dot);
+
+function positionBox(boxId){
+  var box=document.getElementById(boxId);
+  var logo=document.querySelector('.brand-logo');
+  if(logo&&box){
+    var lr=logo.getBoundingClientRect();
+    box.style.setProperty('--modal-left',(lr.left+lr.width/2)+'px');
+    box.style.setProperty('--modal-top',(lr.top+lr.height/2)+'px');
   }
-  container.appendChild(frag);
-})();
+}
+function showAddMonth(){
+  positionBox('pinBox');
+  document.querySelector('.brand-logo').classList.add('hide-logo');
+  document.getElementById('pinModal').classList.add('open');
+  var pinInput=document.getElementById('pinInput');
+  pinInput.value='';
+  var st=document.getElementById('pinStatus');
+  st.className='hp-status';st.textContent='';
+  startCapsuleTimer();
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){pinInput.focus();});
+  });
+}
+function hidePinModal(){
+  var modal=document.getElementById('pinModal');
+  if(!modal.classList.contains('open'))return;
+  modal.classList.add('dismissing');
+  setTimeout(function(){
+    modal.classList.remove('open','dismissing');
+    document.querySelector('.brand-logo').classList.remove('hide-logo');
+  },350);
+}
+function autoVerifyPin(){
+  var pin=document.getElementById('pinInput').value;
+  if(pin.length>=1){
+    stopCapsuleTimer();
+    fetch('/api/verify-pin?pin='+encodeURIComponent(pin))
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
+    .then(function(res){
+      if(res.ok&&res.data.ok){
+        var st=document.getElementById('pinStatus');
+        st.textContent='✓';st.className='hp-status show';st.style.color='var(--green)';
+        document.getElementById('pinInput').blur();
+        setTimeout(function(){openAddBox();},300);
+      } else {
+        var st=document.getElementById('pinStatus');
+        st.textContent='×';st.className='hp-status show';st.style.color='var(--red)';
+        setTimeout(function(){
+          document.getElementById('pinInput').value='';
+          st.className='hp-status';
+          startCapsuleTimer();
+        },500);
+      }
+    })
+    .catch(function(){
+      var st=document.getElementById('pinStatus');
+      st.textContent='网络错误';st.className='hp-status show';st.style.color='var(--red)';
+      setTimeout(function(){st.className='hp-status';startCapsuleTimer();},1000);
+    });
+  }
+}
+function openAddBox(){
+  hidePinModal();
+  setTimeout(function(){
+    positionBox('addBox');
+    document.querySelector('.brand-logo').classList.add('hide-logo');
+    document.getElementById('addModal').classList.add('open');
+    startCapsuleTimer();
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
+    });
+  },200);
+}
+function hideAddMonth(){
+  var modal=document.getElementById('addModal');
+  if(!modal.classList.contains('open'))return;
+  modal.classList.add('dismissing');
+  setTimeout(function(){
+    modal.classList.remove('open','dismissing');
+    document.querySelector('.brand-logo').classList.remove('hide-logo');
+  },350);
+  document.getElementById('addUrlInput').value='';
+  document.getElementById('addStatus').className='hp-status';
+}
+function pasteUrl(){
+  if(navigator.clipboard){
+    navigator.clipboard.readText().then(function(t){
+      document.getElementById('addUrlInput').value=t;
+      if(t.trim()) previewAddMonth();
+    }).catch(function(){});
+  }
+}
+function previewAddMonth(){
+  var url=document.getElementById('addUrlInput').value.trim();
+  var st=document.getElementById('addStatus');
+  if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
+  st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
+  fetch('/api/add-month?url='+encodeURIComponent(url))
+  .then(function(r){if(!r.ok) return r.json().then(function(e){throw new Error(e.error||'HTTP '+r.status)}); return r.json();})
+  .then(function(d){
+    if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
+    st.textContent='✓ '+d.period;st.className='hp-status show';st.style.color='var(--green)';
+    window._monthsData=d.available||{};
+    buildPeriodOpts();
+    setTimeout(function(){hideAddMonth();},800);
+  })
+  .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
+}
+
+var _capsuleTimer=null;
+function startCapsuleTimer(){
+  stopCapsuleTimer();
+  _capsuleTimer=setTimeout(function(){
+    hidePinModal();hideAddMonth();
+  },5000);
+}
+function stopCapsuleTimer(){
+  if(_capsuleTimer){clearTimeout(_capsuleTimer);_capsuleTimer=null;}
+}
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('addModal').addEventListener('click',function(e){
+    if(!e.target.closest('.hp-box')){hideAddMonth();stopCapsuleTimer();}
+  });
+  document.getElementById('pinModal').addEventListener('click',function(e){
+    if(!e.target.closest('.hp-box')){hidePinModal();stopCapsuleTimer();}
+  });
+});
 
 /* Table horizontal scroll hint */
 (function(){
