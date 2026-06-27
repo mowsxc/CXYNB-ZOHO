@@ -1813,29 +1813,30 @@ function loadMonth(period) {
   document.getElementById('error').style.display='none';
   var cached=null;
   try{ cached=JSON.parse(localStorage.getItem('cache_'+period)); }catch(e){}
+  var loadingTimer=null;
   if(cached){
-    clearTimeout(loadingTimer);
     window._lastHash=cached._data_hash||'';
     window._monthsData=cached.available||{};
     render(cached);
+  } else {
+    loadingTimer=setTimeout(function(){
+      document.getElementById('loading').style.display='block';
+      document.getElementById('content').style.display='none';
+      document.getElementById('syncBar').style.display='none';
+    },200);
   }
-  var loadingTimer = setTimeout(function(){
-    document.getElementById('loading').style.display='block';
-    document.getElementById('content').style.display='none';
-    document.getElementById('syncBar').style.display='none';
-  }, cached?500:200);
   fetch('/api/data?period='+encodeURIComponent(period))
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(d){
       if(d.error) throw new Error(d.error);
-      clearTimeout(loadingTimer);
+      if(loadingTimer) clearTimeout(loadingTimer);
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
       try{ localStorage.setItem('cache_'+period, JSON.stringify(d)); }catch(e){}
     })
     .catch(function(err){
-      clearTimeout(loadingTimer);
+      if(loadingTimer) clearTimeout(loadingTimer);
       if(!cached){
         document.getElementById('loading').style.display='none';
         document.getElementById('error').style.display='block';
