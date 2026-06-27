@@ -1811,6 +1811,7 @@ function closeAll() {
 function loadMonth(requestedPeriod) {
   closeAll();
   document.getElementById('error').style.display='none';
+  window._curPeriod=requestedPeriod;
   var cached=null;
   try{ cached=JSON.parse(localStorage.getItem('cache_'+requestedPeriod)); }catch(e){}
   var loadingTimer=null;
