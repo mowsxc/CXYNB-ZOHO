@@ -664,14 +664,14 @@
   .card-back {
     position: absolute; inset: 0;
     transform: rotateY(180deg);
-    display: flex; flex-direction: column;
-    padding: 16px 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; padding: 16px 10px;
     background: linear-gradient(160deg, var(--surface), rgba(255,255,255,.03));
     border-radius: var(--radius);
     overflow: hidden;
   }
   .card-back .fb-island {
-    align-self: center;
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
     background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 20px;
@@ -679,18 +679,16 @@
     font-size: 11px; font-weight: 600; letter-spacing: .04em;
     color: var(--t-primary);
     white-space: nowrap;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   .card-back .fb-cur {
     font-size: 22px; font-family: var(--font-mono); font-weight: 800;
     letter-spacing: -.03em; line-height: 1;
     animation: cashBreathe 2s ease-in-out infinite;
     color: var(--t-primary);
-    margin: auto 0;
-    text-align: center;
-  }
-  .card-back .fb-bottom {
-    display: flex; align-items: center; justify-content: space-between;
-    width: 100%;
+    margin-top: 20px;
   }
   .card-back .fb-prev {
     font-size: 10px; color: var(--t-tertiary);
@@ -1271,7 +1269,7 @@
     .item-value { font-size: 14px; }
     .card-back { padding: 14px 8px; }
     .card-back .fb-island { font-size: 10px; padding: 2px 10px; }
-    .card-back .fb-cur { font-size: 17px; }
+    .card-back .fb-cur { font-size: 17px; margin-top: 18px; }
     .card-back .fb-prev { font-size: 9px; }
     .card-back .fb-delta { font-size: 11px; padding: 1px 5px; }
     .card-back .fb-delta { font-size: 12px; padding: 1px 6px; margin-top: 5px; }
@@ -1445,8 +1443,8 @@ function render(data) {
     var pLabel=prevPeriod||'-';
     var blinkCls=cd.blink?' cash-blink':'';
     var back=prevSum
-      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-bottom"><div class="fb-prev">'+prevPeriod.replace('-','')+' '+fmY(prevVal)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div></div>'
-      :'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev" style="margin:auto 0">暂无上月数据</div></div>';
+      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+prevPeriod.replace('-','')+' '+fmY(prevVal)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+      :'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
     h+='<div class="item-card '+cd.cls+'"><div class="card-inner" onclick="event.stopPropagation();flipCard(this)">'
       +'<div class="card-face card-front"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+cd.icon+'</svg></div><div class="item-title">'+cd.key+'</div><div class="item-value'+blinkCls+'">'+fmY(cd.cur)+'</div></div>'
       +back+'</div></div>';
