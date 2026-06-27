@@ -1359,7 +1359,7 @@
     </div>
   </div>
 
-   <div class="loading-state" id="loading" style="display:none"><span class="loading-ring"></span>正在同步 Zoho Sheet 数据...</div>
+   <div class="loading-state" id="loading" style="display:none"><span class="loading-ring"></span>正在加载数据...</div>
   <div class="error-state" id="error" style="display:none"></div>
 
   <div id="content" style="display:none"></div>
@@ -1823,7 +1823,7 @@ function loadMonth(period) {
       document.getElementById('loading').style.display='block';
       document.getElementById('content').style.display='none';
       document.getElementById('syncBar').style.display='none';
-    },200);
+    },3000);
   }
   fetch('/api/data?period='+encodeURIComponent(period))
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
