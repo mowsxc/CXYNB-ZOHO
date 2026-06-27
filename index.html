@@ -356,7 +356,7 @@
   .add-modal {
     position: fixed; inset: 0; z-index: 9999;
     visibility: hidden; opacity: 0; pointer-events: none;
-    transition: visibility 0s .3s, opacity .3s ease-out;
+    transition: visibility 0s .4s, opacity .4s ease-out;
     -webkit-tap-highlight-color: transparent;
   }
   .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; transition: visibility 0s 0s, opacity .3s ease-out; }
@@ -385,6 +385,11 @@
     transform: translate(-50%, -50%) scaleX(0) scaleY(0);
   }
   .add-modal.open .capsule { transform: translate(-50%, -50%) scaleX(1) scaleY(1); opacity: 1; }
+  .add-modal.dismissing .capsule {
+    transform: translate(-50%, -50%) scaleX(1.1) scaleY(.3);
+    opacity: 0; filter: blur(8px);
+    transition: transform .4s cubic-bezier(.4,0,1,1), opacity .35s ease-in, filter .35s ease-in;
+  }
   .capsule-icon {
     width: 36px; height: 36px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
@@ -1804,17 +1809,24 @@ function showAddMonth(){
   pinInput.value='';
   var st=document.getElementById('pinStatus');
   st.className='capsule-status';st.textContent='';
+  startCapsuleTimer();
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){pinInput.focus();});
   });
 }
 function hidePinModal(){
-  document.getElementById('pinModal').classList.remove('open');
-  document.querySelector('.brand-logo').classList.remove('hide-logo');
+  var modal=document.getElementById('pinModal');
+  if(!modal.classList.contains('open'))return;
+  modal.classList.add('dismissing');
+  setTimeout(function(){
+    modal.classList.remove('open','dismissing');
+    document.querySelector('.brand-logo').classList.remove('hide-logo');
+  },400);
 }
 function autoVerifyPin(){
   var pin=document.getElementById('pinInput').value;
   if(pin.length>=1){
+    stopCapsuleTimer();
     if(pin==='3'){
       var st=document.getElementById('pinStatus');
       st.textContent='✓';st.className='capsule-status show';st.style.color='var(--green)';
@@ -1826,6 +1838,7 @@ function autoVerifyPin(){
       setTimeout(function(){
         document.getElementById('pinInput').value='';
         st.className='capsule-status';
+        startCapsuleTimer();
       },600);
     }
   }
@@ -1836,14 +1849,20 @@ function openAddCapsule(){
     positionCapsule('addCapsule');
     document.querySelector('.brand-logo').classList.add('hide-logo');
     document.getElementById('addModal').classList.add('open');
+    startCapsuleTimer();
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
     });
-  },200);
+  },250);
 }
 function hideAddMonth(){
-  document.getElementById('addModal').classList.remove('open');
-  document.querySelector('.brand-logo').classList.remove('hide-logo');
+  var modal=document.getElementById('addModal');
+  if(!modal.classList.contains('open'))return;
+  modal.classList.add('dismissing');
+  setTimeout(function(){
+    modal.classList.remove('open','dismissing');
+    document.querySelector('.brand-logo').classList.remove('hide-logo');
+  },400);
   document.getElementById('addPreview').className='capsule-preview';
   document.getElementById('addUrlInput').value='';
   document.getElementById('addStatus').className='capsule-status';
@@ -1882,11 +1901,21 @@ function confirmAddMonth(){
   hideAddMonth();
 }
 
+var _capsuleTimer=null;
+function startCapsuleTimer(){
+  stopCapsuleTimer();
+  _capsuleTimer=setTimeout(function(){
+    hidePinModal();hideAddMonth();
+  },10000);
+}
+function stopCapsuleTimer(){
+  if(_capsuleTimer){clearTimeout(_capsuleTimer);_capsuleTimer=null;}
+}
 document.getElementById('addModal').addEventListener('click',function(e){
-  if(e.target===this) hideAddMonth();
+  if(e.target===this||e.target===this.querySelector('::before')){hideAddMonth();stopCapsuleTimer();}
 });
 document.getElementById('pinModal').addEventListener('click',function(e){
-  if(e.target===this) hidePinModal();
+  if(e.target===this||e.target===this.querySelector('::before')){hidePinModal();stopCapsuleTimer();}
 });
 
 // Preview keepalive heartbeat + cache ts sync
