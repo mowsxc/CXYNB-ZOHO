@@ -1500,7 +1500,7 @@ function render(data) {
       var ac=(ci>=2&&ci<=6)?' align-right':'';
       h+='<th class="'+ac+'">'+cols[ci]+'</th>';
     }
-    h+='</tr></thead><tbody>';
+    h+='</tr></thead><tbody id="dailyBody">';
 
     var lastDay='';
     for (var i=0;i<filtered.length;i++) {
@@ -1533,10 +1533,11 @@ function render(data) {
   var newHash=data._data_hash||'';
   var curPeriod=data.period||'';
 
-  /* --- 数据更新模式：结构已存在且同月份，只更新数值 --- */
+  /* --- 始终只更新数据，不重建 DOM 结构 --- */
   var existingCards=contentEl.querySelector('.items');
-  if(existingCards&&window._lastRenderPeriod===curPeriod){
+  if(existingCards){
     window._lastRenderHash=newHash;
+    window._lastRenderPeriod=curPeriod;
     var vals={'网费':nf,'售货':sl,'退款':rf,'支出':ex,'美团':mt_,'现金':cash};
     for(var k in vals){
       var el=document.getElementById('cv-'+k);
@@ -1545,41 +1546,56 @@ function render(data) {
     var skel=document.getElementById('chartSkel');
     var svgDiv=document.getElementById('chartSvg');
     if(skel&&svgDiv){
-      if(window._lastChartHash!==newHash){
-        svgDiv.innerHTML=buildChartSvg();
-        window._lastChartHash=newHash;
-      }
-      skel.style.display='none';
-      svgDiv.style.display='block';
-    }
-    window.scrollTo(sx, sy);
-    return;
-  }
-
-  /* --- 首次渲染或切换月份：构建完整结构 --- */
-  if(contentEl.innerHTML&&window._lastRenderPeriod!==curPeriod){
-    contentEl.classList.add('fading-out');
-  }
-  window._lastRenderHash=newHash;
-  window._lastRenderPeriod=curPeriod;
-  var doSwap=function(){
-    contentEl.innerHTML=h;
-    var skel=document.getElementById('chartSkel');
-    var svgDiv=document.getElementById('chartSvg');
-    if (skel&&svgDiv) {
       svgDiv.innerHTML=buildChartSvg();
       window._lastChartHash=newHash;
       skel.style.display='none';
       svgDiv.style.display='block';
     }
-    requestAnimationFrame(function(){ contentEl.classList.remove('fading-out'); });
+    var tbody=document.getElementById('dailyBody');
+    if(tbody){
+      var daily=(data.daily||[]).slice().reverse();
+      var filtered=[];
+      for(var i=0;i<daily.length;i++){ if(hasData(daily[i])) filtered.push(daily[i]); }
+      var tb='';
+      var lastDay='';
+      for(var i=0;i<filtered.length;i++){
+        var r=filtered[i];
+        var day=r['日期']||'';
+        var divider=day!==lastDay&&i>0?' day-divider':'';
+        var showDay=day!==lastDay?day:'';
+        lastDay=day;
+        var shift=r['班次']||'';
+        tb+='<tr class="'+divider+'">';
+        tb+='<td class="cell-date">'+showDay+'</td>';
+        tb+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
+        tb+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
+        tb+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
+        tb+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
+        tb+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
+        tb+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
+        tb+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
+        tb+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
+        tb+='</tr>';
+      }
+      tbody.innerHTML=tb;
+    }
     window.scrollTo(sx, sy);
-  };
-  if(contentEl.classList.contains('fading-out')){
-    setTimeout(doSwap,150);
-  } else {
-    doSwap();
+    return;
   }
+
+  /* --- 首次渲染：构建完整结构 --- */
+  window._lastRenderHash=newHash;
+  window._lastRenderPeriod=curPeriod;
+  contentEl.innerHTML=h;
+  var skel=document.getElementById('chartSkel');
+  var svgDiv=document.getElementById('chartSvg');
+  if (skel&&svgDiv) {
+    svgDiv.innerHTML=buildChartSvg();
+    window._lastChartHash=newHash;
+    skel.style.display='none';
+    svgDiv.style.display='block';
+  }
+  window.scrollTo(sx, sy);
 }
 
 function buildChartSvg(rangeN) {
