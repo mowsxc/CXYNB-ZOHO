@@ -269,9 +269,10 @@
     color: var(--t-primary);
     overflow: hidden;
     vertical-align: middle;
-    transition: max-width .3s ease, padding .3s ease, opacity .2s ease, color .15s;
+    transition: max-width .3s ease, padding .3s ease, opacity .2s ease, color .15s, transform .15s;
   }
   .per-opt:hover { color: var(--t-primary); }
+  .per-opt:active { transform: scale(.9); }
   .per-opt.yr { max-width: 53px; padding: 8px 11px; letter-spacing: .02em; }
   .per-opt.yr.sel { color: var(--t-primary); }
   .per-opt.mo { max-width: 36px; padding: 8px 8px; }
@@ -359,6 +360,7 @@
   transition: background .25s, color .25s, border-color .25s; color: var(--t-secondary);
 }
   .theme-toggle:hover { border-color: var(--accent2); color: var(--accent2); box-shadow: 0 0 16px var(--purple-glow); }
+  .theme-toggle:active { transform: rotate(30deg) scale(.85); }
   .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
   .theme-toggle svg { width: 20px; height: 20px; }
 
@@ -383,6 +385,7 @@
     backface-visibility: hidden;
     box-shadow:
       0 1px 0 rgba(255,255,255,.06) inset,
+      0 0 0 1px rgba(255,255,255,.03) inset,
       0 4px 24px rgba(0,0,0,.18);
     transition: border-color .3s, transform .4s cubic-bezier(.25,.8,.25,1.2);
   }
@@ -390,8 +393,13 @@
     border-color: var(--border-hover);
     box-shadow:
       0 1px 0 rgba(255,255,255,.1) inset,
+      0 0 0 1px rgba(255,255,255,.06) inset,
       0 12px 48px rgba(0,0,0,.28);
     transform: perspective(600px) rotateX(2deg) translateY(-4px);
+  }
+  .stat-card:active {
+    transform: perspective(600px) rotateX(0deg) translateY(0) scale(.98);
+    transition-duration: .1s;
   }
   .stat-card::after {
     content: '';
@@ -496,6 +504,7 @@
       linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 70%),
       var(--surface);
     border: 1px solid var(--border);
+    border-top-color: rgba(255,255,255,.12);
     box-shadow:
       0 1px 0 rgba(255,255,255,.06) inset,
       0 4px 20px rgba(0,0,0,.14);
@@ -640,24 +649,32 @@
     letter-spacing: .08em;
     color: var(--t-quaternary);
     white-space: nowrap;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .trend-title::before {
+    content: '';
+    width: 3px; height: 14px;
+    background: var(--amber);
+    border-radius: 2px;
+    flex-shrink: 0;
   }
   .trend-ranges { display: flex; gap: 4px; }
   .range-btn {
     font-size: 10px; font-family: inherit; color: var(--t-tertiary);
     background: transparent; border: 1px solid var(--border); border-radius: 5px;
-    padding: 3px 10px; cursor: pointer; transition: color .2s, border-color .2s, background .2s; white-space: nowrap;
+    padding: 3px 10px; cursor: pointer; transition: color .2s, border-color .2s, background .2s, transform .15s; white-space: nowrap;
   }
-  .range-btn:active { background: rgba(255,255,255,.05); }
+  .range-btn:active { background: rgba(255,255,255,.05); transform: scale(.92); }
   .range-btn.sel {
     color: var(--amber); border-color: var(--amber); background: var(--amber-glow);
   }
   .fs-btn {
     flex-shrink: 0; width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center;
     background: transparent; border: 1px solid var(--border); border-radius: 5px; cursor: pointer;
-    color: var(--t-tertiary); transition: color .2s, background .2s, border-color .2s;
+    color: var(--t-tertiary); transition: color .2s, background .2s, border-color .2s, transform .15s;
   }
   .fs-btn svg { width: 14px; height: 14px; }
-  .fs-btn:active { background: rgba(255,255,255,.05); color: var(--amber); }
+  .fs-btn:active { background: rgba(255,255,255,.05); color: var(--amber); transform: scale(.9); }
   .trend-chart-wrap { overflow-x: auto; text-align: center; }
   .trend-chart { }
   .trend-legend {
@@ -684,6 +701,7 @@
     transform-box: fill-box; transform-origin: bottom;
     transition: opacity .2s, filter .2s;
     animation: barBreathe 3s ease-in-out infinite;
+    opacity: .92;
   }
   .trend-bar:nth-child(2n) { animation-delay: 0.3s; }
   .trend-bar:nth-child(3n) { animation-delay: 0.6s; }
@@ -763,6 +781,7 @@
     gap: 10px;
     padding: 18px 24px;
     border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
     font-size: 13px;
     font-weight: 600;
     letter-spacing: -.01em;
@@ -926,10 +945,11 @@
     vertical-align: middle;
     font-size: 13px;
     line-height: 1.5;
-    transition: background .12s;
+    transition: background .12s, border-color .2s;
+    border-left: 3px solid transparent;
   }
-  .table-scroll tbody tr:nth-child(even) { background: rgba(255,255,255,.012); }
-  .table-scroll tbody tr:hover { background: rgba(255,255,255,.05) !important; }
+  .table-scroll tbody tr:nth-child(even) { background: rgba(255,255,255,.025); }
+  .table-scroll tbody tr:hover { background: rgba(255,255,255,.05) !important; border-left-color: var(--accent2); }
   .table-scroll tbody tr:nth-child(even):hover { background: rgba(255,255,255,.06) !important; }
 
   .table-scroll tbody tr.day-divider { border-top: 1px solid rgba(255,255,255,.08); }
@@ -941,6 +961,18 @@
     font-weight: 600;
     font-size: 13px;
     letter-spacing: -.01em;
+    position: relative;
+    padding-left: 14px;
+  }
+  td.cell-date::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent2);
+    opacity: .4;
   }
   td.cell-shift {
     font-weight: 700;
@@ -981,8 +1013,10 @@
     border: 2px solid rgba(255,255,255,.08);
     border-top-color: var(--purple);
     animation: spin .65s linear infinite;
-    box-shadow: 0 0 14px rgba(139,92,246,.25);
+    box-shadow: 0 0 14px rgba(139,92,246,.25), 0 0 4px rgba(139,92,246,.4) inset;
   }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  #content { animation: fadeInUp .4s ease-out; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .error-state {
@@ -1298,6 +1332,23 @@ function buildChartSvg(rangeN) {
   var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
   var chartH=isMob?200:260;
   var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:'+totalW+'px;height:auto;max-width:none;display:block;margin:0 auto">';
+
+  svg+='<defs>';
+  for (var di=0;di<nMetrics;di++) {
+    svg+='<linearGradient id="bg'+di+'" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0%" stop-color="'+metrics[di].color+'" stop-opacity="1"/>'
+      +'<stop offset="100%" stop-color="'+metrics[di].color+'" stop-opacity=".4"/>'
+      +'</linearGradient>';
+  }
+  svg+='</defs>';
+
+  var gridSteps=4;
+  for (var gi=1;gi<=gridSteps;gi++) {
+    var gy=chartH-padB-(gi/gridSteps)*(chartH-padT-padB);
+    svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(totalW-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4 4" opacity=".5"/>';
+  }
+  svg+='<line x1="'+padL+'" y1="'+(chartH-padB)+'" x2="'+(totalW-padR)+'" y2="'+(chartH-padB)+'" stroke="var(--border)" stroke-width="1"/>';
+
   for (var mi=0;mi<nMonths;mi++) {
     var gx=padL+mi*(groupW+groupGap);
     for (var mj=0;mj<nMetrics;mj++) {
@@ -1311,7 +1362,7 @@ function buildChartSvg(rangeN) {
       else shortVal=v.toFixed(0);
       svg+='<g class="bar-group">';
       svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
-      svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="'+metrics[mj].color+'" opacity=".78" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
+      svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="url(#bg'+mj+')" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
       var fsLabel=isMob?7:10;
       svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="'+fsLabel+'" fill="var(--t-secondary)" font-family="var(--font-mono)">'+shortVal+'</text>';
       svg+='</g>';
@@ -1392,6 +1443,20 @@ function toggleFullscreen() {
     var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
     var chartH=isMob?340:360;
     var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%">';
+    svg+='<defs>';
+    for (var di=0;di<nMetrics;di++) {
+      svg+='<linearGradient id="fsBg'+di+'" x1="0" y1="0" x2="0" y2="1">'
+        +'<stop offset="0%" stop-color="'+metrics[di].color+'" stop-opacity="1"/>'
+        +'<stop offset="100%" stop-color="'+metrics[di].color+'" stop-opacity=".4"/>'
+        +'</linearGradient>';
+    }
+    svg+='</defs>';
+    var gridSteps=5;
+    for (var gi=1;gi<=gridSteps;gi++) {
+      var gy=chartH-padB-(gi/gridSteps)*(chartH-padT-padB);
+      svg+='<line x1="'+padL+'" y1="'+gy+'" x2="'+(totalW-padR)+'" y2="'+gy+'" stroke="var(--border)" stroke-width=".5" stroke-dasharray="4 4" opacity=".4"/>';
+    }
+    svg+='<line x1="'+padL+'" y1="'+(chartH-padB)+'" x2="'+(totalW-padR)+'" y2="'+(chartH-padB)+'" stroke="var(--border)" stroke-width="1"/>';
     for (var mi=0;mi<nMonths;mi++) {
       var gx=padL+mi*(groupW+groupGap);
       for (var mj=0;mj<nMetrics;mj++) {
@@ -1406,7 +1471,7 @@ function toggleFullscreen() {
         var fsFont=isMob?8:12;
         svg+='<g class="bar-group">';
         svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
-        svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="'+metrics[mj].color+'" opacity=".88" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
+        svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="url(#fsBg'+mj+')" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
         svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="'+fsFont+'" fill="var(--t-secondary)" font-family="var(--font-mono)" font-weight="600">'+shortVal+'</text>';
         svg+='</g>';
       }
