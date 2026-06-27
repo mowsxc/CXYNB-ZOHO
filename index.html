@@ -1913,20 +1913,29 @@ function autoVerifyPin(){
   var pin=document.getElementById('pinInput').value;
   if(pin.length>=1){
     stopCapsuleTimer();
-    if(pin==='3'){
+    fetch('/api/verify-pin?pin='+encodeURIComponent(pin))
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
+    .then(function(res){
+      if(res.ok&&res.data.ok){
+        var st=document.getElementById('pinStatus');
+        st.textContent='✓';st.className='hp-status show';st.style.color='var(--green)';
+        document.getElementById('pinInput').blur();
+        setTimeout(function(){openAddBox();},300);
+      } else {
+        var st=document.getElementById('pinStatus');
+        st.textContent='×';st.className='hp-status show';st.style.color='var(--red)';
+        setTimeout(function(){
+          document.getElementById('pinInput').value='';
+          st.className='hp-status';
+          startCapsuleTimer();
+        },500);
+      }
+    })
+    .catch(function(){
       var st=document.getElementById('pinStatus');
-      st.textContent='✓';st.className='hp-status show';st.style.color='var(--green)';
-      document.getElementById('pinInput').blur();
-      setTimeout(function(){openAddBox();},300);
-    } else {
-      var st=document.getElementById('pinStatus');
-      st.textContent='×';st.className='hp-status show';st.style.color='var(--red)';
-      setTimeout(function(){
-        document.getElementById('pinInput').value='';
-        st.className='hp-status';
-        startCapsuleTimer();
-      },500);
-    }
+      st.textContent='网络错误';st.className='hp-status show';st.style.color='var(--red)';
+      setTimeout(function(){st.className='hp-status';startCapsuleTimer();},1000);
+    });
   }
 }
 function openAddBox(){

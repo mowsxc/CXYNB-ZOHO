@@ -5,6 +5,7 @@ import hashlib
 import http.server
 import json
 import os
+import copy
 import subprocess
 import threading
 import time
@@ -17,6 +18,7 @@ from zoho_fetcher import fetch_sheet, normalize_period
 PORT = 8000
 WORKSPACE = os.path.dirname(os.path.abspath(__file__))
 MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
+PIN = os.environ.get("APP_PIN", "3")
 
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
@@ -295,7 +297,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _cache_lock:
                 cached = _data_cache.get(actual_period) if actual_period else None
             if cached:
-                data = dict(cached["data"])
+                data = copy.deepcopy(cached["data"])
                 data["_cache_ts"] = cached["ts"]
                 data["_data_hash"] = cached.get("hash", "")
                 data["_cached"] = True
@@ -330,7 +332,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 json_response(self, {"error": "缺少 url 参数"}, 400)
                 return
             url_to_add = url_to_add.split("?")[0]
-            data = fetch_sheet(url_to_add)
+            try:
+                data = fetch_sheet(url_to_add)
+            except Exception as e:
+                json_response(self, {"error": f"链接请求失败: {e}"}, 502)
+                return
             period = normalize_period(data.get("period", ""))
             if not period or "-" not in period or len(data.get("daily", [])) == 0:
                 json_response(self, {"error": "链接无有效数据或无法识别月份"}, 400)
@@ -362,6 +368,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _cache_lock:
                 ts_map = {p: c["ts"] for p, c in _data_cache.items()}
             json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map})
+            return
+
+        if path == "/api/verify-pin":
+            pin = qs.get("pin", [None])[0]
+            if pin == PIN:
+                json_response(self, {"ok": True})
+            else:
+                json_response(self, {"error": "PIN 错误"}, 403)
             return
 
         serve_static(self.path, self)
