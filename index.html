@@ -125,12 +125,8 @@
   body.is-scrolling .glassOrbs,
   body.is-scrolling .barBreathe,
   body.is-scrolling .cash-blink,
-  body.is-scrolling .syncIconSpin,
-  body.is-scrolling .card-face::after { animation-play-state: paused !important; }
+  body.is-scrolling .syncIconSpin { animation-play-state: paused !important; }
   body.is-scrolling .card-back .fb-cur { animation-play-state: paused !important; }
-  body.is-scrolling .bg-orb { filter: blur(8px) !important; opacity: .15 !important; }
-  body.is-scrolling .bg-particle { opacity: 0 !important; }
-  body.is-scrolling .bg-grid { opacity: 0 !important; }
 .bg-orb {
   position: absolute; border-radius: 50%;
   filter: blur(40px); opacity: var(--orb-opacity);
@@ -1230,8 +1226,8 @@
     animation: spin .65s linear infinite;
     box-shadow: 0 0 14px rgba(139,92,246,.25), 0 0 4px rgba(139,92,246,.4) inset;
   }
-  #content { transition: opacity .15s ease-out; }
-  #content.fading-out { opacity: 0; }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  #content { animation: fadeInUp .4s ease-out; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .error-state {
@@ -2101,7 +2097,7 @@ window.addEventListener('resize',function(){
 (function(){
   var container=document.getElementById('bgParticles');
   if(!container) return;
-  var count=6;
+  var count=12;
   var frag=document.createDocumentFragment();
   for(var i=0;i<count;i++){
     var dot=document.createElement('div');
