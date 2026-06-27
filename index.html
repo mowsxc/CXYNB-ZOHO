@@ -379,6 +379,83 @@
     opacity: 0; filter: blur(6px);
     transition: transform .35s cubic-bezier(.4,0,1,1), opacity .3s ease-in, filter .3s ease-in;
   }
+  .hp-box.add-mode {
+    flex-direction: column; align-items: stretch;
+    padding: 20px; border-radius: var(--radius-lg);
+    min-width: 320px; max-width: 90vw;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.03) 0%, transparent 60%),
+      var(--surface-dark);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.05) inset,
+      0 0 0 1px rgba(255,255,255,.03) inset,
+      0 12px 40px rgba(0,0,0,.3);
+  }
+  .hp-box.add-mode .add-head {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+  }
+  .hp-box.add-mode .add-title {
+    font-size: 14px; font-weight: 600; color: var(--t-primary);
+    letter-spacing: .02em;
+  }
+  .hp-box.add-mode .add-input-row {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 4px 4px 4px 12px;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .hp-box.add-mode .add-input-row:focus-within {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(139,92,246,.1);
+  }
+  .hp-box.add-mode .add-input-row input {
+    flex: 1; border: none; background: transparent;
+    color: var(--t-primary); font-size: 13px; outline: none;
+    padding: 8px 0; min-width: 0;
+  }
+  .hp-box.add-mode .add-input-row input::placeholder { color: var(--t-quaternary); }
+  .hp-box.add-mode .add-btn {
+    width: 32px; height: 32px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px; border: none; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  .hp-box.add-mode .add-btn:active { transform: scale(.9); }
+  .hp-box.add-mode .add-btn svg { width: 16px; height: 16px; }
+  .hp-box.add-mode .add-btn.paste { background: rgba(139,92,246,.1); color: var(--accent2); }
+  .hp-box.add-mode .add-btn.paste:hover { background: rgba(139,92,246,.18); }
+  .hp-box.add-mode .add-btn.go { background: var(--accent2); color: #fff; }
+  .hp-box.add-mode .add-btn.go:hover { background: var(--accent2-hover); }
+  .hp-box.add-mode .add-status {
+    font-size: 12px; color: var(--t-tertiary);
+    min-height: 18px; margin-top: 8px;
+  }
+  .hp-box.add-mode .add-preview {
+    margin-top: 12px; padding: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    display: none;
+  }
+  .hp-box.add-mode .add-preview.show { display: block; }
+  .hp-box.add-mode .add-preview .pv-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: var(--t-secondary);
+  }
+  .hp-box.add-mode .add-preview .pv-val {
+    font-family: var(--font-mono); font-weight: 600; color: var(--t-primary);
+  }
+  .hp-box.add-mode .add-preview .pv-acts {
+    display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;
+  }
+  .hp-box.add-mode .add-preview .pv-acts button {
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: none; transition: background .2s, transform .15s;
+  }
+  .hp-box.add-mode .add-preview .pv-acts button:active { transform: scale(.94); }
+  .pv-cancel { background: rgba(255,255,255,.06); color: var(--t-tertiary); }
+  .pv-cancel:hover { background: rgba(255,255,255,.1); }
+  .pv-confirm { background: var(--accent2); color: #fff; }
+  .pv-confirm:hover { background: var(--accent2-hover); }
   .hp-icon {
     width: 30px; height: 30px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
@@ -1825,9 +1902,9 @@ function hideAddMonth(){
     modal.classList.remove('open','dismissing');
     document.querySelector('.brand-logo').classList.remove('hide-logo');
   },350);
-  document.getElementById('addPreview').className='hp-preview';
+  document.getElementById('addPreview').className='add-preview';
   document.getElementById('addUrlInput').value='';
-  document.getElementById('addStatus').className='hp-status';
+  document.getElementById('addStatus').textContent='';
 }
 function pasteUrl(){
   if(navigator.clipboard){
@@ -1841,18 +1918,18 @@ function previewAddMonth(){
   var url=document.getElementById('addUrlInput').value.trim();
   var st=document.getElementById('addStatus');
   var prev=document.getElementById('addPreview');
-  if(!url){st.textContent='请输入链接';st.className='hp-status show';st.style.color='var(--red)';return;}
-  st.textContent='解析中...';st.className='hp-status show';st.style.color='var(--t-tertiary)';
+  if(!url){st.textContent='请输入链接';st.style.color='var(--red)';return;}
+  st.textContent='解析中...';st.style.color='var(--t-tertiary)';
   fetch('/api/add-month?url='+encodeURIComponent(url))
   .then(function(r){return r.json();})
   .then(function(d){
-    if(d.error){st.textContent=d.error;st.className='hp-status show';st.style.color='var(--red)';return;}
-    st.className='hp-status';
+    if(d.error){st.textContent=d.error;st.style.color='var(--red)';return;}
+    st.textContent='';
     document.getElementById('prevPeriod').textContent=d.period||'-';
-    prev.className='hp-preview show';
+    prev.className='add-preview show';
     prev._data=d;
   })
-  .catch(function(e){st.textContent=e.message;st.className='hp-status show';st.style.color='var(--red)';});
+  .catch(function(e){st.textContent=e.message;st.style.color='var(--red)';});
 }
 function confirmAddMonth(){
   var prev=document.getElementById('addPreview');
@@ -1986,30 +2063,33 @@ window.addEventListener('resize',function(){
 </div>
 
 <div class="add-modal" id="addModal" role="dialog" aria-modal="true">
-  <div class="hp-box" id="addBox">
-    <div class="hp-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-      </svg>
+  <div class="hp-box add-mode" id="addBox">
+    <div class="add-head">
+      <div class="hp-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <span class="add-title">添加月份数据</span>
     </div>
-    <input class="hp-input" id="addUrlInput" type="url" placeholder="粘贴 Zoho 链接..." autocomplete="off" />
-    <button class="hp-icon" onclick="pasteUrl()" aria-label="粘贴" style="cursor:pointer;border:none;background:rgba(139,92,246,.1);color:var(--accent2)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-      </svg>
-    </button>
-    <button class="hp-icon" onclick="previewAddMonth()" aria-label="解析" style="cursor:pointer;border:none;background:var(--accent2);color:#fff">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-    <span class="hp-status" id="addStatus"></span>
-    <div class="hp-preview" id="addPreview">
-      <div class="prev-label">预览月份</div>
-      <div class="prev-val" id="prevPeriod">-</div>
-      <div class="prev-acts">
-        <button class="prev-cancel" onclick="hideAddMonth()">取消</button>
-        <button class="prev-confirm" onclick="confirmAddMonth()">确认添加</button>
+    <div class="add-input-row">
+      <input id="addUrlInput" type="url" placeholder="粘贴 Zoho Sheet 发布链接..." autocomplete="off" />
+      <button class="add-btn paste" onclick="pasteUrl()" aria-label="粘贴">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+      </button>
+      <button class="add-btn go" onclick="previewAddMonth()" aria-label="解析">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="add-status" id="addStatus"></div>
+    <div class="add-preview" id="addPreview">
+      <div class="pv-row"><span>月份</span><span class="pv-val" id="prevPeriod">-</span></div>
+      <div class="pv-acts">
+        <button class="pv-cancel" onclick="hideAddMonth()">取消</button>
+        <button class="pv-confirm" onclick="confirmAddMonth()">确认添加</button>
       </div>
     </div>
   </div>
