@@ -1808,11 +1808,11 @@ function closeAll() {
   var p=document.getElementById('periodPill');
   p.classList.remove('pick-yr','pick-mo');
 }
-function loadMonth(period) {
+function loadMonth(requestedPeriod) {
   closeAll();
   document.getElementById('error').style.display='none';
   var cached=null;
-  try{ cached=JSON.parse(localStorage.getItem('cache_'+period)); }catch(e){}
+  try{ cached=JSON.parse(localStorage.getItem('cache_'+requestedPeriod)); }catch(e){}
   var loadingTimer=null;
   if(cached){
     window._lastHash=cached._data_hash||'';
@@ -1825,15 +1825,16 @@ function loadMonth(period) {
       document.getElementById('syncBar').style.display='none';
     },3000);
   }
-  fetch('/api/data?period='+encodeURIComponent(period))
+  fetch('/api/data?period='+encodeURIComponent(requestedPeriod))
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(d){
       if(d.error) throw new Error(d.error);
+      if(window._curPeriod && d.period !== window._curPeriod) return;
       if(loadingTimer) clearTimeout(loadingTimer);
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
-      try{ localStorage.setItem('cache_'+period, JSON.stringify(d)); }catch(e){}
+      try{ localStorage.setItem('cache_'+requestedPeriod, JSON.stringify(d)); }catch(e){}
     })
     .catch(function(err){
       if(loadingTimer) clearTimeout(loadingTimer);
@@ -1867,10 +1868,12 @@ fetch('/api/data')
 // Background silent refresh: poll cache timestamp, re-render if newer
 setInterval(function(){
   if (!window._curPeriod) return;
-  fetch('/api/data?period='+encodeURIComponent(window._curPeriod))
-    .then(function(r){ return r.json(); })
+  var current=window._curPeriod;
+  fetch('/api/data?period='+encodeURIComponent(current))
+    .then(function(r){ if(!r.ok) return; return r.json(); })
     .then(function(d){
-      if(d._data_hash!==window._lastHash){ window._lastHash=d._data_hash; window._monthsData=d.available||{}; render(d); }
+      if(window._curPeriod!==current) return;
+      if(d._data_hash&&d._data_hash!==window._lastHash){ window._lastHash=d._data_hash; window._monthsData=d.available||{}; render(d); }
     })
     .catch(function(){});
 },10000);
