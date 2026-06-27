@@ -210,6 +210,7 @@
     transition: opacity .2s, transform .3s;
   }
   .brand-logo.hide-logo svg { opacity: 0; transform: scale(.6); animation: none; }
+  .brand-logo.hide-logo::after { opacity: 0; animation: none; }
   @keyframes logo-pulse {
     0%,100% { opacity: .85; }
     50% { opacity: 1; }
