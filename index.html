@@ -353,8 +353,6 @@
 
   .add-modal {
     position: fixed; inset: 0; z-index: 9999;
-    display: flex; align-items: flex-start; justify-content: center;
-    padding-top: 80px;
     visibility: hidden; opacity: 0; pointer-events: none;
     transition: visibility 0s .3s, opacity .3s ease-out;
     -webkit-tap-highlight-color: transparent;
@@ -362,78 +360,73 @@
   .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; transition: visibility 0s 0s, opacity .3s ease-out; }
   .add-modal::before {
     content: ''; position: absolute; inset: 0;
-    background: rgba(0,0,0,.5);
+    background: rgba(0,0,0,.45);
     opacity: 0; transition: opacity .35s ease-out;
   }
   .add-modal.open::before { opacity: 1; }
   .capsule {
-    position: relative; z-index: 1;
+    position: absolute; z-index: 1;
     display: flex; align-items: center; gap: 8px;
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: 40px;
-    padding: 6px 8px 6px 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.25), 0 0 0 1px rgba(255,255,255,.04) inset;
+    padding: 6px 10px 6px 14px;
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.06) inset,
+      0 0 0 1px rgba(255,255,255,.03) inset,
+      0 8px 32px rgba(0,0,0,.3),
+      0 0 60px rgba(139,92,246,.08);
     opacity: 0; transform: scale(0);
-    transform-origin: var(--modal-ox, 50%) var(--modal-oy, 50%);
-    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .2s ease-out, width .3s cubic-bezier(.4,0,.2,1);
+    transform-origin: var(--modal-ox, 50%) var(--modal-oy, 100%);
+    transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .2s ease-out;
     will-change: transform, opacity;
     max-width: 92vw;
+    left: var(--modal-left, 50%); top: var(--modal-top, 50%);
+    transform: translate(-50%, 0) scale(0);
   }
-  .add-modal.open .capsule { transform: scale(1); opacity: 1; }
+  .add-modal.open .capsule { transform: translate(-50%, 0) scale(1); opacity: 1; }
   .capsule-icon {
     width: 32px; height: 32px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; background: rgba(139,92,246,.12); color: var(--accent2);
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(139,92,246,.15), rgba(139,92,246,.05));
+    color: var(--accent2);
+    box-shadow: 0 0 0 1px rgba(139,92,246,.1);
   }
   .capsule-icon svg { width: 16px; height: 16px; }
   .capsule input {
-    flex: 1; min-width: 120px;
+    flex: 1; min-width: 100px;
     border: none; background: transparent; color: var(--t-primary);
-    font-size: 14px; outline: none; padding: 8px 0;
-    font-family: var(--font-mono);
+    font-size: 14px; outline: none; padding: 8px 4px;
   }
-  .capsule input::placeholder { color: var(--t-quaternary); font-family: var(--font-sans); }
-  .capsule input[type="number"] { font-size: 20px; font-weight: 700; letter-spacing: .15em; text-align: center; min-width: 50px; max-width: 60px; }
-  .capsule-btn {
-    width: 32px; height: 32px; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: 50%; border: none; cursor: pointer;
-    background: rgba(255,255,255,.06); color: var(--t-tertiary);
-    transition: background .2s, color .2s, transform .15s;
-  }
-  .capsule-btn:active { transform: scale(.88); }
-  .capsule-btn:hover { background: rgba(255,255,255,.1); color: var(--t-primary); }
-  .capsule-btn svg { width: 16px; height: 16px; }
-  .capsule-btn.btn-go { background: var(--accent2); color: #fff; }
-  .capsule-btn.btn-go:hover { background: var(--accent2-hover); }
-  .capsule-btn.btn-paste { background: rgba(139,92,246,.15); color: var(--accent2); }
+  .capsule input::placeholder { color: var(--t-quaternary); }
+  .capsule input[type="number"] { font-size: 22px; font-weight: 700; letter-spacing: .15em; text-align: center; min-width: 44px; max-width: 56px; font-family: var(--font-mono); }
   .capsule-status {
-    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
-    margin-top: 8px; font-size: 12px; color: var(--t-tertiary);
+    position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    font-size: 12px; font-weight: 600;
     white-space: nowrap; pointer-events: none;
     opacity: 0; transition: opacity .2s;
   }
   .capsule-status.show { opacity: 1; }
   .capsule-preview {
-    position: absolute; top: calc(100% + 36px); left: 50%; transform: translateX(-50%);
+    position: absolute; top: calc(100% + 28px); left: 50%; transform: translateX(-50%);
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 12px 16px; min-width: 280px; max-width: 90vw;
-    box-shadow: 0 8px 24px rgba(0,0,0,.2);
-    font-size: 12px; color: var(--t-secondary);
-    opacity: 0; transform: translateX(-50%) translateY(-4px);
+    padding: 14px 18px; min-width: 260px; max-width: 90vw;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2), 0 0 0 1px rgba(255,255,255,.03) inset;
+    font-size: 13px; color: var(--t-secondary);
+    opacity: 0; transform: translateX(-50%) translateY(-6px);
     transition: opacity .25s, transform .25s;
-    pointer-events: none;
-    display: none;
+    pointer-events: none; display: none;
   }
   .capsule-preview.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-  .capsule-preview .prev-label { color: var(--t-quaternary); font-size: 11px; margin-bottom: 4px; }
-  .capsule-preview .prev-val { font-family: var(--font-mono); font-weight: 600; color: var(--t-primary); }
-  .capsule-preview .prev-acts { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+  .capsule-preview .prev-label { color: var(--t-quaternary); font-size: 11px; margin-bottom: 4px; letter-spacing: .05em; }
+  .capsule-preview .prev-val { font-family: var(--font-mono); font-weight: 600; color: var(--t-primary); font-size: 15px; }
+  .capsule-preview .prev-acts { display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end; }
   .capsule-preview .prev-acts button {
-    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 500;
     cursor: pointer; border: none; transition: background .2s, transform .15s;
   }
   .capsule-preview .prev-acts button:active { transform: scale(.94); }
   .prev-cancel { background: rgba(255,255,255,.06); color: var(--t-tertiary); }
+  .prev-cancel:hover { background: rgba(255,255,255,.1); }
   .prev-confirm { background: var(--accent2); color: #fff; }
   .prev-confirm:hover { background: var(--accent2-hover); }
 
@@ -1787,22 +1780,24 @@ setInterval(function(){
     .catch(function(){});
 },10000);
 
-function showAddMonth(){
-  var modal=document.getElementById('pinModal');
-  var capsule=document.getElementById('pinCapsule');
+function positionCapsule(capsuleId){
+  var capsule=document.getElementById(capsuleId);
   var logo=document.querySelector('.brand-logo');
-  if(logo){
+  if(logo&&capsule){
     var lr=logo.getBoundingClientRect();
-    var ox=((lr.left+lr.right)/2/window.innerWidth*100).toFixed(1)+'%';
-    var oy=(lr.bottom/window.innerHeight*100).toFixed(1)+'%';
-    capsule.style.setProperty('--modal-ox',ox);
-    capsule.style.setProperty('--modal-oy',oy);
+    capsule.style.setProperty('--modal-left',(lr.left+lr.right/2)+'px');
+    capsule.style.setProperty('--modal-top',(lr.bottom+4)+'px');
+    capsule.style.setProperty('--modal-ox','50%');
+    capsule.style.setProperty('--modal-oy','0%');
   }
-  modal.classList.add('open');
+}
+function showAddMonth(){
+  positionCapsule('pinCapsule');
+  document.getElementById('pinModal').classList.add('open');
   var pinInput=document.getElementById('pinInput');
   pinInput.value='';
-  document.getElementById('pinStatus').className='capsule-status';
-  document.getElementById('pinStatus').textContent='';
+  var st=document.getElementById('pinStatus');
+  st.className='capsule-status';st.textContent='';
   requestAnimationFrame(function(){
     requestAnimationFrame(function(){pinInput.focus();});
   });
@@ -1817,7 +1812,7 @@ function autoVerifyPin(){
       var st=document.getElementById('pinStatus');
       st.textContent='✓';st.className='capsule-status show';st.style.color='var(--green)';
       document.getElementById('pinInput').blur();
-      setTimeout(function(){openAddCapsule();},300);
+      setTimeout(function(){openAddCapsule();},350);
     } else {
       var st=document.getElementById('pinStatus');
       st.textContent='×';st.className='capsule-status show';st.style.color='var(--red)';
@@ -1831,17 +1826,8 @@ function autoVerifyPin(){
 function openAddCapsule(){
   hidePinModal();
   setTimeout(function(){
-    var modal=document.getElementById('addModal');
-    var capsule=document.getElementById('addCapsule');
-    var logo=document.querySelector('.brand-logo');
-    if(logo){
-      var lr=logo.getBoundingClientRect();
-      var ox=((lr.left+lr.right)/2/window.innerWidth*100).toFixed(1)+'%';
-      var oy=(lr.bottom/window.innerHeight*100).toFixed(1)+'%';
-      capsule.style.setProperty('--modal-ox',ox);
-      capsule.style.setProperty('--modal-oy',oy);
-    }
-    modal.classList.add('open');
+    positionCapsule('addCapsule');
+    document.getElementById('addModal').classList.add('open');
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){document.getElementById('addUrlInput').focus();});
     });
@@ -1991,9 +1977,6 @@ window.addEventListener('resize',function(){
       </svg>
     </div>
     <input id="pinInput" type="number" inputmode="numeric" maxlength="1" placeholder="*" oninput="autoVerifyPin()" autocomplete="off" />
-    <button class="capsule-btn" onclick="hidePinModal()" aria-label="取消">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
     <span class="capsule-status" id="pinStatus"></span>
   </div>
 </div>
@@ -2015,9 +1998,6 @@ window.addEventListener('resize',function(){
     </button>
     <button class="capsule-btn btn-go" onclick="previewAddMonth()" aria-label="解析">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-    <button class="capsule-btn" onclick="hideAddMonth()" aria-label="取消">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <span class="capsule-status" id="addStatus"></span>
     <div class="capsule-preview" id="addPreview">
