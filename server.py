@@ -23,7 +23,7 @@ PIN = os.environ.get("APP_PIN", "3")
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
-_months_lock = threading.Lock()
+_months_lock = threading.RLock()
 _refresh_interval = 20     # seconds — current month cadence
 _historical_period = 15   # refresh historical every N cycles (15*20s=5min)
 _available_cache = None
