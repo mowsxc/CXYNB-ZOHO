@@ -96,7 +96,9 @@
     --cash-glow: rgba(139,92,246,.2);
   }
 
-  [data-theme="light"] .brand-info h1 { color: #7c3aed; }
+  [data-theme="light"] .brand-info h1 { color: var(--amber); }
+  [data-theme="light"] .brand-logo svg { stroke: var(--amber); }
+  [data-theme="light"] .brand-logo::after { background: radial-gradient(circle, var(--amber-glow), transparent 70%); }
 
   * { margin:0; padding:0; box-sizing:border-box; }
 
@@ -1115,8 +1117,13 @@
    .table-scroll.is-scrolled::after { opacity: 0; }
   .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
   .table-scroll::-webkit-scrollbar-track { background: transparent; }
-  .table-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.08); border-radius: 3px; }
-  .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.14); }
+  .table-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+  .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.25); }
+
+  body::-webkit-scrollbar { width: 8px; }
+  body::-webkit-scrollbar-track { background: var(--bg-deep); }
+  body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 4px; }
+  body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.2); }
 
   .table-scroll table {
     width: 100%;
