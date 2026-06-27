@@ -1528,7 +1528,7 @@ function render(data) {
 
   document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
   var contentEl=document.getElementById('content');
-  var newHash=d._data_hash||'';
+  var newHash=data._data_hash||'';
   if(contentEl.innerHTML&&window._lastRenderHash===newHash){
     window.scrollTo(sx, sy); return;
   }
