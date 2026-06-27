@@ -285,7 +285,7 @@
     color: var(--t-primary);
     overflow: hidden;
     vertical-align: middle;
-    transition: max-width .3s ease, padding .3s ease, opacity .2s ease, color .15s, transform .15s;
+    transition: max-width .35s cubic-bezier(.34,1.56,.64,1), padding .3s ease, opacity .25s ease, color .15s, transform .2s cubic-bezier(.34,1.56,.64,1);
   }
   .per-opt:hover { color: var(--t-primary); }
   .per-opt:active { transform: scale(.9); }
@@ -1233,7 +1233,8 @@
     box-shadow: 0 0 14px rgba(139,92,246,.25), 0 0 4px rgba(139,92,246,.4) inset;
   }
   @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-  #content { animation: fadeInUp .4s ease-out; }
+  #content { animation: fadeInUp .4s ease-out; transition: opacity .15s ease-out; }
+  #content.fading-out { opacity: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .error-state {
@@ -1541,18 +1542,27 @@ function render(data) {
     window.scrollTo(sx, sy); return;
   }
   window._lastRenderHash=newHash;
-  contentEl.innerHTML=h;
-  var skel=document.getElementById('chartSkel');
-  var svgDiv=document.getElementById('chartSvg');
-  if (skel&&svgDiv) {
-    if(window._lastChartHash!==newHash){
-      svgDiv.innerHTML=buildChartSvg();
-      window._lastChartHash=newHash;
+  var doSwap=function(){
+    contentEl.innerHTML=h;
+    var skel=document.getElementById('chartSkel');
+    var svgDiv=document.getElementById('chartSvg');
+    if (skel&&svgDiv) {
+      if(window._lastChartHash!==newHash){
+        svgDiv.innerHTML=buildChartSvg();
+        window._lastChartHash=newHash;
+      }
+      skel.style.display='none';
+      svgDiv.style.display='block';
     }
-    skel.style.display='none';
-    svgDiv.style.display='block';
+    requestAnimationFrame(function(){ contentEl.classList.remove('fading-out'); });
+    window.scrollTo(sx, sy);
+  };
+  if(contentEl.innerHTML){
+    contentEl.classList.add('fading-out');
+    setTimeout(doSwap,150);
+  } else {
+    doSwap();
   }
-  window.scrollTo(sx, sy);
 }
 
 function buildChartSvg(rangeN) {
