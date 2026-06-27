@@ -1308,6 +1308,16 @@
   <div id="content" style="display:none"></div>
 </div>
 
+<div class="sync-bar" id="syncBar" style="display:none">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+  </svg>
+  <span id="syncLabel">数据同步</span>
+  <span class="version-link">@MOWSXC/CXYNB-ZOHO</span>
+</div>
+
 <div class="chart-fullscreen" id="chartFS" onclick="if(event.target===this)toggleFullscreen()">
   <button class="fs-close" onclick="toggleFullscreen()">&times;</button>
   <div class="chart-fs-inner" id="chartFsInner"></div>
@@ -2106,16 +2116,6 @@ document.addEventListener('DOMContentLoaded',function(){
     </button>
     <span class="hp-status" id="addStatus"></span>
   </div>
-</div>
-
-<div class="sync-bar" id="syncBar" style="display:none">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="23 4 23 10 17 10"></polyline>
-    <polyline points="1 20 1 14 7 14"></polyline>
-    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-  </svg>
-  <span id="syncLabel">数据同步</span>
-  <span class="version-link">@MOWSXC/CXYNB-ZOHO</span>
 </div>
 
 </body>
