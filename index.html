@@ -671,7 +671,7 @@
     overflow: hidden;
   }
   .card-back .fb-island {
-    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
     background: rgba(255,255,255,.08);
     border: 1px solid rgba(255,255,255,.1);
     border-radius: 20px;
@@ -682,6 +682,13 @@
     z-index: 2;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+  }
+  .card-back .fb-prev .fb-month {
+    font-family: var(--font-mono); font-weight: 600;
+    color: var(--t-secondary); font-size: 10px;
+    background: rgba(255,255,255,.06);
+    padding: 1px 6px; border-radius: 8px;
+    letter-spacing: .02em;
   }
   .card-back .fb-cur {
     font-size: 22px; font-family: var(--font-mono); font-weight: 800;
@@ -1453,7 +1460,7 @@ function render(data) {
     var pLabel=prevPeriod||'-';
     var blinkCls=cd.blink?' cash-blink':'';
     var back=prevSum
-      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev"><span class="fb-month">'+(prevPeriod.split('-')[1]||'')+'月</span><span>'+fmY(prevVal)+'</span></div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev"><span class="fb-month">'+prevPeriod.replace('-','')+'</span><span>'+fmY(prevVal)+'</span></div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
       :'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
     h+='<div class="item-card '+cd.cls+'"><div class="card-inner" onclick="event.stopPropagation();flipCard(this)">'
       +'<div class="card-face card-front"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+cd.icon+'</svg></div><div class="item-title">'+cd.key+'</div><div class="item-value'+blinkCls+'">'+fmY(cd.cur)+'</div></div>'
