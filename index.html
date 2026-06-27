@@ -1806,11 +1806,19 @@ function closeAll() {
 function loadMonth(period) {
   closeAll();
   document.getElementById('error').style.display='none';
+  var cached=null;
+  try{ cached=JSON.parse(localStorage.getItem('cache_'+period)); }catch(e){}
+  if(cached){
+    clearTimeout(loadingTimer);
+    window._lastHash=cached._data_hash||'';
+    window._monthsData=cached.available||{};
+    render(cached);
+  }
   var loadingTimer = setTimeout(function(){
     document.getElementById('loading').style.display='block';
     document.getElementById('content').style.display='none';
     document.getElementById('syncBar').style.display='none';
-  }, 200);
+  }, cached?500:200);
   fetch('/api/data?period='+encodeURIComponent(period))
     .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
     .then(function(d){
@@ -1819,12 +1827,15 @@ function loadMonth(period) {
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
+      try{ localStorage.setItem('cache_'+period, JSON.stringify(d)); }catch(e){}
     })
     .catch(function(err){
       clearTimeout(loadingTimer);
-      document.getElementById('loading').style.display='none';
-      document.getElementById('error').style.display='block';
-      document.getElementById('error').textContent=err.message;
+      if(!cached){
+        document.getElementById('loading').style.display='none';
+        document.getElementById('error').style.display='block';
+        document.getElementById('error').textContent=err.message;
+      }
     });
 }
 document.addEventListener('click',function(e){
