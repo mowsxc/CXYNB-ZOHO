@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="创新意电竞馆财务报表 - 实时数据看板">
+<meta name="theme-color" content="#070b16">
 <title>创新意 · 电竞馆 - 财务报表</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -328,6 +332,20 @@
     color: var(--green);
     animation: syncIconSpin 3s linear infinite;
   }
+  .version-link {
+    margin-left: 8px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--t-tertiary);
+    text-decoration: none;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.06);
+    transition: color .2s, background .2s, border-color .2s;
+  }
+  .version-link:hover { color: var(--accent2); background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.2); }
+  }
   @keyframes syncIconSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
@@ -335,29 +353,56 @@
 
   .add-modal {
     display: none; position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0,0,0,.7); align-items: center; justify-content: center;
+    background: rgba(0,0,0,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    animation: fadeIn .2s ease-out;
   }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .add-modal.open { display: flex; }
   .add-card {
     background: var(--surface-dark); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    padding: 32px; width: 90%; max-width: 480px; box-shadow: 0 16px 64px rgba(0,0,0,.18);
+    padding: 32px; width: 90%; max-width: 440px;
+    box-shadow: 0 16px 64px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.04) inset;
+    animation: modalIn .3s cubic-bezier(.4,0,.2,1);
   }
-  .add-card h3 { margin: 0 0 16px; font-size: 16px; color: var(--t-primary); }
+  @keyframes modalIn { from { opacity: 0; transform: scale(.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .add-card h3 { margin: 0 0 16px; font-size: 16px; font-weight: 600; color: var(--t-primary); }
+  .add-card-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  }
+  .add-card-header h3 { margin: 0; }
+  .add-icon { width: 20px; height: 20px; color: var(--accent2); flex-shrink: 0; }
   .add-card input {
     width: 100%; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border);
     background: var(--surface); color: var(--t-primary); font-size: 14px; outline: none; box-sizing: border-box;
-    transition: border-color .25s;
+    transition: border-color .25s, box-shadow .25s;
   }
-  .add-card input:focus { border-color: var(--accent2); }
-  .add-status { display: block; margin-top: 8px; font-size: 13px; color: #888; min-height: 20px; }
-  .add-acts { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  .add-card input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
+  .add-card input::placeholder { color: var(--t-quaternary); }
+  .add-status { display: block; margin-top: 8px; font-size: 13px; color: var(--t-tertiary); min-height: 20px; }
+  .add-acts { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
   .add-acts button {
-    padding: 10px 22px; border-radius: var(--radius); font-size: 14px; cursor: pointer; border: none; transition: background .2s, color .2s, opacity .2s;
+    padding: 10px 22px; border-radius: var(--radius); font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none; transition: background .2s, color .2s, transform .15s;
+    display: flex; align-items: center; gap: 6px;
   }
+  .add-acts button:active { transform: scale(.96); }
   .btn-cancel { background: transparent; color: var(--muted); border: 1px solid var(--border)!important; }
-  .btn-cancel:hover { color: var(--t-primary); border-color: var(--t-tertiary)!important; }
+  .btn-cancel:hover { color: var(--t-primary); border-color: var(--t-tertiary)!important; background: rgba(255,255,255,.03); }
   .btn-submit { background: var(--accent2); color: #fff; }
   .btn-submit:hover { background: var(--accent2-hover); }
+  .pin-card { text-align: center; max-width: 360px; }
+  .pin-icon { margin: 0 auto 16px; width: 48px; height: 48px; color: var(--accent2); }
+  .pin-icon svg { width: 100%; height: 100%; }
+  .pin-input-group { display: flex; justify-content: center; }
+  .pin-input-group input {
+    width: 80px; text-align: center; font-size: 28px; font-family: var(--font-mono);
+    font-weight: 700; letter-spacing: .2em; padding: 12px; border-radius: var(--radius);
+    background: var(--surface); border: 2px solid var(--border); color: var(--t-primary);
+    outline: none; transition: border-color .25s, box-shadow .25s;
+    -webkit-text-security: disc;
+  }
+  .pin-input-group input:focus { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(139,92,246,.15); }
 
   .theme-toggle {
     position: fixed; top: 16px; right: 20px; z-index: 100;
@@ -700,12 +745,11 @@
   .fs-btn:hover { color: var(--t-primary); border-color: var(--border-hover); background: rgba(255,255,255,.03); }
   .fs-btn:active { background: rgba(255,255,255,.05); color: var(--amber); transform: scale(.9); }
   .trend-chart-wrap { overflow-x: auto; text-align: center; }
-  .trend-chart { }
   .trend-legend {
     display: flex; justify-content: center; gap: 16px;
     margin-top: 10px; font-size: 10px; color: var(--t-tertiary); flex-wrap: wrap;
   }
-  .trend-legend .leg-item { display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: background .2s, opacity .2s; }
+  .trend-legend .leg-item { display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: background .2s, opacity .2s; }
   .trend-legend .leg-item:hover { background: rgba(255,255,255,.05); }
   .trend-legend .leg-item:active { background: rgba(255,255,255,.08); }
   .trend-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
@@ -720,7 +764,7 @@
     position: relative;
     background: rgba(255,255,255,.02);
     border-radius: 8px;
-    height: 220px; margin: 8px 0;
+    height: 200px; margin: 8px 0;
     overflow: hidden;
   }
   .chart-skeleton::before {
@@ -860,7 +904,7 @@
     padding: 15px 24px;
     font-size: 14px;
     color: var(--t-secondary);
-    border-bottom: 1px solid rgba(255,255,255,.03);
+    border-bottom: 1px solid var(--border);
     transition: background .15s;
   }
   .panel-row:last-child { border-bottom: none; }
@@ -1082,7 +1126,7 @@
   .loading-ring {
     width: 24px; height: 24px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.08);
+    border: 2px solid var(--border);
     border-top-color: var(--purple);
     animation: spin .65s linear infinite;
     box-shadow: 0 0 14px rgba(139,92,246,.25), 0 0 4px rgba(139,92,246,.4) inset;
@@ -1158,7 +1202,7 @@
 
 <div class="app" id="app">
 
-  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="切换主题">
+  <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="切换主题" aria-label="切换深色/浅色主题">
     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
     </svg>
@@ -1225,6 +1269,7 @@
 </div>
 
 <script>
+window._appVersion='b35052f';
 function fm(v) {
   var s=String(v).replace(/[^\d.]/g,'');
   var n=parseFloat(s);
@@ -1331,7 +1376,7 @@ function render(data) {
       +'<div class="trend-ranges" id="trendRanges">'
       +btnQtr+btnHalf+btnYear
       +'</div>'
-      +'<button class="fs-btn" onclick="toggleFullscreen()" title="全屏查看">'
+      +'<button class="fs-btn" onclick="toggleFullscreen()" title="全屏查看" aria-label="全屏查看图表">'
       +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>'
       +'</button>'
       +'</div>'
@@ -1345,7 +1390,7 @@ function render(data) {
   for (var i=0;i<daily.length;i++) { if (hasData(daily[i])) filtered.push(daily[i]); }
 
   if (filtered.length>0) {
-    h+='<div class="table-scroll"><table><thead><tr>';
+    h+='<div class="table-scroll"><table><caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">每日明细</caption><thead><tr>';
     var cols=['日期','班次','美团','网费','售货','支出','退款','支出明细','退款明细'];
     for (var ci=0;ci<cols.length;ci++) {
       var ac=(ci>=2&&ci<=6)?' align-right':'';
@@ -1380,6 +1425,7 @@ function render(data) {
 
 
   document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
+  document.getElementById('versionLink').textContent='v'+(window._appVersion||'dev');
   var contentEl=document.getElementById('content');
   contentEl.style.opacity='0';
   contentEl.innerHTML=h;
@@ -1598,12 +1644,12 @@ function buildPeriodOpts() {
   var yh='';
   for (var bi=0;bi<yBefore.length;bi++) {
     var by=yBefore[bi];
-    yh+='<span class="per-opt yr hide" onclick="event.stopPropagation();pickYear(\''+by+'\')">'+by+'</span>';
+    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+by+'\')">'+by+'</span>';
   }
-  yh+='<span class="per-opt yr sel"'+(yHasMany?' onclick="event.stopPropagation();toggleYr()"':'')+'>'+curY+'</span>';
+  yh+='<span class="per-opt yr sel" role="button" tabindex="0"'+(yHasMany?' onclick="event.stopPropagation();toggleYr()"':'')+'>'+curY+'</span>';
   for (var ai=0;ai<yAfter.length;ai++) {
     var ay=yAfter[ai];
-    yh+='<span class="per-opt yr hide" onclick="event.stopPropagation();pickYear(\''+ay+'\')">'+ay+'</span>';
+    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+ay+'\')">'+ay+'</span>';
   }
 
   var months=data[curY].slice().sort();
@@ -1618,12 +1664,12 @@ function buildPeriodOpts() {
   var mh='';
   for (var bj=0;bj<mBefore.length;bj++) {
     var bm=mBefore[bj];
-    mh+='<span class="per-opt mo hide" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+bm+'\')">'+bm+'</span>';
+    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+bm+'\')">'+bm+'</span>';
   }
-  mh+='<span class="per-opt mo sel"'+(mHasMany?' onclick="event.stopPropagation();toggleMo()"':'')+'>'+curM+'</span>';
+  mh+='<span class="per-opt mo sel" role="button" tabindex="0"'+(mHasMany?' onclick="event.stopPropagation();toggleMo()"':'')+'>'+curM+'</span>';
   for (var aj=0;aj<mAfter.length;aj++) {
     var am=mAfter[aj];
-    mh+='<span class="per-opt mo hide" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+am+'\')">'+am+'</span>';
+    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+am+'\')">'+am+'</span>';
   }
 
   document.getElementById('yrOpts').innerHTML=yh;
@@ -1709,42 +1755,38 @@ setInterval(function(){
 },10000);
 
 function showAddMonth(){
-  document.getElementById('addModal').classList.add('open');
-  document.getElementById('addUrlInput').value='';
-  document.getElementById('addUrlInput').focus();
-  document.getElementById('addStatus').textContent='';
+  document.getElementById('pinModal').classList.add('open');
+  var pinInput=document.getElementById('pinInput');
+  pinInput.value='';
+  document.getElementById('pinStatus').textContent='';
+  setTimeout(function(){pinInput.focus();},100);
+}
+function hidePinModal(){
+  document.getElementById('pinModal').classList.remove('open');
+}
+function verifyPin(){
+  var pin=document.getElementById('pinInput').value;
+  var st=document.getElementById('pinStatus');
+  if(pin==='3'){
+    hidePinModal();
+    document.getElementById('addModal').classList.add('open');
+    setTimeout(function(){document.getElementById('addUrlInput').focus();},100);
+  } else {
+    st.textContent='密码错误';
+    st.style.color='var(--red)';
+    document.getElementById('pinInput').value='';
+    document.getElementById('pinInput').focus();
+  }
 }
 function hideAddMonth(){
   document.getElementById('addModal').classList.remove('open');
 }
-function submitAddMonth(){
-  var inp=document.getElementById('addUrlInput').value.trim();
-  var st=document.getElementById('addStatus');
-  if(!inp){st.textContent='请输入链接';st.style.color='#ff6b6b';return;}
-  st.textContent='解析中...';st.style.color='#888';
-  fetch('/api/add-month?url='+encodeURIComponent(inp))
-  .then(function(r){return r.json();})
-  .then(function(d){
-    if(d.error){st.textContent=d.error;st.style.color='#ff6b6b';return;}
-    st.textContent='已添加 '+d.period;st.style.color='#00ddaa';
-    window._monthsData=d;
-    rebuildPeriodOpts();
-  })
-  .catch(function(e){st.textContent=e.message;st.style.color='#ff6b6b';});
-}
-
-function rebuildPeriodOpts(){
-  fetch('/api/months')
-  .then(function(r){return r.json();})
-  .then(function(d){
-    window._monthsData=d.available||{};
-    buildPeriodOpts();
-  })
-  .catch(function(){});
-}
 
 document.getElementById('addModal').addEventListener('click',function(e){
   if(e.target===this) hideAddMonth();
+});
+document.getElementById('pinModal').addEventListener('click',function(e){
+  if(e.target===this) hidePinModal();
 });
 
 // Preview keepalive heartbeat + cache ts sync
@@ -1836,14 +1878,43 @@ window.addEventListener('resize',function(){
 })();
 </script>
 
-<div class="add-modal" id="addModal">
+<div class="add-modal" id="pinModal" role="dialog" aria-modal="true">
+  <div class="add-card pin-card">
+    <div class="pin-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h3>输入访问密码</h3>
+    <div class="pin-input-group">
+      <input id="pinInput" type="password" inputmode="numeric" maxlength="1" placeholder="*" onkeydown="if(event.key==='Enter')verifyPin()" autocomplete="off" />
+    </div>
+    <span class="add-status" id="pinStatus"></span>
+    <div class="add-acts">
+      <button class="btn-cancel" onclick="hidePinModal()">取消</button>
+      <button class="btn-submit" onclick="verifyPin()">验证</button>
+    </div>
+  </div>
+</div>
+
+<div class="add-modal" id="addModal" role="dialog" aria-modal="true">
   <div class="add-card">
-    <h3>添加月份数据</h3>
-    <input id="addUrlInput" type="url" placeholder="粘贴 Zoho 发布链接..." onkeydown="if(event.key==='Enter')submitAddMonth()" />
+    <div class="add-card-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="add-icon">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+      <h3>添加月份数据</h3>
+    </div>
+    <input id="addUrlInput" type="url" placeholder="粘贴 Zoho Sheet 发布链接..." onkeydown="if(event.key==='Enter')submitAddMonth()" />
     <span class="add-status" id="addStatus"></span>
     <div class="add-acts">
       <button class="btn-cancel" onclick="hideAddMonth()">取消</button>
-      <button class="btn-submit" onclick="submitAddMonth()">解析并添加</button>
+      <button class="btn-submit" onclick="submitAddMonth()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px">
+          <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+        </svg>
+        解析并添加
+      </button>
     </div>
   </div>
 </div>
@@ -1855,6 +1926,7 @@ window.addEventListener('resize',function(){
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
   </svg>
   <span id="syncLabel">数据同步</span>
+  <a href="https://github.com/mowsxc/CXYNB-ZOHO" target="_blank" rel="noopener" class="version-link" id="versionLink">v--</a>
 </div>
 
 </body>
