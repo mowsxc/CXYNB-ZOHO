@@ -4,6 +4,7 @@
 import http.server
 import json
 import os
+import subprocess
 import threading
 import time
 import urllib.error
@@ -155,6 +156,16 @@ def _build_trends():
     return trends
 
 
+_git_hash = ""
+try:
+    _git_hash = subprocess.check_output(
+        ["git", "rev-parse", "--short", "HEAD"],
+        cwd=WORKSPACE, stderr=subprocess.DEVNULL
+    ).decode().strip()
+except Exception:
+    pass
+
+
 def serve_static(path, handler):
     if path in ("/", ""):
         path = "/index.html"
@@ -162,6 +173,11 @@ def serve_static(path, handler):
     if os.path.isfile(filepath):
         with open(filepath, "rb") as f:
             content = f.read()
+        if path == "/index.html" and _git_hash:
+            content = content.replace(
+                b"window._appVersion='dev'",
+                f"window._appVersion='{_git_hash}'".encode()
+            )
         handler.send_response(200)
         ext = os.path.splitext(filepath)[1]
         ct = {
