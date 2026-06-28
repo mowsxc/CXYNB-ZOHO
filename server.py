@@ -398,6 +398,6 @@ if __name__ == "__main__":
     init_valid_months()
     t = threading.Thread(target=_background_refresh, daemon=True)
     t.start()
-    server = http.server.HTTPServer(("0.0.0.0", PORT), Handler)
+    server = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Server running on http://0.0.0.0:{PORT}")
     server.serve_forever()
