@@ -213,6 +213,8 @@ def serve_static(path, handler):
             ".html": "text/html; charset=utf-8",
             ".js": "application/javascript; charset=utf-8",
             ".css": "text/css; charset=utf-8",
+            ".json": "application/json",
+            ".png": "image/png",
             ".svg": "image/svg+xml",
         }.get(ext, "application/octet-stream")
         handler.send_header("Content-Type", ct)
