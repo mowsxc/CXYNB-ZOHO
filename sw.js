@@ -1,4 +1,4 @@
-const CACHE = "cxy-finance-v4"
+const CACHE = "cxy-finance-v5"
 const SHELL = ["manifest.json", "favicon.svg", "icon-192.png", "icon-512.png"]
 
 self.addEventListener("install", (e) => {
