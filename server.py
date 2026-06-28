@@ -154,8 +154,8 @@ def _background_refresh():
                     old = _data_cache.get(period)
                     if not old or _data_hash(old["data"]) != h:
                         _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"  refresh fail {period}: {e}")
 
 
 def _data_hash(data):
@@ -187,7 +187,7 @@ try:
         cwd=WORKSPACE, stderr=subprocess.DEVNULL
     ).decode().strip()
 except Exception:
-    pass
+    pass  # git not available, skip version hash
 
 
 def serve_static(path, handler):

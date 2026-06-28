@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="创新意电竞馆财务报表 - 实时数据看板">
-<meta name="theme-color" content="#faf5f0">
+<meta name="theme-color" content="#070b16">
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1266,6 +1266,16 @@
     font-size: 14px;
     font-weight: 500;
   }
+  .error-state .retry-btn {
+    display: block; margin: 16px auto 0;
+    padding: 10px 28px;
+    background: var(--accent2); color: #fff;
+    border: none; border-radius: 20px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background .2s, transform .15s;
+  }
+  .error-state .retry-btn:hover { background: var(--accent2-hover); }
+  .error-state .retry-btn:active { transform: scale(.94); }
 
   /* ---- RESPONSIVE ---- */
   @media (max-width: 860px) {
@@ -1390,7 +1400,7 @@
   </div>
 
    <div class="loading-state" id="loading" style="display:none"><span class="loading-ring"></span>正在加载数据...</div>
-  <div class="error-state" id="error" style="display:none"></div>
+  <div class="error-state" id="error" style="display:none"><span id="errorMsg"></span><button class="retry-btn" onclick="loadMonth(window._curPeriod||'')" style="display:none" id="retryBtn">重试</button></div>
 
   <div id="content" style="display:none"></div>
 </div>
@@ -1891,6 +1901,24 @@ function closeAll() {
   var p=document.getElementById('periodPill');
   p.classList.remove('pick-yr','pick-mo');
 }
+function trimCache() {
+  var keys=[], total=0;
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(k&&k.startsWith('cache_')){
+      var v=localStorage.getItem(k)||'';
+      keys.push({key:k,len:v.length});
+      total+=v.length;
+    }
+  }
+  if(total<5242880) return;
+  keys.sort(function(a,b){ return b.len-a.len; });
+  while(total>4194304&&keys.length>1){
+    var rm=keys.pop();
+    localStorage.removeItem(rm.key);
+    total-=rm.len;
+  }
+}
 function loadMonth(requestedPeriod) {
   closeAll();
   document.getElementById('error').style.display='none';
@@ -1921,15 +1949,15 @@ function loadMonth(requestedPeriod) {
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       render(d);
-      try{ localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
+      try{ trimCache(); localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
     })
     .catch(function(err){
       if(loadingTimer) clearTimeout(loadingTimer);
       if(!cached){
         document.getElementById('loading').style.display='none';
         document.getElementById('error').style.display='block';
-        document.getElementById('error').textContent=err.message;
-      }
+        document.getElementById('errorMsg').textContent=err.message;
+        document.getElementById('retryBtn').style.display='block';
     });
 }
 document.addEventListener('click',function(e){
@@ -1960,13 +1988,14 @@ fetchWithRetry('api/data',3,1000)
     render(d);
     try{
       var p=d.period||'';
-      if(p) localStorage.setItem('cache_'+p, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash}));
+      if(p){ trimCache(); localStorage.setItem('cache_'+p, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }
     }catch(e){}
   })
   .catch(function(err){
     document.getElementById('loading').style.display='none';
     document.getElementById('error').style.display='block';
-    document.getElementById('error').textContent=err.message+'，请刷新页面重试';
+    document.getElementById('errorMsg').textContent=err.message+'，请重试';
+    document.getElementById('retryBtn').style.display='block';
   });
 
 // Eagerly render from localStorage cache before network resolves
@@ -2006,9 +2035,10 @@ function toggleTheme(){
 (function(){
   var saved=localStorage.getItem('theme');
   if(!saved){
-    saved='light';
+    saved=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
   }
-  if(saved==='light'){ document.documentElement.setAttribute('data-theme','light'); document.getElementById('themeBtn').classList.add('sunny'); }
+  if(saved==='dark'){ document.documentElement.removeAttribute('data-theme'); }
+  else { document.documentElement.setAttribute('data-theme','light'); document.getElementById('themeBtn').classList.add('sunny'); }
 })();
 var _resizeTimer=null;
 window.addEventListener('resize',function(){

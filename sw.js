@@ -1,8 +1,13 @@
-const CACHE = "cxy-finance-v1"
+const CACHE = "cxy-finance-v2"
 const SHELL = ["./", "index.html", "manifest.json", "favicon.svg", "icon-192.png", "icon-512.png"]
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}))
+  e.waitUntil(
+    caches.open(CACHE).then((c) => c.addAll(SHELL)).catch((err) => {
+      console.warn("SW install cache failed:", err)
+      return caches.delete(CACHE)
+    })
+  )
   self.skipWaiting()
 })
 

@@ -5,8 +5,8 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "theme_color": "#faf5f0",
-  "background_color": "#faf5f0",
+  "theme_color": "#070b16",
+  "background_color": "#070b16",
   "description": "创新意电竞馆财务报表 - 实时数据看板",
   "lang": "zh-CN",
   "icons": [
