@@ -1,19 +1,9 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="100%" stop-color="#020617"/>
-    </linearGradient>
-    <linearGradient id="purp" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#a78bfa"/>
-      <stop offset="100%" stop-color="#7c3aed"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <polygon points="256,56 429,156 429,356 256,456 83,356 83,156" fill="url(#purp)" stroke="#6d28d9" stroke-width="10" stroke-linejoin="round"/>
-  <path d="M170,220 Q170,150 256,150 Q342,150 342,220" stroke="white" stroke-width="22" stroke-linecap="round" fill="none"/>
-  <path d="M152,250 L152,310 Q152,354 200,354 L230,354 L230,300 L196,300 L196,250" stroke="white" stroke-width="20" stroke-linejoin="round" fill="none"/>
-  <path d="M360,250 L360,310 Q360,354 312,354 L282,354 L282,300 L316,300 L316,250" stroke="white" stroke-width="20" stroke-linejoin="round" fill="none"/>
-  <circle cx="256" cy="200" r="14" fill="white"/>
-  <text x="256" y="415" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="900" fill="#020617" text-anchor="middle" letter-spacing="12">CXY</text>
+  <rect width="512" height="512" rx="96" fill="white"/>
+  <polygon points="256,56 429,156 429,356 256,456 83,356 83,156" fill="#ede9fe" stroke="#7c3aed" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M170,220 Q170,150 256,150 Q342,150 342,220" stroke="#7c3aed" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M152,250 L152,310 Q152,354 200,354 L230,354 L230,300 L196,300 L196,250" stroke="#7c3aed" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <path d="M360,250 L360,310 Q360,354 312,354 L282,354 L282,300 L316,300 L316,250" stroke="#7c3aed" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="200" r="14" fill="#7c3aed"/>
+  <text x="256" y="415" font-family="Arial,Helvetica,sans-serif" font-size="95" font-weight="900" fill="#2563eb" text-anchor="middle" letter-spacing="12">CXY</text>
 </svg>
