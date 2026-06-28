@@ -1,8 +1,8 @@
 <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" rx="12" fill="#0f172a"/>
-  <polygon points="32,10 48,20 48,44 32,54 16,44 16,20" fill="#1e293b" stroke="#f97316" stroke-width="2.5" stroke-linejoin="round"/>
-  <path d="M22,30 Q22,22 32,22 Q42,22 42,30" stroke="#f97316" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-  <path d="M19,33 L19,38 Q19,46 26,46 L30,46 L30,38 L25,38 L25,33" stroke="#f97316" stroke-width="4" stroke-linejoin="round" fill="none"/>
-  <path d="M45,33 L45,38 Q45,46 38,46 L34,46 L34,38 L39,38 L39,33" stroke="#f97316" stroke-width="4" stroke-linejoin="round" fill="none"/>
-  <circle cx="32" cy="27" r="2.5" fill="#f97316"/>
+  <polygon points="32,12 47,21 47,43 32,52 17,43 17,21" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M24,29 Q24,23 32,23 Q40,23 40,29" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <path d="M21,32 L21,37 Q21,43 27,43 L30,43 L30,37 L25,37 L25,32" stroke="white" stroke-width="3.2" stroke-linejoin="round" fill="none"/>
+  <path d="M43,32 L43,37 Q43,43 37,43 L34,43 L34,37 L39,37 L39,32" stroke="white" stroke-width="3.2" stroke-linejoin="round" fill="none"/>
+  <circle cx="32" cy="27" r="2.5" fill="white"/>
 </svg>
