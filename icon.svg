@@ -6,12 +6,10 @@
     </linearGradient>
   </defs>
   <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <polygon points="256,120 368,192 368,320 256,392 144,320 144,192" fill="#1e293b" stroke="#f97316" stroke-width="5" stroke-linejoin="round"/>
-  <path d="M192,224 Q192,176 256,176 Q320,176 320,224" stroke="#f97316" stroke-width="22" stroke-linecap="round" fill="none"/>
-  <path d="M180,244 L180,300 Q180,336 216,336 L236,336 L236,296 L212,296 L212,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
-  <path d="M332,244 L332,300 Q332,336 296,336 L276,336 L276,296 L300,296 L300,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
-  <circle cx="256" cy="205" r="12" fill="#f97316"/>
-  <path d="M256,60 L256,110" stroke="#f97316" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
-  <path d="M340,146 L256,195" stroke="#f97316" stroke-width="6" stroke-linecap="round" opacity="0.25"/>
-  <path d="M172,146 L256,195" stroke="#f97316" stroke-width="6" stroke-linecap="round" opacity="0.25"/>
+  <polygon points="256,100 376,176 376,316 256,392 136,316 136,176" fill="#1e293b" stroke="#f97316" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M186,224 Q186,166 256,166 Q326,166 326,224" stroke="#f97316" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M174,244 L174,308 Q174,344 214,344 L236,344 L236,300 L210,300 L210,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <path d="M338,244 L338,308 Q338,344 298,344 L276,344 L276,300 L302,300 L302,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="200" r="12" fill="#f97316"/>
+  <text x="256" y="450" font-family="Arial,Helvetica,sans-serif" font-size="56" font-weight="900" fill="#f97316" text-anchor="middle" letter-spacing="8">CXY</text>
 </svg>
