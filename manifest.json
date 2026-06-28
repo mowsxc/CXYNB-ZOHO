@@ -1,0 +1,23 @@
+{
+  "name": "创新意电竞馆 - 财务报表",
+  "short_name": "创新意电竞馆",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#070b16",
+  "background_color": "#070b16",
+  "description": "创新意电竞馆财务报表 - 实时数据看板",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "finance"],
+  "display_override": ["standalone", "minimal-ui"]
+}
