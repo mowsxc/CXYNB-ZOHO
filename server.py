@@ -238,6 +238,24 @@ def json_response(handler, data, status=200):
 
 
 class Handler(http.server.BaseHTTPRequestHandler):
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        path = parsed.path
+        if path == "/api/verify-pin":
+            length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(length) if length else b"{}"
+            try:
+                data = json.loads(body)
+                pin = str(data.get("pin", ""))
+            except Exception:
+                pin = ""
+            if pin == PIN:
+                json_response(self, {"ok": True})
+            else:
+                json_response(self, {"error": "PIN error"}, 403)
+            return
+        serve_static(self.path, self)
+
     def do_GET(self):
         parsed = urlparse(self.path)
         path = parsed.path
@@ -368,14 +386,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _cache_lock:
                 ts_map = {p: c["ts"] for p, c in _data_cache.items()}
             json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map})
-            return
-
-        if path == "/api/verify-pin":
-            pin = qs.get("pin", [None])[0]
-            if pin == PIN:
-                json_response(self, {"ok": True})
-            else:
-                json_response(self, {"error": "PIN 错误"}, 403)
             return
 
         serve_static(self.path, self)
