@@ -1,5 +1,5 @@
 const CACHE = "cxy-finance-v1"
-const SHELL = ["/", "/index.html", "/manifest.json", "/favicon.svg", "/icon-192.png", "/icon-512.png"]
+const SHELL = ["./", "index.html", "manifest.json", "favicon.svg", "icon-192.png", "icon-512.png"]
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}))
@@ -14,7 +14,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url)
   if (e.request.method !== "GET") return
-  if (u.pathname.startsWith("/api/")) {
+  if (u.pathname.endsWith("/api/data") || u.pathname.endsWith("/api/months") || u.pathname.endsWith("/api/add-month") || u.pathname.endsWith("/api/trends") || u.pathname.endsWith("/api/ping") || u.pathname.endsWith("/api/verify-pin")) {
     e.respondWith(networkFirst(e.request))
   } else {
     e.respondWith(cacheFirst(e.request))
