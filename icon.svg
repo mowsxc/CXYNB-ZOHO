@@ -4,18 +4,14 @@
       <stop offset="0%" stop-color="#0f172a"/>
       <stop offset="100%" stop-color="#020617"/>
     </linearGradient>
-    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fb923c"/>
-      <stop offset="100%" stop-color="#ea580c"/>
-    </linearGradient>
   </defs>
   <rect width="512" height="512" rx="96" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="180" fill="#1e293b" opacity="0.6"/>
-  <path d="M160 180 h192 a20 20 0 0 1 20 20 v80 a20 20 0 0 1 -20 20 h-192 a20 20 0 0 1 -20 -20 v-80 a20 20 0 0 1 20 -20z" fill="#334155"/>
-  <path d="M192 220 h128 v40 h-128 z" fill="url(#glow)" opacity="0.95"/>
-  <path d="M160 245 l-24 24 l24 24" stroke="#fb923c" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <path d="M352 245 l24 24 l-24 24" stroke="#fb923c" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-  <circle cx="256" cy="240" r="18" fill="#f97316"/>
-  <path d="M220 300 h72 l-12 48 h-48 z" fill="#fb923c" opacity="0.85"/>
-  <rect x="192" y="330" width="128" height="14" rx="7" fill="#fb923c" opacity="0.5"/>
+  <polygon points="256,120 368,192 368,320 256,392 144,320 144,192" fill="#1e293b" stroke="#f97316" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M192,224 Q192,176 256,176 Q320,176 320,224" stroke="#f97316" stroke-width="22" stroke-linecap="round" fill="none"/>
+  <path d="M180,244 L180,300 Q180,336 216,336 L236,336 L236,296 L212,296 L212,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <path d="M332,244 L332,300 Q332,336 296,336 L276,336 L276,296 L300,296 L300,244" stroke="#f97316" stroke-width="20" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="205" r="12" fill="#f97316"/>
+  <path d="M256,60 L256,110" stroke="#f97316" stroke-width="8" stroke-linecap="round" opacity="0.5"/>
+  <path d="M340,146 L256,195" stroke="#f97316" stroke-width="6" stroke-linecap="round" opacity="0.25"/>
+  <path d="M172,146 L256,195" stroke="#f97316" stroke-width="6" stroke-linecap="round" opacity="0.25"/>
 </svg>
