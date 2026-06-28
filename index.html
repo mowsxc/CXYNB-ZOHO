@@ -2238,8 +2238,22 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").then(function(r) {
-    console.log("SW registered:", r.scope)
+  var refreshing = false
+  navigator.serviceWorker.addEventListener("controllerchange", function() {
+    if (refreshing) return
+    refreshing = true
+    window.location.reload()
+  })
+  navigator.serviceWorker.register("sw.js").then(function(reg) {
+    reg.addEventListener("updatefound", function() {
+      var installing = reg.installing
+      if (!installing) return
+      installing.addEventListener("statechange", function() {
+        if (installing.state === "installed" && navigator.serviceWorker.controller) {
+          installing.postMessage("skipWaiting")
+        }
+      })
+    })
   }).catch(function(e) {
     console.log("SW failed:", e)
   })
