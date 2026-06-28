@@ -1,8 +1,9 @@
-<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="12" fill="white"/>
-  <polygon points="32,12 47,21 47,43 32,52 17,43 17,21" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linejoin="round"/>
-  <path d="M24,29 Q24,23 32,23 Q40,23 40,29" stroke="#7c3aed" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-  <path d="M21,32 L21,37 Q21,43 27,43 L30,43 L30,37 L25,37 L25,32" stroke="#7c3aed" stroke-width="3.2" stroke-linejoin="round" fill="none"/>
-  <path d="M43,32 L43,37 Q43,43 37,43 L34,43 L34,37 L39,37 L39,32" stroke="#7c3aed" stroke-width="3.2" stroke-linejoin="round" fill="none"/>
-  <circle cx="32" cy="27" r="2.5" fill="#7c3aed"/>
+<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <rect width="80" height="80" rx="16" fill="white"/>
+  <polygon points="40,12 60,24 60,56 40,68 20,56 20,24" fill="#ede9fe" stroke="#7c3aed" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M26,32 Q26,22 40,22 Q54,22 54,32" stroke="#7c3aed" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+  <path d="M22,36 L22,44 Q22,52 30,52 L36,52 L36,44 L28,44 L28,36" stroke="#7c3aed" stroke-width="5" stroke-linejoin="round" fill="none"/>
+  <path d="M58,36 L58,44 Q58,52 50,52 L44,52 L44,44 L52,44 L52,36" stroke="#7c3aed" stroke-width="5" stroke-linejoin="round" fill="none"/>
+  <circle cx="40" cy="30" r="3.5" fill="#7c3aed"/>
+  <text x="40" y="67" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="900" fill="#2563eb" text-anchor="middle" letter-spacing="3">CXY</text>
 </svg>
