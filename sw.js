@@ -1,5 +1,5 @@
 const CACHE = "cxy-finance-v1"
-const SHELL = ["/", "/index.html", "/manifest.json", "/favicon.svg"]
+const SHELL = ["/", "/index.html", "/manifest.json", "/favicon.svg", "/icon-192.png", "/icon-512.png"]
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).catch(() => {}))

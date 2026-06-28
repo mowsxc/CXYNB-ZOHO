@@ -9,15 +9,23 @@
   "background_color": "#070b16",
   "description": "创新意电竞馆财务报表 - 实时数据看板",
   "lang": "zh-CN",
-  "dir": "ltr",
   "icons": [
     {
-      "src": "favicon.svg",
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "finance"],
-  "display_override": ["standalone", "minimal-ui"]
+  "categories": ["business", "finance"]
 }
