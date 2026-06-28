@@ -1422,6 +1422,10 @@
 
 <script>
 window._appVersion='dev';
+function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:msg})); }catch(e){} }
+window.addEventListener('error',function(e){ logFE('ERR: '+e.message+' @ '+e.filename+':'+e.lineno); });
+window.addEventListener('unhandledrejection',function(e){ logFE('REJ: '+(e.reason&&e.reason.message||String(e.reason))); });
+logFE('page_loaded');
 function fm(v) {
   var s=String(v).replace(/[^\d.]/g,'');
   var n=parseFloat(s);
@@ -1920,6 +1924,7 @@ function trimCache() {
   }
 }
 function loadMonth(requestedPeriod) {
+  logFE('loadMonth: '+requestedPeriod);
   closeAll();
   document.getElementById('error').style.display='none';
   window._curPeriod=requestedPeriod;
@@ -1981,8 +1986,10 @@ function fetchWithRetry(url,retries,delay){
   });
 }
 
+logFE('fetch_start');
 fetchWithRetry('api/data',3,1000)
   .then(function(d){
+    logFE('fetch_ok: '+d.period+' rows='+(d.daily||[]).length);
     window._monthsData=d.available||{};
     window._lastHash=d._data_hash||'';
     render(d);
@@ -1992,6 +1999,7 @@ fetchWithRetry('api/data',3,1000)
     }catch(e){}
   })
   .catch(function(err){
+    logFE('fetch_fail: '+err.message);
     document.getElementById('loading').style.display='none';
     document.getElementById('error').style.display='block';
     document.getElementById('errorMsg').textContent=err.message+'，请重试';
@@ -2010,6 +2018,7 @@ fetchWithRetry('api/data',3,1000)
     }
   }
   if(cachedKey){
+    logFE('eager_cache_hit: '+cachedKey);
     try{
       var d=JSON.parse(localStorage.getItem('cache_'+cachedKey));
       if(d&&d._data_hash){
@@ -2017,7 +2026,9 @@ fetchWithRetry('api/data',3,1000)
         window._lastHash=d._data_hash||'';
         render(d);
       }
-    }catch(e){}
+    }catch(e){ logFE('eager_render_err: '+e.message); }
+  } else {
+    logFE('eager_cache_miss');
   }
 })();
 
@@ -2245,6 +2256,7 @@ if ("serviceWorker" in navigator) {
     window.location.reload()
   })
   navigator.serviceWorker.register("sw.js").then(function(reg) {
+    logFE('sw_reg_ok scope='+reg.scope);
     reg.addEventListener("updatefound", function() {
       var installing = reg.installing
       if (!installing) return
