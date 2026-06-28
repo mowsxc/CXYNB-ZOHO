@@ -254,6 +254,19 @@ class Handler(http.server.BaseHTTPRequestHandler):
             else:
                 json_response(self, {"error": "PIN error"}, 403)
             return
+        if path == "/api/log":
+            try:
+                n = int(self.headers.get("Content-Length", 0))
+                if 0 < n < 65536:
+                    body = json.loads(self.rfile.read(n))
+                    ts = body.get("ts", "")
+                    msg = body.get("msg", "")
+                    ua = self.headers.get("User-Agent", "")[:80]
+                    print(f"[FE:{ts}] {msg}  UA={ua}", flush=True)
+            except Exception:
+                pass
+            json_response(self, {"ok": True})
+            return
         serve_static(self.path, self)
 
     def do_GET(self):
