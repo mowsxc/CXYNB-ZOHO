@@ -43,6 +43,8 @@
     --red-glow: rgba(244,63,94,.3);
     --purple: #8b5cf6;
     --purple-glow: rgba(139,92,246,.35);
+    --cyan: #22d3ee;
+    --cyan-glow: rgba(34,211,238,.25);
     --pink: #ff1a75;
     --pink-glow: rgba(255,26,117,.35);
     --bg-deep: #070b16;
@@ -88,6 +90,8 @@
     --red-glow: rgba(220,38,38,.12);
     --purple: #f97316;
     --purple-glow: rgba(249,115,22,.18);
+    --cyan: #0891b2;
+    --cyan-glow: rgba(8,145,178,.15);
     --pink: #f43f5e;
     --pink-glow: rgba(244,63,94,.12);
     --bg-deep: #faf5f0;
@@ -1268,8 +1272,8 @@
     font-size: 12px;
     letter-spacing: .02em;
   }
-  td.shift-day { color: #60a5fa; }
-  td.shift-night { color: #c084fc; }
+  td.shift-day { color: var(--cyan); }
+  td.shift-night { color: var(--purple); }
   td.shift-day:empty, td.shift-night:empty { display: none; }
 
   td.cell-mt { color: var(--amber); font-family: var(--font-mono); font-weight: 600; font-size: 12px; font-variant-numeric: tabular-nums; }
@@ -1579,7 +1583,7 @@ function render(data) {
   if (tkeys.length>1) {
     var metrics=[
       {k:'网费',label:'网费',color:'var(--green)',cls:'green'},
-      {k:'售货',label:'售货',color:'#22d3ee',cls:'cyan'},
+      {k:'售货',label:'售货',color:'var(--cyan)',cls:'cyan'},
       {k:'支出',label:'支出',color:'var(--red)',cls:'red'},
       {k:'美团',label:'美团',color:'var(--amber)',cls:'amber'},
       {k:'现金结余',label:'现金',color:'var(--pink)',cls:'pink'}
