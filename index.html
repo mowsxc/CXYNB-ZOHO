@@ -2000,10 +2000,40 @@ function loadMonth(requestedPeriod) {
     });
 }
 
-/* Keep health check running on visibility change */
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) checkApiHealth();
-});
+/* Pre-cache all months data for seamless offline use */
+var _precacheDone = false;
+function precacheAllMonths() {
+  if (_precacheDone || !navigator.onLine) return;
+  _precacheDone = true;
+  fetch('api/months').then(function(r){return r.json()}).then(function(d){
+    var months = d.list || [];
+    months.forEach(function(p){
+      if (!localStorage.getItem('cache_' + p)) {
+        fetch('api/data?period=' + encodeURIComponent(p))
+          .then(function(r){return r.json()})
+          .then(function(data){
+            if (data && data.period && data._data_hash) {
+              localStorage.setItem('cache_' + p, JSON.stringify({
+                period: data.period, summary: data.summary, daily: data.daily,
+                trends: data.trends, available: data.available, _data_hash: data._data_hash
+              }));
+              logFE('precache_ok: ' + p);
+            }
+          })
+          .catch(function(){});
+      }
+    });
+  }).catch(function(){});
+}
+setTimeout(precacheAllMonths, 5000);
+
+/* Softer offline UX: don't show full error page if we have ANY data to show */
+function showOfflineNotice(period) {
+  var dot = document.getElementById('statusDot');
+  if (dot) dot.className = 'status-dot offline';
+  var label = document.getElementById('syncLabel');
+  if (label) label.textContent = '离线模式 · ' + (period || '');
+}
 document.addEventListener('click',function(e){
   var pill=document.getElementById('periodPill');
   if (pill && !pill.contains(e.target)) closeAll();
