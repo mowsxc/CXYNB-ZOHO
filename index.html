@@ -220,6 +220,12 @@
     font-size: 14px;
     line-height: 1.6;
   }
+  * { scrollbar-color: rgba(255,255,255,.18) transparent; scrollbar-width: thin; }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+  [data-theme="light"] * { scrollbar-color: rgba(0,0,0,.2) transparent; }
+  [data-theme="light"] *::-webkit-scrollbar-thumb { background: rgba(0,0,0,.2); }
 
   /* ---- Ambient BG ---- */
    .bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; contain:strict; transform:translateZ(0); }
