@@ -406,7 +406,17 @@
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--t-tertiary);
+    cursor: pointer;
+    user-select: none;
   }
+  .version-link .vl-hash {
+    display: none;
+  }
+  @media (min-width: 861px) {
+    .version-link .vl-hash { display: inline; }
+  }
+  .version-link.show-hash .vl-hash { display: inline !important; }
+  [data-theme="light"] .version-link .vl-hash { }
 
   @keyframes syncIconSpin {
     0% { transform: rotate(0deg); }
@@ -1429,7 +1439,7 @@
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
   </svg>
   <span id="syncLabel">数据同步</span>
-  <span class="version-link">@MOWSXC/CXYNB-ZOHO</span>
+  <span class="version-link" id="versionLink">@MOWSXC/CXYNB-ZOHO <span class="vl-hash" id="vlHash"></span></span>
 </div>
 
 <div class="chart-fullscreen" id="chartFS" onclick="if(event.target===this)toggleFullscreen()">
@@ -1441,6 +1451,17 @@
 window._appVersion='dev';
 window._lastRenderHash='';
 window._lastHash='';
+(function(){
+  var h = window._appVersion;
+  var el = document.getElementById('vlHash');
+  if (el && h && h !== 'dev') el.textContent = '™' + h;
+})();
+(function(){
+  var link = document.getElementById('versionLink');
+  if (link) link.addEventListener('click', function(){
+    link.classList.toggle('show-hash');
+  });
+})();
 function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:String(msg).slice(0,200)})); }catch(e){} }
 function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');}
 window.addEventListener('error',function(e){ logFE('ERR: '+e.message+' @ '+e.filename+':'+e.lineno); });

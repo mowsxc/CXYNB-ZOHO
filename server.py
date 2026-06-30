@@ -242,9 +242,10 @@ def serve_static(path, handler):
         with open(filepath, "rb") as f:
             content = f.read()
         if path == "/index.html" and _git_hash:
-            gh = _git_hash.encode()
-            content = content.replace(b"window._appVersion='dev'", f"window._appVersion='{_git_hash}'".encode())
-            content = content.replace(b"@MOWSXC/CXYNB-ZOHO", f"@{_git_hash}".encode())
+            content = content.replace(
+                b"window._appVersion='dev'",
+                f"window._appVersion='{_git_hash}'".encode()
+            )
         handler.send_response(200)
         ext = os.path.splitext(filepath)[1]
         ct = {
