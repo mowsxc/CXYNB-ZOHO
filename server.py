@@ -31,6 +31,7 @@ _refresh_interval = 20     # seconds — current month cadence
 _historical_period = 15   # refresh historical every N cycles (15*20s=5min)
 _available_cache = None
 _priming = False
+server_instance = None    # for graceful shutdown
 def _prime_cache_async():
     """Pre-load cache in background after server starts."""
     global _priming
@@ -157,9 +158,6 @@ def _background_refresh():
         time.sleep(_refresh_interval)
         try:
             cycle += 1
-        except Exception:
-            break
-        try:
             cur = datetime.now().strftime("%Y-%m")
             if cur != current_month:
                 current_month = cur
