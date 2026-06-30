@@ -206,6 +206,7 @@
 
   * { margin:0; padding:0; box-sizing:border-box; }
 
+  html { -webkit-tap-highlight-color: transparent; }
   body {
     font-family: var(--font-sans);
     background: var(--bg-deep);
@@ -321,19 +322,14 @@
     justify-content: center;
   }
   .period-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.05) 0%, transparent 50%),
-      var(--surface);
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 14px;
+    border-radius: 100px;
     border: 1px solid var(--border);
-    border-radius: 40px;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.08) inset,
-      0 4px 24px rgba(0,0,0,.25);
-    user-select: none;
-    padding: 0 4px;
+    background: var(--surface);
+    cursor: pointer;
+    transition: border-color .2s, background .2s, box-shadow .2s;
+    -webkit-tap-highlight-color: transparent;
   }
   #yrOpts, #moOpts { display: inline-flex; align-items: center; }
 
@@ -707,6 +703,7 @@
     transition: transform .5s cubic-bezier(.4,0,.2,1);
     transform-style: preserve-3d;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
   .card-inner:active { opacity: .85; }
   .card-inner.flipped { transform: rotateY(180deg); }
