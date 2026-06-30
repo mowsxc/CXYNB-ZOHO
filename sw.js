@@ -20,11 +20,11 @@ self.addEventListener("message", (e) => {
   if (e.data === "skipWaiting") self.skipWaiting()
 })
 
-self.addEventListener("fetch", (e) => {
+self.addEventListener("fetch", (e) {
   const u = new URL(e.request.url)
   if (e.request.method !== "GET") return
   if (u.pathname.endsWith("/api/data") || u.pathname.endsWith("/api/months") || u.pathname.endsWith("/api/add-month") || u.pathname.endsWith("/api/trends") || u.pathname.endsWith("/api/ping") || u.pathname.endsWith("/api/verify-pin") || u.pathname.endsWith("/api/log")) {
-    e.respondWith(networkFirst(e.request))
+    e.respondWith(networkFirstApi(e.request))
   } else if (u.pathname === "/" || u.pathname.endsWith(".html")) {
     e.respondWith(networkFirst(e.request))
   } else if (u.pathname.endsWith(".png") || u.pathname.endsWith(".svg") || u.pathname.endsWith(".ico")) {
@@ -58,7 +58,30 @@ async function networkFirst(req) {
     }
     return resp
   } catch {
-    return caches.match(req)
+    const cached = await caches.match(req)
+    if (cached) return cached
+    return new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } })
+  }
+}
+
+async function networkFirstApi(req) {
+  try {
+    const resp = await fetch(req)
+    if (resp.ok) {
+      const clone = resp.clone()
+      // Cache API responses for offline availability
+      caches.open(CACHE).then((c) => c.put(req, clone))
+    }
+    return resp
+  } catch {
+    // Network failed — try cache
+    const cached = await caches.match(req)
+    if (cached) return cached
+    // No cache either — return JSON offline indicator
+    return new Response(JSON.stringify({ offline: true, error: "当前离线且无缓存数据" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" }
+    })
   }
 }
 

@@ -130,7 +130,11 @@
   [data-theme="light"] .pv-cancel:hover { background: rgba(249,115,22,.12); }
   [data-theme="light"] .pv-confirm { background: var(--amber); }
   [data-theme="light"] .pv-confirm:hover { background: var(--accent2-hover); }
-  [data-theme="light"] .sync-bar { background: var(--surface-dark); border-top-color: rgba(249,115,22,.10); }
+  [data-theme="light"] .sync-bar { background: linear-gradient(180deg, rgba(249,115,22,.03) 0%, transparent 50%), var(--surface); box-shadow: 0 1px 0 rgba(249,115,22,.04) inset, 0 2px 8px rgba(0,0,0,.04); }
+  [data-theme="light"] .sync-bar .status-dot { }
+  [data-theme="light"] .sync-bar .status-dot.offline { }
+  [data-theme="light"] .sync-bar .status-dot.priming { }
+  [data-theme="light"] .sync-bar .status-dot.online { }
   [data-theme="light"] .theme-toggle { border-color: rgba(249,115,22,.15); color: var(--t-secondary); }
   [data-theme="light"] .theme-toggle:hover { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 20px rgba(249,115,22,.15); }
   [data-theme="light"] .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
@@ -389,6 +393,16 @@
     color: var(--green);
     animation: syncIconSpin 3s linear infinite;
   }
+  .sync-bar .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    transition: background .3s, box-shadow .3s;
+  }
+  .sync-bar .status-dot.offline { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .sync-bar .status-dot.priming { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
   .version-link {
     margin-left: 8px;
     font-family: var(--font-mono);
@@ -1416,6 +1430,7 @@
     <polyline points="1 20 1 14 7 14"></polyline>
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
   </svg>
+  <span class="status-dot" id="statusDot"></span>
   <span id="syncLabel">数据同步</span>
   <span class="version-link">@MOWSXC/CXYNB-ZOHO</span>
 </div>
@@ -1952,13 +1967,25 @@ function loadMonth(requestedPeriod) {
     },800);
   }
   fetch('api/data?period='+encodeURIComponent(requestedPeriod))
-    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    .then(function(r){
+      if(r.status === 202) { // Server still priming
+        updateStatusDot('priming');
+        throw new Error('服务正在启动，请稍候...');
+      }
+      if(r.status === 503) { // Offline, no cache
+        return r.json().then(function(d){ throw new Error(d.error || '离线模式，暂无缓存数据'); });
+      }
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    })
     .then(function(d){
       if(d.error) throw new Error(d.error);
+      if(d.offline) throw new Error(d.error || '离线模式，暂无缓存数据');
       if(window._curPeriod && d.period !== window._curPeriod) return;
       if(loadingTimer) clearTimeout(loadingTimer);
       window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
+      if(d._priming) updateStatusDot('priming');
       render(d);
       try{ trimCache(); localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
     })
@@ -1972,6 +1999,11 @@ function loadMonth(requestedPeriod) {
       }
     });
 }
+
+/* Keep health check running on visibility change */
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) checkApiHealth();
+});
 document.addEventListener('click',function(e){
   var pill=document.getElementById('periodPill');
   if (pill && !pill.contains(e.target)) closeAll();
@@ -1980,10 +2012,19 @@ document.addEventListener('click',function(e){
 
 function fetchWithRetry(url,retries,delay){
   return fetch(url).then(function(r){
+    if(r.status === 202){ // Server still priming — wait and retry
+      return new Promise(function(resolve,reject){
+        setTimeout(function(){ fetchWithRetry(url,retries,delay).then(resolve).catch(reject); },delay);
+      });
+    }
+    if(r.status === 503){ // Offline
+      return r.json().then(function(d){ throw new Error(d.error || '离线模式，暂无缓存数据'); });
+    }
     if(!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }).then(function(d){
     if(d.error) throw new Error(d.error);
+    if(d.offline) throw new Error(d.error || '离线模式');
     return d;
   }).catch(function(err){
     if(retries<=0) throw err;
@@ -1997,6 +2038,7 @@ logFE('fetch_start');
 fetchWithRetry('api/data',3,1000)
   .then(function(d){
     logFE('fetch_ok: '+d.period+' rows='+(d.daily||[]).length);
+    if(d._priming) updateStatusDot('priming');
     window._monthsData=d.available||{};
     window._lastHash=d._data_hash||'';
     render(d);
@@ -2007,6 +2049,7 @@ fetchWithRetry('api/data',3,1000)
   })
   .catch(function(err){
     logFE('fetch_fail: '+err.message);
+    updateStatusDot('offline');
     document.getElementById('loading').style.display='none';
     document.getElementById('error').style.display='block';
     document.getElementById('errorMsg').textContent=err.message+'，请重试';
@@ -2039,8 +2082,44 @@ fetchWithRetry('api/data',3,1000)
   }
 })();
 
-// Preview keepalive heartbeat + cache ts sync
-setInterval(function(){ fetch('api/ping',{cache:'no-cache'}); },150000);
+/* --- Online/Offline detection & API health check --- */
+function updateStatusDot(state) {
+  var dot = document.getElementById('statusDot');
+  if (!dot) return;
+  dot.className = 'status-dot ' + state; // '' | 'online' | 'offline' | 'priming'
+}
+window.addEventListener('online', function() {
+  logFE('browser_online');
+  checkApiHealth();
+});
+window.addEventListener('offline', function() {
+  logFE('browser_offline');
+  updateStatusDot('offline');
+});
+function checkApiHealth() {
+  var ctrl = (navigator.serviceWorker && navigator.serviceWorker.controller) ? navigator.serviceWorker.controller : null;
+  return fetch('api/ping', { cache: 'no-cache' })
+    .then(function(r) {
+      if (r.ok) {
+        updateStatusDot(ctrl ? 'online' : '');
+        return true;
+      }
+      if (r.status === 202) {
+        updateStatusDot('priming');
+        return 'priming';
+      }
+      updateStatusDot('offline');
+      return false;
+    })
+    .catch(function() {
+      updateStatusDot('offline');
+      return false;
+    });
+}
+// Health check every 30s after load
+setInterval(checkApiHealth, 30000);
+// Initial check after 2s
+setTimeout(checkApiHealth, 2000);
 
 function toggleTheme(){
   var html=document.documentElement;

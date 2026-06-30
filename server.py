@@ -30,7 +30,20 @@ _file_lock = threading.Lock()  # protects months.json reads/writes
 _refresh_interval = 20     # seconds — current month cadence
 _historical_period = 15   # refresh historical every N cycles (15*20s=5min)
 _available_cache = None
-server_instance = None    # for graceful shutdown
+_priming = False
+def _prime_cache_async():
+    """Pre-load cache in background after server starts."""
+    global _priming
+    _priming = True
+    time.sleep(1)  # let server start first
+    _prime_cache()
+    _priming = False
+
+def _wait_for_prime(timeout=10):
+    """Block until priming completes or timeout."""
+    start = time.time()
+    while _priming and time.time() - start < timeout:
+        time.sleep(0.1)
 
 
 def load_months():
@@ -120,7 +133,6 @@ def init_valid_months():
         _invalidate_available()
     if not valid:
         print("WARNING: no valid months!")
-    _prime_cache()
 
 
 def _prime_cache():
@@ -143,30 +155,35 @@ def _background_refresh():
     current_month = datetime.now().strftime("%Y-%m")
     while True:
         time.sleep(_refresh_interval)
-        if server_instance and not server_instance.running:
+        try:
+            cycle += 1
+        except Exception:
             break
-        cycle += 1
-        cur = datetime.now().strftime("%Y-%m")
-        if cur != current_month:
-            current_month = cur
-            cycle = 0  # force full refresh on month rollover
+        try:
+            cur = datetime.now().strftime("%Y-%m")
+            if cur != current_month:
+                current_month = cur
+                cycle = 0  # force full refresh on month rollover
 
-        with _months_lock:
-            snapshot = list(_valid_months.items())
-        for period, url in snapshot:
-            is_current = (period == current_month)
-            if not is_current and cycle % _historical_period != 0:
-                continue
-            try:
-                data = fetch_sheet(url, timeout=15)
-                data["period"] = normalize_period(data.get("period", ""))
-                h = _data_hash(data)
-                with _cache_lock:
-                    old = _data_cache.get(period)
-                    if not old or _data_hash(old["data"]) != h:
-                        _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
-            except Exception as e:
-                print(f"  refresh fail {period}: {e}", flush=True)
+            with _months_lock:
+                snapshot = list(_valid_months.items())
+            for period, url in snapshot:
+                is_current = (period == current_month)
+                if not is_current and cycle % _historical_period != 0:
+                    continue
+                try:
+                    data = fetch_sheet(url, timeout=15)
+                    data["period"] = normalize_period(data.get("period", ""))
+                    h = _data_hash(data)
+                    with _cache_lock:
+                        old = _data_cache.get(period)
+                        if not old or _data_hash(old["data"]) != h:
+                            _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
+                except Exception as e:
+                    print(f"  refresh fail {period}: {e}", flush=True)
+        except Exception as e:
+            print(f"  background refresh error: {e}", flush=True)
+            break
 
 
 def _data_hash(data):
@@ -365,6 +382,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         actual_period = k
                         break
 
+            # Wait for priming if cache is empty (max 15s)
+            if _priming and actual_period and actual_period not in _data_cache:
+                _wait_for_prime(timeout=15)
+
             # Serve from cache if available
             avail = build_available(_valid_months)
             with _cache_lock:
@@ -374,9 +395,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 data["_cache_ts"] = cached["ts"]
                 data["_data_hash"] = cached.get("hash", "")
                 data["_cached"] = True
+                data["_priming"] = _priming
                 data["available"] = avail
                 data["trends"] = _build_trends()
                 json_response(self, data)
+                return
+
+            # Still priming and no cache yet — return priming status
+            if _priming:
+                json_response(self, {"priming": True, "period": actual_period}, 202)
                 return
 
             # Cache miss — fetch synchronously
@@ -486,7 +513,7 @@ def _signal_handler(signum, frame):
 
 
 def main():
-    global server_instance
+    global server_instance, _priming
     signal.signal(signal.SIGINT, _signal_handler)
     signal.signal(signal.SIGTERM, _signal_handler)
     init_valid_months()
@@ -494,6 +521,9 @@ def main():
     t.start()
     server_instance = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Server running on http://0.0.0.0:{PORT}")
+    # Prime cache in background after server starts
+    prime_thread = threading.Thread(target=_prime_cache_async, daemon=True)
+    prime_thread.start()
     server_instance.serve_forever()
 
 
