@@ -13,7 +13,11 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <script>
     (function(){
-      if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        var btn = document.getElementById('themeBtn');
+        if (btn) btn.classList.add('sunny');
+      }
     })();
   </script>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
