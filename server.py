@@ -5,8 +5,9 @@ import hashlib
 import http.server
 import json
 import os
-import copy
+import signal
 import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -19,34 +20,41 @@ PORT = 8000
 WORKSPACE = os.path.dirname(os.path.abspath(__file__))
 MONTHS_FILE = os.path.join(WORKSPACE, "months.json")
 PIN = os.environ.get("APP_PIN", "3")
+PIN_RATE_LIMIT = {}  # {ip: [timestamp, ...]}
 
 _valid_months = {}
 _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
 _months_lock = threading.RLock()
+_file_lock = threading.Lock()  # protects months.json reads/writes
 _refresh_interval = 20     # seconds — current month cadence
 _historical_period = 15   # refresh historical every N cycles (15*20s=5min)
 _available_cache = None
-_available_version = 0
+server_instance = None    # for graceful shutdown
 
 
 def load_months():
-    if os.path.exists(MONTHS_FILE):
-        with open(MONTHS_FILE) as f:
-            return json.load(f)
-    return {}
+    with _file_lock:
+        if os.path.exists(MONTHS_FILE):
+            with open(MONTHS_FILE) as f:
+                return json.load(f)
+        return {}
 
 
 def save_months(data):
-    with open(MONTHS_FILE, "w") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    with _file_lock:
+        tmp = MONTHS_FILE + ".tmp"
+        with open(tmp, "w") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, MONTHS_FILE)
 
 
 def build_available(urls):
-    global _available_cache, _available_version
+    global _available_cache
     with _months_lock:
-        cur_ver = _available_version
-        if cur_ver >= 0 and _available_cache is not None:
+        if _available_cache is not None:
             return _available_cache
         av = {}
         for k in urls:
@@ -58,10 +66,9 @@ def build_available(urls):
 
 
 def _invalidate_available():
-    global _available_cache, _available_version
+    global _available_cache
     with _months_lock:
         _available_cache = None
-        _available_version += 1
 
 
 def default_month(urls):
@@ -70,6 +77,13 @@ def default_month(urls):
         return cur
     lst = sorted(urls.keys(), reverse=True)
     return lst[0] if lst else None
+
+
+def _is_zero(val):
+    try:
+        return float(val) == 0
+    except (ValueError, TypeError):
+        return True
 
 
 def validate_month(url, timeout=10):
@@ -81,13 +95,8 @@ def validate_month(url, timeout=10):
         if not period or "-" not in period or len(rows) == 0:
             return None
         summary = data.get("summary", {})
-        def is_zero(val):
-            try:
-                return float(val) == 0
-            except (ValueError, TypeError):
-                return True
         key_fields = ["网费", "售货", "美团", "现金结余"]
-        if all(is_zero(summary.get(f, "")) for f in key_fields):
+        if all(_is_zero(summary.get(f, "")) for f in key_fields):
             return None
         return period
     except Exception:
@@ -134,6 +143,8 @@ def _background_refresh():
     current_month = datetime.now().strftime("%Y-%m")
     while True:
         time.sleep(_refresh_interval)
+        if server_instance and not server_instance.running:
+            break
         cycle += 1
         cur = datetime.now().strftime("%Y-%m")
         if cur != current_month:
@@ -155,7 +166,7 @@ def _background_refresh():
                     if not old or _data_hash(old["data"]) != h:
                         _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             except Exception as e:
-                print(f"  refresh fail {period}: {e}")
+                print(f"  refresh fail {period}: {e}", flush=True)
 
 
 def _data_hash(data):
@@ -164,7 +175,7 @@ def _data_hash(data):
         "summary": data.get("summary", {}),
         "daily": data.get("daily", []),
     }, sort_keys=True, ensure_ascii=False)
-    return hashlib.md5(s.encode()).hexdigest()
+    return hashlib.sha256(s.encode()).hexdigest()
 
 
 def _build_trends():
@@ -178,6 +189,19 @@ def _build_trends():
             if c:
                 trends[p] = c["data"].get("summary", {})
     return trends
+
+
+def _check_rate_limit(ip, window=60, max_attempts=10):
+    """Simple sliding-window rate limiter. Returns True if allowed."""
+    now = time.time()
+    with _cache_lock:
+        attempts = PIN_RATE_LIMIT.get(ip, [])
+        attempts = [t for t in attempts if now - t < window]
+        PIN_RATE_LIMIT[ip] = attempts
+        if len(attempts) >= max_attempts:
+            return False
+        attempts.append(now)
+        return True
 
 
 _git_hash = ""
@@ -220,6 +244,17 @@ def serve_static(path, handler):
         handler.send_header("Content-Type", ct)
         handler.send_header("Content-Length", str(len(content)))
         handler.send_header("Cache-Control", "no-cache")
+        handler.send_header("X-Content-Type-Options", "nosniff")
+        handler.send_header("X-Frame-Options", "DENY")
+        handler.send_header("Referrer-Policy", "no-referrer")
+        handler.send_header("Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data:; "
+            "connect-src 'self'"
+        )
         handler.end_headers()
         handler.wfile.write(content)
     else:
@@ -232,9 +267,10 @@ def json_response(handler, data, status=200):
     body = json.dumps(data, ensure_ascii=False).encode("utf-8")
     handler.send_response(status)
     handler.send_header("Content-Type", "application/json; charset=utf-8")
-    handler.send_header("Access-Control-Allow-Origin", "*")
+    handler.send_header("Access-Control-Allow-Origin", handler.headers.get("Origin", "*"))
     handler.send_header("Cache-Control", "no-cache")
     handler.send_header("Content-Length", str(len(body)))
+    handler.send_header("X-Content-Type-Options", "nosniff")
     handler.end_headers()
     handler.wfile.write(body)
 
@@ -244,6 +280,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         path = parsed.path
         if path == "/api/verify-pin":
+            client_ip = self.client_address[0]
+            if not _check_rate_limit(client_ip):
+                json_response(self, {"error": "请求过于频繁，请稍后再试"}, 429)
+                return
             length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(length) if length else b"{}"
             try:
@@ -330,7 +370,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _cache_lock:
                 cached = _data_cache.get(actual_period) if actual_period else None
             if cached:
-                data = copy.deepcopy(cached["data"])
+                data = json.loads(json.dumps(cached["data"]))
                 data["_cache_ts"] = cached["ts"]
                 data["_data_hash"] = cached.get("hash", "")
                 data["_cached"] = True
@@ -423,10 +463,39 @@ class Handler(http.server.BaseHTTPRequestHandler):
         pass
 
 
-if __name__ == "__main__":
+class ThreadingHTTPServer(http.server.ThreadingHTTPServer):
+    """ThreadingHTTPServer with graceful shutdown support."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.running = True
+
+    def shutdown(self):
+        self.running = False
+        super().shutdown()
+
+    def serve_forever(self, poll_interval=0.5):
+        self.running = True
+        super().serve_forever(poll_interval)
+
+
+def _signal_handler(signum, frame):
+    print(f"\nReceived signal {signum}, shutting down...", flush=True)
+    if server_instance:
+        server_instance.shutdown()
+    sys.exit(0)
+
+
+def main():
+    global server_instance
+    signal.signal(signal.SIGINT, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
     init_valid_months()
     t = threading.Thread(target=_background_refresh, daemon=True)
     t.start()
-    server = http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
+    server_instance = ThreadingHTTPServer(("0.0.0.0", PORT), Handler)
     print(f"Server running on http://0.0.0.0:{PORT}")
-    server.serve_forever()
+    server_instance.serve_forever()
+
+
+if __name__ == "__main__":
+    main()

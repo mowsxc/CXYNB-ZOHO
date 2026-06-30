@@ -1,5 +1,5 @@
-const CACHE = "cxy-finance-v5"
-const SHELL = ["manifest.json", "favicon.svg", "icon-192.png", "icon-512.png"]
+const CACHE = "cxy-finance-v6"
+const SHELL = ["manifest.json"]
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -27,6 +27,8 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(networkFirst(e.request))
   } else if (u.pathname === "/" || u.pathname.endsWith(".html")) {
     e.respondWith(networkFirst(e.request))
+  } else if (u.pathname.endsWith(".png") || u.pathname.endsWith(".svg") || u.pathname.endsWith(".ico")) {
+    e.respondWith(staleWhileRevalidate(e.request))
   } else {
     e.respondWith(cacheFirst(e.request))
   }
@@ -58,4 +60,16 @@ async function networkFirst(req) {
   } catch {
     return caches.match(req)
   }
+}
+
+async function staleWhileRevalidate(req) {
+  const cached = await caches.match(req)
+  const networkFetch = fetch(req).then((resp) => {
+    if (resp.ok) {
+      const clone = resp.clone()
+      caches.open(CACHE).then((c) => c.put(req, clone))
+    }
+    return resp
+  }).catch(() => cached)
+  return cached || networkFetch
 }

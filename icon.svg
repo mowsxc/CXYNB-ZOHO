@@ -5,5 +5,5 @@
   <path d="M152,250 L152,310 Q152,354 200,354 L230,354 L230,300 L196,300 L196,250" stroke="#7c3aed" stroke-width="30" stroke-linejoin="round" fill="none"/>
   <path d="M360,250 L360,310 Q360,354 312,354 L282,354 L282,300 L316,300 L316,250" stroke="#7c3aed" stroke-width="30" stroke-linejoin="round" fill="none"/>
   <circle cx="256" cy="200" r="18" fill="#7c3aed"/>
-  <text x="256" y="422" font-family="Arial,Helvetica,sans-serif" font-size="105" font-weight="900" fill="#2563eb" stroke="#2563eb" stroke-width="8" text-anchor="middle" letter-spacing="14">CXY</text>
+  <text x="256" y="422" font-family="Arial,Helvetica,sans-serif" font-size="105" font-weight="900" fill="#2563eb" stroke="#2563eb" stroke-width="8" text-anchor="middle"><tspan>C</tspan><tspan dx="10">X</tspan><tspan dx="10">Y</tspan></text>
 </svg>

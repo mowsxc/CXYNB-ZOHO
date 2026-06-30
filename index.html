@@ -7,7 +7,7 @@
 <meta name="description" content="创新意电竞馆财务报表 - 实时数据看板">
 <meta name="theme-color" content="#070b16">
 <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="创新意电竞馆">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -15,10 +15,15 @@
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>创新意 · 电竞馆 - 财务报表</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all';this.onload=null">
+  <style>
+    /* Font fallback: if Google Fonts blocked, system fonts apply immediately */
+    @font-face {
+      font-family: 'Inter';
+      src: local('Inter'), local('-apple-system'), local('BlinkMacSystemFont'), local('Segoe UI');
+      font-weight: 100 900;
+      font-display: optional;
+    }
+  </style>
 <style>
   :root {
     --green: #10b981;
@@ -1422,7 +1427,10 @@
 
 <script>
 window._appVersion='dev';
-function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:msg})); }catch(e){} }
+window._lastRenderHash='';
+window._lastHash='';
+function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:String(msg).slice(0,200)})); }catch(e){} }
+function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');}
 window.addEventListener('error',function(e){ logFE('ERR: '+e.message+' @ '+e.filename+':'+e.lineno); });
 window.addEventListener('unhandledrejection',function(e){ logFE('REJ: '+(e.reason&&e.reason.message||String(e.reason))); });
 logFE('page_loaded');
@@ -1460,8 +1468,6 @@ function render(data) {
   var ex=parseFloat((s['支出']||'0').replace(/[^\d.]/g,''))||0;
   var getV=function(obj,key){return obj[key]||(key==='退款'?obj['退款金额']:'')||'0';};
   var rf=parseFloat(getV(s,'退款').replace(/[^\d.]/g,''))||0;
-  var rev=nf+sl+rf;
-  var M=' mono';
 
   // Store prev-month data for card comparison
   var tkeysAll=Object.keys(data.trends||{}).sort();
@@ -1494,7 +1500,7 @@ function render(data) {
     var pLabel=prevPeriod||'-';
     var blinkCls=cd.blink?' cash-blink':'';
     var back=prevSum
-      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+prevPeriod.replace('-','')+' '+fmY(prevVal)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+      ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+prevPeriod.replace(/-/g,'')+' '+fmY(prevVal)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
       :'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
     h+='<div class="item-card '+cd.cls+'"><div class="card-inner" onclick="event.stopPropagation();flipCard(this)">'
       +'<div class="card-face card-front"><div class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">'+cd.icon+'</svg></div><div class="item-title">'+cd.key+'</div><div class="item-value'+blinkCls+'" id="cv-'+cd.key+'">'+fmY(cd.cur)+'</div></div>'
@@ -1705,7 +1711,7 @@ function buildChartSvg(rangeN) {
       else if (v>=1000) shortVal=(v/1000).toFixed(1)+'k';
       else shortVal=v.toFixed(0);
       svg+='<g class="bar-group">';
-      svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
+      svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+escJs(metrics[mj].label)+'\',\''+escJs(months[mi])+'\',\''+escJs(fmY(v))+'\')"></rect>';
       svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="2" fill="url(#bg'+mj+')" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
       var fsLabel=isMob?7:10;
       svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="'+fsLabel+'" fill="var(--t-secondary)" font-family="var(--font-mono)">'+shortVal+'</text>';
@@ -1761,10 +1767,10 @@ function unflip() {
 function toggleFullscreen() {
   var fs=document.getElementById('chartFS');
   if (!fs || !window._chartState) return;
+  var inner=document.getElementById('chartFsInner');
   var isOpen=fs.classList.contains('open');
   if (isOpen) { fs.classList.remove('open'); document.body.style.overflow=''; if(inner) inner.innerHTML=''; return; }
   document.body.style.overflow='hidden';
-  var inner=document.getElementById('chartFsInner');
   if (inner) {
     var st=window._chartState;
     var trends=st.trends, tkeys=st.tkeys, metrics=st.metrics;
@@ -1814,7 +1820,7 @@ function toggleFullscreen() {
         else shortVal=v.toFixed(0);
         var fsFont=isMob?8:12;
         svg+='<g class="bar-group">';
-        svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+metrics[mj].label+'\',\''+months[mi]+'\',\''+fmY(v)+'\')"></rect>';
+        svg+='<rect x="'+bx+'" y="0" width="'+barW+'" height="'+(chartH-padB)+'" fill="transparent" style="pointer-events:all;cursor:pointer" onclick="trendClick(\''+escJs(metrics[mj].label)+'\',\''+escJs(months[mi])+'\',\''+escJs(fmY(v))+'\')"></rect>';
         svg+='<rect class="trend-bar" x="'+bx+'" y="'+by+'" width="'+barW+'" height="'+bh+'" rx="3" fill="url(#fsBg'+mj+')" data-label="'+metrics[mj].label+'" data-period="'+months[mi]+'" data-val="'+fmY(v)+'" style="pointer-events:none"></rect>';
         svg+='<text x="'+(bx+barW/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="'+fsFont+'" fill="var(--t-secondary)" font-family="var(--font-mono)" font-weight="600">'+shortVal+'</text>';
         svg+='</g>';
