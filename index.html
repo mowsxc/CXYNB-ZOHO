@@ -9,8 +9,15 @@
 <link rel="manifest" href="manifest.json">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="创新意电竞馆">
-<link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="创新意电竞馆">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <script>
+    (function(){
+      var s = localStorage.getItem('theme');
+      if (!s) s = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (s === 'light') document.documentElement.setAttribute('data-theme', 'light');
+    })();
+  </script>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>创新意 · 电竞馆 - 财务报表</title>
@@ -209,7 +216,8 @@
     overflow-x: hidden;
     font-size: 14px;
     line-height: 1.6;
-}
+    transition: background-color .35s ease, color .35s ease;
+  }
 
   /* ---- Ambient BG ---- */
    .bg-layer { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; contain:strict; transform:translateZ(0); }
@@ -427,10 +435,12 @@
   .add-modal {
     position: fixed; inset: 0; z-index: 9999;
     visibility: hidden; opacity: 0; pointer-events: none;
-    transition: visibility 0s .4s, opacity .4s ease-out;
+    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,.3);
+    transition: visibility 0s .4s, opacity .4s ease-out, background .3s;
     -webkit-tap-highlight-color: transparent;
   }
-  .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; transition: visibility 0s 0s, opacity .3s ease-out; }
+  .add-modal.open { visibility: visible; opacity: 1; pointer-events: auto; background: rgba(0,0,0,.45); transition: visibility 0s 0s, opacity .3s ease-out, background .3s; }
   .hp-box {
     position: absolute; z-index: 1;
     display: flex; align-items: center; gap: 6px;
@@ -699,6 +709,7 @@
     transform-style: preserve-3d;
     cursor: pointer;
   }
+  .card-inner:active { opacity: .85; }
   .card-inner.flipped { transform: rotateY(180deg); }
   .card-face {
     width: 100%; min-height: 100%;
@@ -1289,10 +1300,19 @@
 
   .error-state {
     text-align: center;
-    padding: 48px;
+    padding: 48px 24px;
     color: var(--red);
     font-size: 14px;
     font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .error-state .error-icon {
+    width: 40px; height: 40px;
+    color: var(--red);
+    opacity: .7;
   }
   .error-state .retry-btn {
     display: block; margin: 16px auto 0;
@@ -1428,7 +1448,13 @@
   </div>
 
    <div class="loading-state" id="loading" style="display:none"><span class="loading-ring"></span>正在加载数据...</div>
-  <div class="error-state" id="error" style="display:none"><span id="errorMsg"></span><button class="retry-btn" onclick="loadMonth(window._curPeriod||'')" style="display:none" id="retryBtn">重试</button></div>
+  <div class="error-state" id="error" style="display:none">
+    <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span id="errorMsg"></span>
+    <button class="retry-btn" onclick="loadMonth(window._curPeriod||'')" style="display:none" id="retryBtn">重试</button>
+  </div>
 
   <div id="content" style="display:none"></div>
 </div>
@@ -2151,7 +2177,7 @@ function checkApiHealth() {
     updateApiStatus('offline');
     return Promise.resolve(false);
   }
-  return fetch('api/ping', { cache: 'no-cache' })
+  return fetch('/ping', { cache: 'no-cache' })
     .then(function(r) {
       if (r.ok) {
         return r.json().then(function(d) {
@@ -2186,14 +2212,6 @@ function toggleTheme(){
   if(isLight){ html.removeAttribute('data-theme'); btn.classList.remove('sunny'); localStorage.setItem('theme','dark'); if(meta) meta.content='#070b16'; }
   else { html.setAttribute('data-theme','light'); btn.classList.add('sunny'); localStorage.setItem('theme','light'); if(meta) meta.content='#faf5f0'; }
 }
-(function(){
-  var saved=localStorage.getItem('theme');
-  if(!saved){
-    saved=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
-  }
-  if(saved==='dark'){ document.documentElement.removeAttribute('data-theme'); }
-  else { document.documentElement.setAttribute('data-theme','light'); document.getElementById('themeBtn').classList.add('sunny'); }
-})();
 var _resizeTimer=null;
 window.addEventListener('resize',function(){
   if(_resizeTimer) clearTimeout(_resizeTimer);

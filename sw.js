@@ -23,8 +23,10 @@ self.addEventListener("message", (e) => {
 self.addEventListener("fetch", (e) {
   const u = new URL(e.request.url)
   if (e.request.method !== "GET") return
-  if (u.pathname.endsWith("/api/data") || u.pathname.endsWith("/api/months") || u.pathname.endsWith("/api/add-month") || u.pathname.endsWith("/api/trends") || u.pathname.endsWith("/api/ping") || u.pathname.endsWith("/api/verify-pin") || u.pathname.endsWith("/api/log")) {
+  if (u.pathname.endsWith("/api/data") || u.pathname.endsWith("/api/months") || u.pathname.endsWith("/api/add-month") || u.pathname.endsWith("/api/trends") || u.pathname.endsWith("/api/verify-pin") || u.pathname.endsWith("/api/log")) {
     e.respondWith(networkFirstApi(e.request))
+  } else if (u.pathname === "/ping") {
+    e.respondWith(fetch(e.request))
   } else if (u.pathname === "/" || u.pathname.endsWith(".html")) {
     e.respondWith(networkFirst(e.request))
   } else if (u.pathname.endsWith(".png") || u.pathname.endsWith(".svg") || u.pathname.endsWith(".ico")) {

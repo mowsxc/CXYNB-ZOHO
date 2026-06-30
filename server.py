@@ -471,7 +471,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             json_response(self, {"ok": True})
             return
 
-        if path == "/api/ping":
+        if path == "/ping":
             is_priming = _priming
             with _cache_lock:
                 ts_map = {p: c["ts"] for p, c in _data_cache.items()}
