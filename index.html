@@ -1453,10 +1453,8 @@ window._appVersion='dev';
 window._lastRenderHash='';
 window._lastHash='';
 (function(){
-  var h = window._appVersion;
   var el = document.querySelector('.version-link');
   if (el) {
-    el.textContent = '@MOWSXC/CXYNB-ZOHO' + (h && h !== 'dev' ? ' ' + h : '');
     el.addEventListener('click', function(){
       window.open('https://github.com/mowsxc/CXYNB-ZOHO', '_blank', 'noopener');
     });
