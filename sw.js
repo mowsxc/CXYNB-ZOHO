@@ -1,4 +1,4 @@
-const CACHE = "cxy-finance-v6"
+const CACHE = "cxy-finance-v7"
 const SHELL = ["manifest.json"]
 
 self.addEventListener("install", (e) => {
