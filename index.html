@@ -2116,7 +2116,7 @@ fetchWithRetry('api/data',3,1000)
 function updateStatusDot(state) {
   var dot = document.getElementById('statusDot');
   if (!dot) return;
-  dot.className = 'status-dot ' + state; // '' | 'online' | 'offline' | 'priming'
+  dot.className = 'status-dot ' + state;
 }
 window.addEventListener('online', function() {
   logFE('browser_online');
@@ -2127,12 +2127,21 @@ window.addEventListener('offline', function() {
   updateStatusDot('offline');
 });
 function checkApiHealth() {
-  var ctrl = (navigator.serviceWorker && navigator.serviceWorker.controller) ? navigator.serviceWorker.controller : null;
+  if (!navigator.onLine) {
+    updateStatusDot('offline');
+    return Promise.resolve(false);
+  }
   return fetch('api/ping', { cache: 'no-cache' })
     .then(function(r) {
       if (r.ok) {
-        updateStatusDot(ctrl ? 'online' : '');
-        return true;
+        return r.json().then(function(d) {
+          if (d && d.priming) {
+            updateStatusDot('priming');
+            return 'priming';
+          }
+          updateStatusDot('online');
+          return true;
+        });
       }
       if (r.status === 202) {
         updateStatusDot('priming');
@@ -2146,9 +2155,7 @@ function checkApiHealth() {
       return false;
     });
 }
-// Health check every 30s after load
 setInterval(checkApiHealth, 30000);
-// Initial check after 2s
 setTimeout(checkApiHealth, 2000);
 
 function toggleTheme(){

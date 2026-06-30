@@ -477,9 +477,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
 
         if path == "/api/ping":
+            is_priming = _priming
             with _cache_lock:
                 ts_map = {p: c["ts"] for p, c in _data_cache.items()}
-            json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map})
+            json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map, "priming": is_priming})
             return
 
         serve_static(self.path, self)
