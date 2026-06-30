@@ -113,8 +113,8 @@
   [data-theme="light"] .brand-info h1 { color: var(--amber); }
   [data-theme="light"] .brand-logo svg { stroke: var(--amber); filter: drop-shadow(0 0 8px rgba(249,115,22,.25)); }
   [data-theme="light"] .brand-dot { background: var(--amber); box-shadow: 0 0 8px rgba(249,115,22,.25), 0 0 20px rgba(249,115,22,.15); }
-  [data-theme="light"] .brand-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red-glow), 0 0 20px var(--red-glow); }
-  [data-theme="light"] .brand-dot.priming { background: var(--amber); box-shadow: 0 0 8px rgba(249,115,22,.25), 0 0 20px rgba(249,115,22,.15); }
+  [data-theme="light"] .brand-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red-glow); animation: statusBreathe 2s ease-in-out infinite; }
+  [data-theme="light"] .brand-dot.priming { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); animation: statusBreathe 1.5s ease-in-out infinite; }
   [data-theme="light"] .per-opt.mo.sel { color: var(--amber); }
   [data-theme="light"] .period-pill { background: linear-gradient(180deg, rgba(249,115,22,.04) 0%, transparent 50%), var(--surface); box-shadow: 0 1px 0 rgba(249,115,22,.06) inset, 0 2px 12px rgba(0,0,0,.06); border-color: rgba(249,115,22,.12); }
   [data-theme="light"] .stat-card { box-shadow: 0 1px 0 rgba(249,115,22,.04) inset, 0 2px 16px rgba(0,0,0,.06); border-color: rgba(249,115,22,.08); }
@@ -303,8 +303,8 @@
     top: -1px;
     transition: background .3s, box-shadow .3s;
   }
-  .brand-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red-glow), 0 0 20px var(--red-glow); }
-  .brand-dot.priming { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 20px var(--amber-glow); }
+  .brand-dot.offline { background: var(--red); box-shadow: 0 0 8px var(--red-glow), 0 0 20px var(--red-glow); animation: statusBreathe 2s ease-in-out infinite; }
+  .brand-dot.priming { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow), 0 0 20px var(--amber-glow); animation: statusBreathe 1.5s ease-in-out infinite; }
 
   /* ---- PERIOD SELECTOR ---- */
   .period-group {
@@ -397,8 +397,8 @@
     animation: syncIconSpin 3s linear infinite;
     transition: color .3s;
   }
-  .sync-bar.offline svg { color: var(--red); animation: none; }
-  .sync-bar.priming svg { color: var(--amber); animation: none; }
+  .sync-bar.offline svg { color: var(--red); }
+  .sync-bar.priming svg { color: var(--amber); }
   [data-theme="light"] .sync-bar.offline svg { color: var(--red); }
   [data-theme="light"] .sync-bar.priming svg { color: var(--accent2); }
   .version-link {
@@ -406,21 +406,17 @@
     font-family: var(--font-mono);
     font-size: 10px;
     color: var(--t-tertiary);
-    cursor: pointer;
-    user-select: none;
+    cursor: default;
+    user-select: text;
   }
-  .version-link .vl-hash {
-    display: none;
-  }
-  @media (min-width: 861px) {
-    .version-link .vl-hash { display: inline; }
-  }
-  .version-link.show-hash .vl-hash { display: inline !important; }
-  [data-theme="light"] .version-link .vl-hash { }
 
   @keyframes syncIconSpin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+  @keyframes statusBreathe {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.45; transform: scale(0.8); }
   }
 
   .add-modal {
@@ -1438,8 +1434,8 @@
     <polyline points="1 20 1 14 7 14"></polyline>
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
   </svg>
-  <span id="syncLabel">数据同步</span>
-  <span class="version-link" id="versionLink">@MOWSXC/CXYNB-ZOHO <span class="vl-hash" id="vlHash"></span></span>
+  <span id="syncLabel">SYNC</span>
+  <span class="version-link">@MOWSXC/CXYNB-ZOHO</span>
 </div>
 
 <div class="chart-fullscreen" id="chartFS" onclick="if(event.target===this)toggleFullscreen()">
@@ -1453,14 +1449,10 @@ window._lastRenderHash='';
 window._lastHash='';
 (function(){
   var h = window._appVersion;
-  var el = document.getElementById('vlHash');
-  if (el && h && h !== 'dev') el.textContent = '™' + h;
-})();
-(function(){
-  var link = document.getElementById('versionLink');
-  if (link) link.addEventListener('click', function(){
-    link.classList.toggle('show-hash');
-  });
+  var el = document.querySelector('.version-link');
+  if (el && h && h !== 'dev') {
+    el.textContent = '@MOWSXC/CXYNB-ZOHO | ' + h;
+  }
 })();
 function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:String(msg).slice(0,200)})); }catch(e){} }
 function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"');}
@@ -1619,7 +1611,7 @@ function render(data) {
 
 
 
-  document.getElementById('syncLabel').textContent='数据同步 '+new Date().toLocaleString('zh-CN');
+  document.getElementById('syncLabel').textContent='SYNC ' + new Date().toLocaleString('zh-CN');
   var contentEl=document.getElementById('content');
   var newHash=data._data_hash||'';
   var curPeriod=data.period||'';
