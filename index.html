@@ -13,9 +13,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <script>
     (function(){
-      var s = localStorage.getItem('theme');
-      if (!s) s = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (s === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      if (localStorage.getItem('theme') === 'light') document.documentElement.setAttribute('data-theme', 'light');
     })();
   </script>
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
