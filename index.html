@@ -2169,33 +2169,8 @@ window.addEventListener('offline', function() {
   updateApiStatus('offline');
 });
 function checkApiHealth() {
-  if (!navigator.onLine) {
-    updateApiStatus('offline');
-    return Promise.resolve(false);
-  }
-  return fetch('/ping', { cache: 'no-cache' })
-    .then(function(r) {
-      if (r.ok) {
-        return r.json().then(function(d) {
-          if (d && d.priming) {
-            updateApiStatus('priming');
-            return 'priming';
-          }
-          updateApiStatus('online');
-          return true;
-        });
-      }
-      if (r.status === 202) {
-        updateApiStatus('priming');
-        return 'priming';
-      }
-      updateApiStatus('offline');
-      return false;
-    })
-    .catch(function() {
-      updateApiStatus('offline');
-      return false;
-    });
+  updateApiStatus(navigator.onLine ? 'online' : 'offline');
+  return navigator.onLine;
 }
 setInterval(checkApiHealth, 30000);
 setTimeout(checkApiHealth, 2000);
