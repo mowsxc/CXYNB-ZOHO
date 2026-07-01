@@ -1267,7 +1267,7 @@ var _lastTrimCache=0;
   }
 })();
 function logFE(msg){ try{ navigator.sendBeacon('api/log',JSON.stringify({ts:new Date().toISOString().slice(11,23),msg:String(msg).slice(0,200)})); }catch(e){} }
-function escJs(s){return String(s).replace(/[\\'"]/g,function(c){return '\\'+c;}).replace(/</g,'\\x3c');}
+function escJs(s){return String(s).replace(/[\\']/g,function(c){return '\\'+c;}).replace(/"/g,'\\x22').replace(/</g,'\\x3c').replace(/>/g,'\\x3e').replace(/&/g,'\\x26');}
 window.addEventListener('error',function(e){ logFE('ERR: '+e.message+' @ '+e.filename+':'+e.lineno); });
 window.addEventListener('unhandledrejection',function(e){ logFE('REJ: '+(e.reason&&e.reason.message||String(e.reason))); });
 logFE('page_loaded');
@@ -2156,6 +2156,8 @@ function initTableScroll(){
   var tables=document.querySelectorAll('.table-scroll');
   tables.forEach(function(el){
     if(el.scrollWidth<=el.clientWidth) return;
+    if(el.dataset.tsInited) return;
+    el.dataset.tsInited='1';
     el.classList.add('is-scrollable');
     el.addEventListener('scroll',function(){
       el.classList.toggle('is-scrolled',el.scrollLeft+el.clientWidth>=el.scrollWidth-4);

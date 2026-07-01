@@ -70,6 +70,8 @@ def _build_data(rows):
         return {"error": "表格行数不足"}
 
     period = rows[0][0] if rows[0] else ""
+    if not re.match(r"\d{4}/\d+", period):
+        return {"error": f"无法识别月份标识: {period}"}
 
     summary = {}
     if len(rows) >= 3:

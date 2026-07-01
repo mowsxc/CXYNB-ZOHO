@@ -42,7 +42,9 @@ def _prime_cache_async():
     finally:
         _priming = False
 
-def _wait_for_prime(timeout=10):
+_workspace_real = os.path.realpath(WORKSPACE)
+
+def _wait_for_prime(timeout=5):
     """Block until priming completes or timeout."""
     start = time.time()
     while _priming and time.time() - start < timeout:
@@ -239,8 +241,8 @@ except Exception:
 def serve_static(path, handler):
     if path in ("/", ""):
         path = "/index.html"
-    filepath = os.path.realpath(os.path.join(WORKSPACE, path.lstrip("/")))
-    if not filepath.startswith(os.path.realpath(WORKSPACE)):
+    filepath = os.path.realpath(os.path.join(_workspace_real, path.lstrip("/")))
+    if not filepath.startswith(_workspace_real):
         handler.send_response(403)
         handler.end_headers()
         handler.wfile.write(b"Forbidden")
@@ -516,7 +518,7 @@ class ThreadingHTTPServer(http.server.ThreadingHTTPServer):
 def _signal_handler(signum, frame):
     print(f"\nReceived signal {signum}, shutting down...", flush=True)
     if server_instance:
-        server_instance.shutdown()
+        threading.Thread(target=server_instance.shutdown, daemon=True).start()
     sys.exit(0)
 
 
