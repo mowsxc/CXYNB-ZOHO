@@ -61,7 +61,6 @@
     --accent2: var(--purple);
     --accent2-hover: #7c3aed;
     --thead-bg: rgba(7,11,22,.94);
-    --stat-icon-bg: rgba(16,185,129,.1);
     --orb-opacity: .28;
     --grid-opacity: .025;
     --grid-stroke: rgba(255,255,255,.6);
@@ -108,7 +107,6 @@
     --accent2: var(--purple);
     --accent2-hover: #ea580c;
     --thead-bg: rgba(255,255,255,.94);
-    --stat-icon-bg: rgba(249,115,22,.08);
     --orb-opacity: .15;
     --grid-opacity: .04;
     --grid-stroke: rgba(249,115,22,.06);
@@ -127,9 +125,6 @@
   [data-theme="light"] .brand-dot.priming { background: var(--amber); box-shadow: 0 0 8px var(--amber-glow); animation: statusBreathe 1.5s ease-in-out infinite; }
   [data-theme="light"] .per-opt.mo.sel { color: var(--amber); }
   [data-theme="light"] .period-pill { background: linear-gradient(180deg, rgba(249,115,22,.04) 0%, transparent 50%), var(--surface); box-shadow: 0 1px 0 rgba(249,115,22,.06) inset, 0 2px 12px rgba(0,0,0,.06); border-color: rgba(249,115,22,.12); }
-  [data-theme="light"] .stat-card { box-shadow: 0 1px 0 rgba(249,115,22,.04) inset, 0 2px 16px rgba(0,0,0,.06); border-color: rgba(249,115,22,.08); }
-  [data-theme="light"] .stat-card:hover { box-shadow: 0 1px 0 rgba(249,115,22,.08) inset, 0 4px 28px rgba(249,115,22,.10); border-color: rgba(249,115,22,.20); }
-  [data-theme="light"] .stat-card::after { background: radial-gradient(ellipse at 0% 0%, rgba(249,115,22,.06), transparent 70%); opacity: 1; }
   [data-theme="light"] .hp-box { box-shadow: 0 4px 24px rgba(0,0,0,.10), 0 0 0 1px rgba(249,115,22,.04) inset; }
   [data-theme="light"] .hp-box.add-mode { background: linear-gradient(180deg, rgba(249,115,22,.03) 0%, transparent 60%), var(--surface-dark); box-shadow: 0 1px 0 rgba(249,115,22,.05) inset, 0 8px 32px rgba(0,0,0,.08); }
   [data-theme="light"] .hp-icon { background: rgba(249,115,22,.12); color: var(--accent2); }
@@ -149,18 +144,7 @@
   [data-theme="light"] .theme-toggle:hover { border-color: var(--amber); color: var(--amber); box-shadow: 0 0 20px rgba(249,115,22,.15); }
   [data-theme="light"] .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
   [data-theme="light"] .theme-toggle.sunny:hover { box-shadow: 0 0 20px rgba(249,115,22,.20); }
-  [data-theme="light"] .per-div { background: rgba(249,115,22,.12); }
   [data-theme="light"] .per-opt:hover { color: var(--amber); }
-
-  [data-theme="light"] .stat-card {
-    background: linear-gradient(180deg, rgba(249,115,22,.03) 0%, transparent 60%), var(--surface);
-  }
-  [data-theme="light"] .stat-card::after {
-    background: radial-gradient(ellipse 35% 30% at 25% 35%, rgba(249,115,22,.05), transparent 60%),
-                radial-gradient(ellipse 22% 28% at 72% 65%, rgba(249,115,22,.03), transparent 55%);
-    opacity: 1;
-  }
-  [data-theme="light"] .grid-line-shadow { background: rgba(249,115,22,.04) 0px !important; }
 
   [data-theme="light"] .table-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); }
   [data-theme="light"] .table-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,.25); }
@@ -189,24 +173,6 @@
   [data-theme="light"] .range-btn:active { background: rgba(249,115,22,.06); }
   [data-theme="light"] .fs-btn:hover { background: rgba(249,115,22,.04); }
   [data-theme="light"] .fs-btn:active { background: rgba(249,115,22,.06); }
-  [data-theme="light"] .trend-legend .leg-item:hover { background: rgba(249,115,22,.05); }
-  [data-theme="light"] .trend-legend .leg-item:active { background: rgba(249,115,22,.08); }
-
-  [data-theme="light"] .panel-section {
-    background: linear-gradient(180deg, rgba(249,115,22,.03) 0%, transparent 70%), var(--surface);
-  }
-  [data-theme="light"] .panel-section::after {
-    background: radial-gradient(ellipse 35% 22% at 25% 25%, rgba(249,115,22,.04), transparent 55%),
-                radial-gradient(ellipse 20% 18% at 75% 70%, rgba(249,115,22,.02), transparent 50%);
-    opacity: 1;
-  }
-  [data-theme="light"] .panel-bg {
-    background: radial-gradient(circle, rgba(249,115,22,.04), transparent 70%);
-  }
-  [data-theme="light"] .panel-row:hover { background: rgba(249,115,22,.03); }
-  [data-theme="light"] .panel-row-tag { background: rgba(249,115,22,.04); }
-  [data-theme="light"] .panel-sep { background: linear-gradient(90deg, transparent, rgba(249,115,22,.08), transparent); }
-
   * { margin:0; padding:0; box-sizing:border-box; }
 
   html { -webkit-tap-highlight-color: transparent; }
@@ -243,8 +209,6 @@
   @keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-70px,-50px) scale(1.12)} 66%{transform:translate(50px,40px) scale(.85)} }
   @keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-80px,-40px) scale(1.08)} 66%{transform:translate(30px,60px) scale(.92)} }
 
-  .bg-particles { display:none; }
-
   .bg-grid {
     position:fixed; inset:0; z-index:0; pointer-events:none; opacity:var(--grid-opacity);
     background-image:
@@ -253,8 +217,6 @@
     background-size:64px 64px;
     transform:translateZ(0);
   }
-  .bg-noise { display:none; }
-
   .app {
     position: relative; z-index: 1;
     max-width: 1080px;
@@ -593,111 +555,6 @@
   .theme-toggle.sunny { color: var(--amber); border-color: var(--amber); }
   .theme-toggle.sunny:hover { box-shadow: 0 0 20px var(--amber-glow); }
 
-  /* ---- STAT CARDS ---- */
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 32px;
-  }
-
-  .stat-card {
-    position: relative;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 60%),
-      var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 24px 24px;
-    contain: layout style paint;
-    overflow: hidden;
-    backface-visibility: hidden;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.06) inset,
-      0 0 0 1px rgba(255,255,255,.03) inset,
-      0 4px 24px rgba(0,0,0,.18);
-    transition: border-color .3s, transform .4s cubic-bezier(.25,.8,.25,1.2);
-  }
-  .stat-card:hover {
-    border-color: var(--border-hover);
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.1) inset,
-      0 0 0 1px rgba(255,255,255,.06) inset,
-      0 12px 48px rgba(0,0,0,.28);
-    transform: perspective(600px) rotateX(2deg) translateY(-4px);
-  }
-  .stat-card:active {
-    transform: perspective(600px) rotateX(0deg) translateY(0) scale(.98);
-    transition-duration: .1s;
-  }
-  .stat-card::after {
-    content: '';
-    position: absolute; inset: -25%;
-    border-radius: inherit;
-    pointer-events: none; z-index: -1;
-    background:
-      radial-gradient(ellipse 35% 30% at 25% 35%, rgba(255,255,255,.07), transparent 60%),
-      radial-gradient(ellipse 22% 28% at 72% 65%, rgba(255,255,255,.04), transparent 55%),
-      radial-gradient(ellipse 18% 22% at 50% 15%, rgba(255,255,255,.05), transparent 50%);
-    opacity: .5;
-  }
-  .stat-card::before {
-    content: '';
-    position: absolute; inset: 0;
-    border-radius: var(--radius-lg);
-    opacity: 0; transition: opacity .4s;
-    pointer-events: none; z-index: -1;
-  }
-  .stat-card.s-income::before { background: radial-gradient(ellipse 80% 80% at 0% 0%, var(--green-glow), transparent); }
-  .stat-card.s-meituan::before { background: radial-gradient(ellipse 80% 80% at 0% 0%, var(--amber-glow), transparent); }
-  .stat-card.s-expense::before { background: radial-gradient(ellipse 80% 80% at 0% 0%, var(--red-glow), transparent); }
-  .stat-card.s-cash::before { background: radial-gradient(ellipse 80% 80% at 0% 0%, var(--purple-glow), transparent); }
-  .stat-card:hover::before { opacity: 1; }
-
-  .stat-icon {
-    width: 38px; height: 38px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    position: relative; z-index: 1;
-  }
-  .s-income .stat-icon { background: rgba(16,185,129,.14); color: var(--green); }
-  .s-meituan .stat-icon { background: rgba(245,158,11,.14); color: var(--amber); }
-  .s-expense .stat-icon { background: rgba(244,63,94,.14); color: var(--red); }
-  .s-cash .stat-icon { background: rgba(255,26,117,.14); color: var(--pink); }
-  .stat-icon svg { width: 16px; height: 16px; }
-
-  .stat-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--t-quaternary);
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    position: relative; z-index: 1;
-  }
-  .stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -.04em;
-    line-height: 1.15;
-    position: relative; z-index: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .stat-value.mono { font-family: var(--font-mono); font-size: 25px; font-weight: 700; }
-  .s-income .stat-value { color: var(--green); }
-  .s-meituan .stat-value { color: var(--amber); }
-  .s-expense .stat-value { color: var(--red); }
-  .s-cash .stat-value { color: var(--pink); }
-
-  .stat-hint {
-    font-size: 12px;
-    color: var(--hint-color);
-    margin-top: 6px;
-    position: relative; z-index: 1;
-    line-height: 1.4;
-  }
-
   /* ---- ITEM CARDS ---- */
   .items {
     display: grid;
@@ -859,10 +716,6 @@
     50% { transform: scale(1.06); }
   }
 
-  .card-tooltip {
-    display: none;
-  }
-
   /* ---- TREND PANEL ---- */
   .trend-panel {
     background:
@@ -1018,84 +871,6 @@
     }
     .fs-close { top: 8px; right: 8px; width: 32px; height: 32px; font-size: 14px; }
   }
-
-  /* ---- GLASS PANEL ---- */
-  .panel {
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.04) 0%, transparent 70%),
-      var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-bottom: 16px;
-    position: relative;
-    box-shadow:
-      0 1px 0 rgba(255,255,255,.06) inset,
-      0 4px 24px rgba(0,0,0,.18);
-    contain: layout style paint;
-  }
-  .panel::after {
-    content: '';
-    position: absolute; inset: -25%;
-    pointer-events: none; z-index: -1;
-    background:
-      radial-gradient(ellipse 35% 22% at 25% 25%, rgba(255,255,255,.05), transparent 55%),
-      radial-gradient(ellipse 20% 18% at 75% 70%, rgba(255,255,255,.03), transparent 50%);
-    opacity: .35;
-  }
-  .cols-2 .panel { margin-bottom: 0; }
-
-  .panel-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    color: var(--t-secondary);
-  }
-  .panel-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .pd-green { background: var(--green); box-shadow: 0 0 10px var(--green-glow); }
-  .pd-red { background: var(--red); box-shadow: 0 0 10px var(--red-glow); }
-  .pd-purple { background: var(--purple); box-shadow: 0 0 10px var(--purple-glow); }
-
-  .panel-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 15px 24px;
-    font-size: 14px;
-    color: var(--t-secondary);
-    border-bottom: 1px solid var(--border);
-    transition: background .15s;
-  }
-  .panel-row:last-child { border-bottom: none; }
-  .panel-row:hover { background: rgba(255,255,255,.02); }
-
-  .panel-row .val {
-    font-weight: 600;
-    font-size: 15px;
-    letter-spacing: -.01em;
-  }
-  .val-green { color: var(--green); }
-  .val-red { color: var(--red); }
-  .val-amber { color: var(--amber); }
-
-  .panel-row.subtotal {
-    background: rgba(255,255,255,.03);
-    border-top: 1px solid var(--border);
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--t-primary);
-  }
-  .panel-row.subtotal .val { font-size: 16px; }
 
   /* ---- CASH HERO ---- */
   .cash-section {
@@ -1340,16 +1115,10 @@
     .brand-logo { width: 66px; height: 66px; }
     .brand-logo svg { width: 66px; height: 66px; }
     .brand-info h1 { font-size: 20px; }
-    .stats { grid-template-columns: 1fr 1fr; gap: 10px; }
-    .stat-card { padding: 20px 16px; }
-    .stat-value { font-size: 23px; }
-    .stat-value.mono { font-size: 20px; }
     .items { grid-template-columns: repeat(3, 1fr); }
     .table-scroll table { min-width: 700px; font-size: 12px; }
     .table-scroll thead th { padding: 10px 10px; font-size: 12px; }
     .table-scroll tbody td { padding: 8px 10px; font-size: 12px; }
-    .panel-row { padding: 13px 18px; }
-    .panel-head { padding: 15px 18px; }
     .trend-panel { padding: 16px 10px; }
     .trend-header { flex-wrap: wrap; }
     .range-btn { font-size: 9px; padding: 3px 8px; }
@@ -1368,9 +1137,6 @@
     .card-back .fb-prev { font-size: 9px; }
     .card-back .fb-delta { font-size: 11px; padding: 1px 5px; }
     .card-back .fb-delta { font-size: 12px; padding: 1px 6px; margin-top: 5px; }
-    .stat-card { padding: 16px 14px; }
-    .stat-value { font-size: 20px; }
-    .stat-value.mono { font-size: 18px; }
     .trend-panel { padding: 14px 8px; }
     .trend-header { gap: 6px; }
     .trend-title { font-size: 11px; }
@@ -1403,7 +1169,6 @@
   <div class="bg-orb bg-orb-3"></div>
 </div>
 <div class="bg-grid"></div>
-<div class="bg-noise"></div>
 
 <div class="app" id="app">
 
@@ -1493,7 +1258,6 @@
 window._appVersion='dev';
 window._lastRenderHash='';
 var _lastTrimCache=0;
-window._lastHash='';
 (function(){
   var el = document.querySelector('.version-link');
   if (el) {
@@ -1550,11 +1314,6 @@ function render(data) {
     if(tkeysAll[ti]===cp){ if(ti>0){prevPeriod=tkeysAll[ti-1]; prevSum=((data.trends||{})[prevPeriod]||{});} break; }
   }
   if(!prevPeriod&&tkeysAll.length>1){ prevPeriod=tkeysAll[tkeysAll.length-2]; prevSum=((data.trends||{})[prevPeriod]||{}); }
-  window._cardCompare={now:s, prev:prevSum, prevPeriod:prevPeriod, curPeriod:cp};
-
-  var h='';
-
-  /* --- Item cards --- */
   var cardDefs=[
     {key:'网费', cls:'ic-green', cur:nf, icon:'<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>'},
     {key:'售货', cls:'ic-green', cur:sl, icon:'<path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/>'},
@@ -1678,10 +1437,11 @@ function render(data) {
     var svgDiv=document.getElementById('chartSvg');
     if(skel&&svgDiv){
       svgDiv.innerHTML=buildChartSvg();
-      window._lastChartHash=newHash;
       skel.style.display='none';
       svgDiv.style.display='block';
     }
+    var tip=document.getElementById('trendTip');
+    if(tip){ tip.style.display='none'; tip.style.opacity='1'; }
     var tbody=document.getElementById('dailyBody');
     if(tbody){
       var daily=(data.daily||[]).slice().reverse();
@@ -1710,7 +1470,37 @@ function render(data) {
       }
       tbody.innerHTML=tb;
     }
+    /* --- Rebuild card backs (flip side) --- */
+    var tkeysAll=Object.keys(data.trends||{}).sort();
+    var prevSum=null, prevPeriod=null;
+    var cp=data.period||'';
+    for(var ti=0;ti<tkeysAll.length;ti++){
+      if(tkeysAll[ti]===cp){ if(ti>0){prevPeriod=tkeysAll[ti-1]; prevSum=((data.trends||{})[prevPeriod]||{});} break; }
+    }
+    if(!prevPeriod&&tkeysAll.length>1){ prevPeriod=tkeysAll[tkeysAll.length-2]; prevSum=((data.trends||{})[prevPeriod]||{}); }
+    var cBackDefs=[
+      {key:'网费', cur:nf},{key:'售货', cur:sl},{key:'退款', cur:rf},
+      {key:'支出', cur:ex},{key:'美团', cur:mt_},{key:'现金', cur:cash}
+    ];
+    var itemCards=existingCards.querySelectorAll('.item-card');
+    for(var ci=0;ci<cBackDefs.length&&ci<itemCards.length;ci++){
+      var cd=cBackDefs[ci];
+      var ck=cd.key==='现金'?'现金结余':cd.key;
+      var prevVal=prevSum?parseFloat(getV(prevSum,ck).replace(/[^\d.]/g,''))||0:0;
+      var delta=cd.cur-prevVal;
+      var dSign=delta>=0?'+':''; var dCls=delta>=0?'up':'down';
+      var back=prevSum
+        ?'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">'+prevPeriod.replace(/-/g,'')+' '+fmY(prevVal)+'</div><div class="fb-delta '+dCls+'">'+dSign+fmY(delta)+' <span class="fb-arrow">'+(delta>=0?'&#9650;':'&#9660;')+'</span></div></div>'
+        :'<div class="card-face card-back"><div class="fb-island">'+cd.key+'</div><div class="fb-cur">'+fmY(cd.cur)+'</div><div class="fb-prev">暂无上月数据</div></div>';
+      var inner=itemCards[ci].querySelector('.card-inner');
+      if(inner){
+        var oldBack=inner.querySelector('.card-back');
+        if(oldBack) oldBack.remove();
+        inner.insertAdjacentHTML('beforeend', back);
+      }
+    }
     window.scrollTo(sx, sy);
+    initTableScroll();
     return;
   }
 
@@ -1722,11 +1512,11 @@ function render(data) {
   var svgDiv=document.getElementById('chartSvg');
   if (skel&&svgDiv) {
     svgDiv.innerHTML=buildChartSvg();
-    window._lastChartHash=newHash;
     skel.style.display='none';
     svgDiv.style.display='block';
   }
   window.scrollTo(sx, sy);
+  initTableScroll();
 }
 
 function buildChartSvg(rangeN) {
@@ -2014,11 +1804,9 @@ function loadMonth(requestedPeriod) {
   try{ cached=JSON.parse(localStorage.getItem('cache_'+requestedPeriod)); }catch(e){}
   var loadingTimer=null;
   if(cached&&cached._data_hash!==window._lastRenderHash){
-    window._lastHash=cached._data_hash||'';
     window._monthsData=cached.available||{};
     render(cached);
   } else if(cached){
-    window._lastHash=cached._data_hash||'';
     window._monthsData=cached.available||{};
   } else {
     loadingTimer=setTimeout(function(){
@@ -2044,7 +1832,6 @@ function loadMonth(requestedPeriod) {
       if(d.offline) throw new Error(d.error || '离线模式，暂无缓存数据');
       if(window._curPeriod && d.period !== window._curPeriod) return;
       if(loadingTimer) clearTimeout(loadingTimer);
-      window._lastHash=d._data_hash||'';
       window._monthsData=d.available||{};
       if(d._priming) updateApiStatus('priming');
       render(d);
@@ -2130,7 +1917,6 @@ fetchWithRetry('api/data',3,1000)
     logFE('fetch_ok: '+d.period+' rows='+(d.daily||[]).length);
     if(d._priming) updateApiStatus('priming');
     window._monthsData=d.available||{};
-    window._lastHash=d._data_hash||'';
     render(d);
     try{
       var p=d.period||'';
@@ -2163,7 +1949,6 @@ fetchWithRetry('api/data',3,1000)
       var d=JSON.parse(localStorage.getItem('cache_'+cachedKey));
       if(d&&d._data_hash){
         window._monthsData=d.available||{};
-        window._lastHash=d._data_hash||'';
         render(d);
       }
     }catch(e){ logFE('eager_render_err: '+e.message); }
@@ -2197,6 +1982,25 @@ function checkApiHealth() {
 }
 setInterval(checkApiHealth, 30000);
 setTimeout(checkApiHealth, 2000);
+
+/* Background data refresh: every 25s */
+function refreshData(){
+  if(!navigator.onLine||!window._curPeriod) return;
+  fetch('api/data?period='+encodeURIComponent(window._curPeriod))
+    .then(function(r){
+      if(r.status===202||r.status===503||!r.ok) return null;
+      return r.json();
+    })
+    .then(function(d){
+      if(!d||d.error||d.offline) return;
+      if(window._curPeriod&&d.period!==window._curPeriod) return;
+      window._monthsData=d.available||{};
+      render(d);
+      try{ trimCache(); localStorage.setItem('cache_'+d.period, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
+    })
+    .catch(function(){});
+}
+setTimeout(function(){ setInterval(refreshData, 25000); }, 10000);
 
 function toggleTheme(){
   var html=document.documentElement;
@@ -2345,30 +2149,20 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 
 /* Table horizontal scroll hint */
+function initTableScroll(){
+  var tables=document.querySelectorAll('.table-scroll');
+  tables.forEach(function(el){
+    if(el.scrollWidth<=el.clientWidth) return;
+    el.classList.add('is-scrollable');
+    el.addEventListener('scroll',function(){
+      el.classList.toggle('is-scrolled',el.scrollLeft+el.clientWidth>=el.scrollWidth-4);
+    },{passive:true});
+  });
+}
 (function(){
-  function initTableScroll(){
-    var tables=document.querySelectorAll('.table-scroll');
-    tables.forEach(function(el){
-      if(el.scrollWidth<=el.clientWidth) return;
-      el.classList.add('is-scrollable');
-      el.addEventListener('scroll',function(){
-        el.classList.toggle('is-scrolled',el.scrollLeft+el.clientWidth>=el.scrollWidth-4);
-      },{passive:true});
-    });
-  }
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',initTableScroll);
-  } else {
-    initTableScroll();
-  }
-  /* Re-check after content renders */
-  var origRender=window.render;
-  if(typeof origRender==='function'){
-    window.render=function(){
-      origRender.apply(this,arguments);
-      setTimeout(initTableScroll,100);
-    };
-  }
+  } else { initTableScroll(); }
 })();
 </script>
 
@@ -2404,26 +2198,17 @@ document.addEventListener('DOMContentLoaded',function(){
 
 <script>
 if ("serviceWorker" in navigator) {
-  var refreshing = false
+  var refreshing = false;
   navigator.serviceWorker.addEventListener("controllerchange", function() {
-    if (refreshing) return
-    refreshing = true
-    window.location.reload()
-  })
-  navigator.serviceWorker.register("sw.js").then(function(reg) {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+  navigator.serviceWorker.register("sw.js?v=3").then(function(reg) {
     logFE('sw_reg_ok scope='+reg.scope);
-    reg.addEventListener("updatefound", function() {
-      var installing = reg.installing
-      if (!installing) return
-      installing.addEventListener("statechange", function() {
-        if (installing.state === "installed" && navigator.serviceWorker.controller) {
-          installing.postMessage("skipWaiting")
-        }
-      })
-    })
   }).catch(function(e) {
-    console.log("SW failed:", e)
-  })
+    logFE('sw_reg_fail: '+e.message);
+  });
 }
 </script>
 </body>

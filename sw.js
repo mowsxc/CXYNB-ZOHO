@@ -1,4 +1,4 @@
-var CACHE_NAME = 'cyxnb-zoho-v1';
+var CACHE_NAME = 'cyxnb-zoho-v3';
 var ASSETS = [
   '/',
   '/index.html',
@@ -6,13 +6,12 @@ var ASSETS = [
   '/favicon.svg',
   '/icon-192.png',
   '/icon-512.png',
-  '/months.json',
 ];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(ASSETS);
+      return cache.addAll(ASSETS).catch(function(e){ console.warn('SW cache addAll failed:', e); });
     })
   );
   self.skipWaiting();
@@ -27,12 +26,40 @@ self.addEventListener('activate', function(event) {
         })
       );
     })
+    .then(function() {
+      return caches.open(CACHE_NAME).then(function(cache) {
+        return Promise.all(ASSETS.map(function(url) {
+          return fetch(url + '?t=' + Date.now()).then(function(r) {
+            if (r.ok) cache.put(url, r);
+          }).catch(function(){});
+        }));
+      });
+    })
+    .then(function() {
+      return self.clients.claim();
+    })
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', function(event) {
-  if (event.request.method !== 'GET') return;
+  var u = new URL(event.request.url);
+  if (u.pathname.startsWith('/api/') || u.pathname === '/ping') return;
+  if (u.pathname === '/' || u.pathname.endsWith('.html')) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        if (response && response.status === 200) {
+          var responseClone = response.clone();
+          caches.open(CACHE_NAME).then(function(cache) {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return response;
+      }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(function(cached) {
       var networkFetch = fetch(event.request).then(function(response) {

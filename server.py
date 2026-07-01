@@ -181,7 +181,7 @@ def _background_refresh():
                     print(f"  refresh fail {period}: {e}", flush=True)
         except Exception as e:
             print(f"  background refresh error: {e}", flush=True)
-            break
+            time.sleep(60)
 
 
 def _data_hash(data):
