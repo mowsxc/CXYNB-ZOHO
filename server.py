@@ -182,7 +182,7 @@ def _background_refresh():
                     h = _data_hash(data)
                     with _cache_lock:
                         old = _data_cache.get(period)
-                        if not old or _data_hash(old["data"]) != h:
+                        if not old or old.get("hash") != h:
                             _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
                 except Exception as e:
                     print(f"  refresh fail {period}: {e}", flush=True)
@@ -258,6 +258,7 @@ def serve_static(path, handler):
             ".css": "text/css; charset=utf-8",
             ".json": "application/json; charset=utf-8",
             ".png": "image/png",
+            ".ico": "image/x-icon",
             ".svg": "image/svg+xml",
         }.get(ext, "application/octet-stream")
         handler.send_header("Content-Type", ct)

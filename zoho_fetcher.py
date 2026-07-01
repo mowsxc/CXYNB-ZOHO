@@ -70,7 +70,7 @@ def _build_data(rows):
         return {"error": "表格行数不足"}
 
     period = rows[0][0] if rows[0] else ""
-    if not re.match(r"\d{4}/\d+", period):
+    if not re.match(r"^\d{4}/\d+$", period):
         return {"error": f"无法识别月份标识: {period}"}
 
     summary = {}
@@ -103,7 +103,7 @@ def _build_data(rows):
 
 def normalize_period(raw):
     """将 "2026/6" 或 "2026/12" 归一化为 "2026-06" 格式。"""
-    m = re.match(r"(\d{4})/(\d+)", raw)
+    m = re.match(r"^(\d{4})/(\d+)$", raw)
     if m:
         return f"{m.group(1)}-{int(m.group(2)):02d}"
     return raw

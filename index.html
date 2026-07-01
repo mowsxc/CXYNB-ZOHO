@@ -1255,7 +1255,6 @@
 </div>
 
 <script>
-window._appVersion='dev';
 window._lastRenderHash='';
 var _lastTrimCache=0;
 (function(){
@@ -1305,6 +1304,20 @@ function render(data) {
   var sl=parseFloat((s['售货']||'0').replace(/[^\d.]/g,''))||0;
   var ex=parseFloat((s['支出']||'0').replace(/[^\d.]/g,''))||0;
   var getV=function(obj,key){return obj[key]||(key==='退款'?obj['退款金额']:'')||'0';};
+  var buildTableRow=function(r,divider){
+    var shift=r['班次']||'';
+    return '<tr class="'+divider+'">'
+      +'<td class="cell-date">'+(r['日期']||'')+'</td>'
+      +'<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>'
+      +'<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>'
+      +'<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>'
+      +'<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>'
+      +'<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>'
+      +'<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>'
+      +'<td class="cell-memo" title="'+escJs(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>'
+      +'<td class="cell-memo" title="'+escJs(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>'
+      +'</tr>';
+  };
   var rf=parseFloat(getV(s,'退款').replace(/[^\d.]/g,''))||0;
 
   // Store prev-month data for card comparison
@@ -1402,17 +1415,7 @@ function render(data) {
       lastDay=day;
       var shift=r['班次']||'';
 
-      h+='<tr class="'+divider+'">';
-      h+='<td class="cell-date">'+showDay+'</td>';
-      h+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
-      h+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
-      h+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
-      h+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
-      h+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
-      h+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
-      h+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
-      h+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
-      h+='</tr>';
+      h+=buildTableRow(r,divider);
     }
     h+='</tbody></table></div>';
   }
@@ -1428,7 +1431,6 @@ function render(data) {
   var existingCards=contentEl.querySelector('.items');
   if(existingCards){
     window._lastRenderHash=newHash;
-    window._lastRenderPeriod=curPeriod;
     var vals={'网费':nf,'售货':sl,'退款':rf,'支出':ex,'美团':mt_,'现金':cash};
     for(var k in vals){
       var el=document.getElementById('cv-'+k);
@@ -1462,17 +1464,7 @@ function render(data) {
           var showDay=day!==lastDay?day:'';
           lastDay=day;
           var shift=r['班次']||'';
-          tb+='<tr class="'+divider+'">';
-          tb+='<td class="cell-date">'+showDay+'</td>';
-          tb+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
-          tb+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
-          tb+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
-          tb+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
-          tb+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
-          tb+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
-          tb+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
-          tb+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
-          tb+='</tr>';
+          tb+=buildTableRow(r,divider);
         }
         tbody.innerHTML=tb;
       }
@@ -1494,17 +1486,7 @@ function render(data) {
           var showDay=day!==lastDay?day:'';
           lastDay=day;
           var shift=r['班次']||'';
-          tableHTML+='<tr class="'+divider+'">';
-          tableHTML+='<td class="cell-date">'+showDay+'</td>';
-          tableHTML+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
-          tableHTML+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
-          tableHTML+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
-          tableHTML+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
-          tableHTML+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
-          tableHTML+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
-          tableHTML+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
-          tableHTML+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
-          tableHTML+='</tr>';
+          tableHTML+=buildTableRow(r,divider);
         }
         tableHTML+='</tbody></table></div>';
         chartSvg.insertAdjacentHTML('afterend', tableHTML);
@@ -1546,7 +1528,6 @@ function render(data) {
 
   /* --- 首次渲染：构建完整结构 --- */
   window._lastRenderHash=newHash;
-  window._lastRenderPeriod=curPeriod;
   contentEl.innerHTML=h;
   var skel=document.getElementById('chartSkel');
   var svgDiv=document.getElementById('chartSvg');
@@ -1759,12 +1740,12 @@ function buildPeriodOpts() {
   var yh='';
   for (var bi=0;bi<yBefore.length;bi++) {
     var by=yBefore[bi];
-    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+by+'\')">'+by+'</span>';
+    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+escJs(by)+'\')">'+by+'</span>';
   }
   yh+='<span class="per-opt yr sel" role="button" tabindex="0"'+(yHasMany?' onclick="event.stopPropagation();toggleYr()"':'')+'>'+curY+'</span>';
   for (var ai=0;ai<yAfter.length;ai++) {
     var ay=yAfter[ai];
-    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+ay+'\')">'+ay+'</span>';
+    yh+='<span class="per-opt yr hide" role="button" tabindex="0" onclick="event.stopPropagation();pickYear(\''+escJs(ay)+'\')">'+ay+'</span>';
   }
 
   var months=localData[curY].slice().sort();
@@ -1779,12 +1760,12 @@ function buildPeriodOpts() {
   var mh='';
   for (var bj=0;bj<mBefore.length;bj++) {
     var bm=mBefore[bj];
-    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+bm+'\')">'+bm+'</span>';
+    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+escJs(curY)+'-'+escJs(bm)+'\')">'+bm+'</span>';
   }
   mh+='<span class="per-opt mo sel" role="button" tabindex="0"'+(mHasMany?' onclick="event.stopPropagation();toggleMo()"':'')+'>'+curM+'</span>';
   for (var aj=0;aj<mAfter.length;aj++) {
     var am=mAfter[aj];
-    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+curY+'-'+am+'\')">'+am+'</span>';
+    mh+='<span class="per-opt mo hide" role="button" tabindex="0" onclick="event.stopPropagation();loadMonth(\''+escJs(curY)+'-'+escJs(am)+'\')">'+am+'</span>';
   }
 
   document.getElementById('yrOpts').innerHTML=yh;
