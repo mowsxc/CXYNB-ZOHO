@@ -33,6 +33,42 @@ function fetchWithTimeout(req, ms){
   });
 }
 
+// Pre-fetch current month API data into cache for offline/instant-first-load
+function prefetchApiData(cache){
+  var base = self.location.origin;
+  return fetch(base + '/api/months').then(function(r){ return r.json(); }).then(function(d){
+    var list = d.list || [];
+    var cur = list[0] || '';
+    var toFetch = [base + '/api/data'];
+    if(cur) toFetch.push(base + '/api/data?period=' + encodeURIComponent(cur));
+    return Promise.all(toFetch.map(function(url){
+      return fetch(url).then(function(r){
+        if(r.ok) cache.put(r.url, r);
+      }).catch(function(){});
+    }));
+  }).catch(function(){});
+}
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE_NAME; }).map(function(k) {
+          return caches.delete(k);
+        })
+      );
+    })
+    .then(function() {
+      return caches.open(CACHE_NAME).then(function(cache) {
+        return batchFetch(cache, ASSETS, 2).then(function(){ return prefetchApiData(cache); });
+      });
+    })
+    .then(function() {
+      return self.clients.claim();
+    })
+  );
+});
+
 function batchFetch(cache, urls, batchSize){
   var i = 0;
   function next(){
@@ -48,29 +84,19 @@ function batchFetch(cache, urls, batchSize){
   return next();
 }
 
-self.addEventListener('activate', function(event) {
-  event.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; }).map(function(k) {
-          return caches.delete(k);
-        })
-      );
-    })
-    .then(function() {
-      return caches.open(CACHE_NAME).then(function(cache) {
-        return batchFetch(cache, ASSETS, 2);
-      });
-    })
-    .then(function() {
-      return self.clients.claim();
-    })
-  );
-});
-
 self.addEventListener('fetch', function(event) {
   var u = new URL(event.request.url);
-  if (u.pathname.startsWith('/api/') || u.pathname === '/ping') return;
+  var isApi = u.pathname.startsWith('/api/') || u.pathname === '/ping';
+  if (isApi) {
+    event.respondWith(
+      fetch(event.request).then(function(response) {
+        return response;
+      }).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
   if (u.pathname === '/' || u.pathname.endsWith('.html')) {
     event.respondWith(
       fetchWithTimeout(event.request, 5000).then(function(response) {
