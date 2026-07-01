@@ -1754,7 +1754,7 @@ function buildChartSvg(rangeN) {
   var groupW=nMetrics*(barW+barGap)-barGap;
   var totalW=padL+nMonths*(groupW+groupGap)-groupGap+padR;
   var chartH=isMob?200:260;
-  var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:'+totalW+'px;height:auto;max-width:none;display:block;margin:0 auto">';
+  var svg='<svg class="trend-chart" viewBox="0 0 '+totalW+' '+chartH+'" style="width:'+totalW+'px;height:auto;max-width:100%;display:block;margin:0 auto">';
 
   svg+='<defs>';
   for (var di=0;di<nMetrics;di++) {
