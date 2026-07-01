@@ -27,8 +27,8 @@ _data_cache = {}       # {period: {"data": {...}, "ts": float}}
 _cache_lock = threading.Lock()
 _months_lock = threading.RLock()
 _file_lock = threading.Lock()  # protects months.json reads/writes
-_refresh_interval = 20     # seconds — current month cadence
-_historical_period = 15   # refresh historical every N cycles (15*20s=5min)
+_refresh_interval = 30     # seconds — current month cadence
+_historical_period = 10   # refresh historical every N cycles (10*30s=5min)
 _available_cache = None
 _priming = False
 server_instance = None    # for graceful shutdown
@@ -36,9 +36,11 @@ def _prime_cache_async():
     """Pre-load cache in background after server starts."""
     global _priming
     _priming = True
-    time.sleep(1)  # let server start first
-    _prime_cache()
-    _priming = False
+    time.sleep(1)
+    try:
+        _prime_cache()
+    finally:
+        _priming = False
 
 def _wait_for_prime(timeout=10):
     """Block until priming completes or timeout."""
@@ -139,12 +141,15 @@ def init_valid_months():
 def _prime_cache():
     """Pre-load all valid months into cache on startup."""
     global _data_cache
-    for period, url in _valid_months.items():
+    with _months_lock:
+        items = list(_valid_months.items())
+    for period, url in items:
         try:
             data = fetch_sheet(url, timeout=15)
             data["period"] = normalize_period(data.get("period", ""))
             h = _data_hash(data)
-            _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
+            with _cache_lock:
+                _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             print(f"  cached {period}")
         except Exception as e:
             print(f"  cache fail {period}: {e}")
@@ -206,10 +211,12 @@ def _build_trends():
     return trends
 
 
+_rate_lock = threading.Lock()
+
 def _check_rate_limit(ip, window=60, max_attempts=10):
     """Simple sliding-window rate limiter. Returns True if allowed."""
     now = time.time()
-    with _cache_lock:
+    with _rate_lock:
         attempts = PIN_RATE_LIMIT.get(ip, [])
         attempts = [t for t in attempts if now - t < window]
         PIN_RATE_LIMIT[ip] = attempts
@@ -344,7 +351,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         _valid_months[k] = v
                         _invalidate_available()
             avail = build_available(_valid_months)
-            json_response(self, {"available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
+            with _months_lock:
+                month_list = sorted(_valid_months.keys(), reverse=True)
+            json_response(self, {"available": avail, "list": month_list})
             return
 
         if path == "/api/data":
@@ -370,10 +379,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
             actual_period = period
             if not actual_period:
-                for k, v in targets.items():
-                    if v == url:
-                        actual_period = k
-                        break
+                with _months_lock:
+                    for k, v in list(targets.items()):
+                        if v == url:
+                            actual_period = k
+                            break
 
             # Wait for priming if cache is empty (max 15s)
             if _priming and actual_period and actual_period not in _data_cache:
@@ -444,13 +454,17 @@ class Handler(http.server.BaseHTTPRequestHandler):
             with _cache_lock:
                 _data_cache[period] = {"data": data, "ts": time.time(), "hash": h}
             avail = build_available(_valid_months)
-            json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted(_valid_months.keys(), reverse=True)})
+            with _months_lock:
+                sorted_keys = sorted(_valid_months.keys(), reverse=True)
+            json_response(self, {"ok": True, "period": period, "available": avail, "list": sorted_keys})
             return
 
         if path == "/api/trends":
+            with _months_lock:
+                trend_keys = sorted(_valid_months.keys())
             with _cache_lock:
                 trends = {}
-                for p in sorted(_valid_months.keys()):
+                for p in trend_keys:
                     c = _data_cache.get(p)
                     if c:
                         trends[p] = c["data"].get("summary", {})

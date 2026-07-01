@@ -1297,6 +1297,7 @@ function render(data) {
   window._curPeriod=curPeriod;
   buildPeriodOpts();
 
+  var h='';
   var s=data.summary||{};
   var cash=parseFloat((s['现金结余']||'0').replace(/[^\d.]/g,''))||0;
   var mt_=parseFloat((s['美团']||'0').replace(/[^\d.]/g,''))||0;
@@ -1855,22 +1856,24 @@ function precacheAllMonths() {
   _precacheDone = true;
   fetch('api/months').then(function(r){return r.json()}).then(function(d){
     var months = d.list || [];
-    months.forEach(function(p){
-      if (!localStorage.getItem('cache_' + p)) {
-        fetch('api/data?period=' + encodeURIComponent(p))
-          .then(function(r){return r.json()})
-          .then(function(data){
-            if (data && data.period && data._data_hash) {
-              localStorage.setItem('cache_' + p, JSON.stringify({
-                period: data.period, summary: data.summary, daily: data.daily,
-                trends: data.trends, available: data.available, _data_hash: data._data_hash
-              }));
-              logFE('precache_ok: ' + p);
-            }
-          })
-          .catch(function(){});
-      }
-    });
+    var idx=0;
+    function next(){
+      if(idx>=months.length) return;
+      var p=months[idx++];
+      if(localStorage.getItem('cache_'+p)){ next(); return; }
+      fetch('api/data?period='+encodeURIComponent(p))
+        .then(function(r){return r.json()})
+        .then(function(data){
+          if(data&&data.period&&data._data_hash){
+            localStorage.setItem('cache_'+p, JSON.stringify({
+              period:data.period,summary:data.summary,daily:data.daily,
+              trends:data.trends,available:data.available,_data_hash:data._data_hash
+            }));
+            logFE('precache_ok: '+p);
+          }
+        }).catch(function(){}).then(next);
+    }
+    next();next();next(); // 3 concurrent
   }).catch(function(){});
 }
 setTimeout(precacheAllMonths, 5000);
@@ -2000,7 +2003,7 @@ function refreshData(){
     })
     .catch(function(){});
 }
-setTimeout(function(){ setInterval(refreshData, 25000); }, 10000);
+setTimeout(function(){ setInterval(refreshData, 30000); }, 10000);
 
 function toggleTheme(){
   var html=document.documentElement;

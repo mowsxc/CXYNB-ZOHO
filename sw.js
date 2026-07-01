@@ -11,7 +11,13 @@ var ASSETS = [
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
-      return cache.addAll(ASSETS).catch(function(e){ console.warn('SW cache addAll failed:', e); });
+      return Promise.all(ASSETS.map(function(url) {
+        return fetch(url).then(function(r) {
+          if (r.ok) cache.put(url, r);
+        }).catch(function(e) {
+          console.warn('SW cache fail:', url, e.message);
+        });
+      }));
     })
   );
   self.skipWaiting();

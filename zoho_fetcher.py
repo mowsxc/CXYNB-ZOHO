@@ -10,7 +10,7 @@ import urllib.request
 import urllib.error
 
 
-def fetch_sheet(url, timeout=15):
+def fetch_sheet(url, timeout=30):
     """从 Zoho 发布的 HTML 表格抓取数据，返回结构化 dict。
 
     参数:

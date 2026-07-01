@@ -2,7 +2,7 @@
   "name": "创新意电竞馆 - 财务报表",
   "short_name": "创新意电竞馆",
   "start_url": "./",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
