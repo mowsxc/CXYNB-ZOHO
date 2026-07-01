@@ -1836,7 +1836,7 @@ function loadMonth(requestedPeriod) {
       window._monthsData=d.available||{};
       if(d._priming) updateApiStatus('priming');
       render(d);
-      try{ trimCache(); localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
+      try{ trimCache(); localStorage.setItem('cache_'+requestedPeriod, JSON.stringify({_cache_ts:Math.floor(Date.now()/1000),period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
     })
     .catch(function(err){
       if(loadingTimer) clearTimeout(loadingTimer);
@@ -1850,6 +1850,13 @@ function loadMonth(requestedPeriod) {
 }
 
 /* Pre-cache all months data for seamless offline use */
+var _scheduledPrecache = false;
+function schedulePrecache(){
+  if(_scheduledPrecache) return;
+  _scheduledPrecache = true;
+  setTimeout(precacheAllMonths, 3000);
+}
+
 var _precacheDone = false;
 function precacheAllMonths() {
   if (_precacheDone || !navigator.onLine) return;
@@ -1860,12 +1867,19 @@ function precacheAllMonths() {
     function next(){
       if(idx>=months.length) return;
       var p=months[idx++];
-      if(localStorage.getItem('cache_'+p)){ next(); return; }
+      var cached=localStorage.getItem('cache_'+p);
+      if(cached){
+        try{
+          var ts=JSON.parse(cached)._cache_ts||0;
+          if(Date.now()-ts*1000<300000){ next(); return; } // skip if <5min old
+        }catch(e){}
+      }
       fetch('api/data?period='+encodeURIComponent(p))
         .then(function(r){return r.json()})
         .then(function(data){
           if(data&&data.period&&data._data_hash){
             localStorage.setItem('cache_'+p, JSON.stringify({
+              _cache_ts:Math.floor(Date.now()/1000),
               period:data.period,summary:data.summary,daily:data.daily,
               trends:data.trends,available:data.available,_data_hash:data._data_hash
             }));
@@ -1873,10 +1887,9 @@ function precacheAllMonths() {
           }
         }).catch(function(){}).then(next);
     }
-    next();next();next(); // 3 concurrent
+    next(); // serial, one at a time
   }).catch(function(){});
 }
-setTimeout(precacheAllMonths, 5000);
 
 /* Softer offline UX: don't show full error page if we have ANY data to show */
 function showOfflineNotice(period) {
@@ -1923,8 +1936,9 @@ fetchWithRetry('api/data',3,1000)
     render(d);
     try{
       var p=d.period||'';
-      if(p){ trimCache(); localStorage.setItem('cache_'+p, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }
+      if(p){ trimCache(); localStorage.setItem('cache_'+p, JSON.stringify({_cache_ts:Math.floor(Date.now()/1000),period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }
     }catch(e){}
+    schedulePrecache();
   })
   .catch(function(err){
     logFE('fetch_fail: '+err.message);
@@ -1999,11 +2013,12 @@ function refreshData(){
       if(window._curPeriod&&d.period!==window._curPeriod) return;
       window._monthsData=d.available||{};
       render(d);
-      try{ trimCache(); localStorage.setItem('cache_'+d.period, JSON.stringify({period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
+      try{ trimCache(); localStorage.setItem('cache_'+d.period, JSON.stringify({_cache_ts:Math.floor(Date.now()/1000),period:d.period,summary:d.summary,daily:d.daily,trends:d.trends,available:d.available,_data_hash:d._data_hash})); }catch(e){}
+      schedulePrecache();
     })
     .catch(function(){});
 }
-setTimeout(function(){ setInterval(refreshData, 30000); }, 10000);
+setTimeout(function(){ setInterval(refreshData, 30000); }, 5000);
 
 function toggleTheme(){
   var html=document.documentElement;
