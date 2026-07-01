@@ -1906,17 +1906,22 @@ function precacheAllMonths() {
     function next(){
       if(idx>=months.length) return;
       var p=months[idx++];
-      var cached=localStorage.getItem('cache_'+p);
-      if(cached){
-        try{
-          var ts=JSON.parse(cached)._cache_ts||0;
-          if(Date.now()-ts*1000<300000){ next(); return; } // skip if <5min old
-        }catch(e){}
-      }
       fetch('api/data?period='+encodeURIComponent(p))
         .then(function(r){return r.json()})
         .then(function(data){
           if(data&&data.period&&data._data_hash){
+            var cached=localStorage.getItem('cache_'+p);
+            if(cached){
+              try{
+                var old=JSON.parse(cached);
+                if(old._data_hash===data._data_hash){
+                  /* hash unchanged: just update timestamp */
+                  old._cache_ts=Math.floor(Date.now()/1000);
+                  localStorage.setItem('cache_'+p, JSON.stringify(old));
+                  next(); return;
+                }
+              }catch(e){}
+            }
             localStorage.setItem('cache_'+p, JSON.stringify({
               _cache_ts:Math.floor(Date.now()/1000),
               period:data.period,summary:data.summary,daily:data.daily,
