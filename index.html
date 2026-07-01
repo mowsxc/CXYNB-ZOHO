@@ -2257,12 +2257,6 @@ function initTableScroll(){
 
 <script>
 if ("serviceWorker" in navigator) {
-  var refreshing = false;
-  navigator.serviceWorker.addEventListener("controllerchange", function() {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
-  });
   navigator.serviceWorker.register("sw.js?v=3").then(function(reg) {
     logFE('sw_reg_ok scope='+reg.scope);
   }).catch(function(e) {
