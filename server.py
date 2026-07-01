@@ -177,7 +177,7 @@ def _background_refresh():
                 if not is_current and cycle % _historical_period != 0:
                     continue
                 try:
-                    data = fetch_sheet(url, timeout=15)
+                    data = fetch_sheet(url)
                     data["period"] = normalize_period(data.get("period", ""))
                     h = _data_hash(data)
                     with _cache_lock:

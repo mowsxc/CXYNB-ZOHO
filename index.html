@@ -1420,7 +1420,6 @@ function render(data) {
 
 
   document.getElementById('syncLabel').textContent='SYNC ' + new Date().toLocaleString('zh-CN');
-  var contentEl=document.getElementById('content');
   var newHash=data._data_hash||'';
   var curPeriod=data.period||'';
 
@@ -1444,32 +1443,71 @@ function render(data) {
     var tip=document.getElementById('trendTip');
     if(tip){ tip.style.display='none'; tip.style.opacity='1'; }
     var tbody=document.getElementById('dailyBody');
+    var dailyData=(data.daily||[]).slice().reverse();
     if(tbody){
-      var daily=(data.daily||[]).slice().reverse();
-      var filtered=[];
-      for(var i=0;i<daily.length;i++){ if(hasData(daily[i])) filtered.push(daily[i]); }
-      var tb='';
-      var lastDay='';
-      for(var i=0;i<filtered.length;i++){
-        var r=filtered[i];
-        var day=r['日期']||'';
-        var divider=day!==lastDay&&i>0?' day-divider':'';
-        var showDay=day!==lastDay?day:'';
-        lastDay=day;
-        var shift=r['班次']||'';
-        tb+='<tr class="'+divider+'">';
-        tb+='<td class="cell-date">'+showDay+'</td>';
-        tb+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
-        tb+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
-        tb+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
-        tb+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
-        tb+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
-        tb+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
-        tb+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
-        tb+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
-        tb+='</tr>';
+      if(dailyData.length===0){
+        /* No data: remove the table */
+        var tw=tbody.closest('.table-scroll');
+        if(tw) tw.remove();
+      } else {
+        var filtered=[];
+        for(var i=0;i<dailyData.length;i++){ if(hasData(dailyData[i])) filtered.push(dailyData[i]); }
+        var tb='';
+        var lastDay='';
+        for(var i=0;i<filtered.length;i++){
+          var r=filtered[i];
+          var day=r['日期']||'';
+          var divider=day!==lastDay&&i>0?' day-divider':'';
+          var showDay=day!==lastDay?day:'';
+          lastDay=day;
+          var shift=r['班次']||'';
+          tb+='<tr class="'+divider+'">';
+          tb+='<td class="cell-date">'+showDay+'</td>';
+          tb+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
+          tb+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
+          tb+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
+          tb+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
+          tb+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
+          tb+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
+          tb+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
+          tb+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
+          tb+='</tr>';
+        }
+        tbody.innerHTML=tb;
       }
-      tbody.innerHTML=tb;
+    } else if(dailyData.length>0) {
+      /* Table doesn't exist but data has rows - build full table after chart */
+      var chartSvg=document.getElementById('chartSvg');
+      if(chartSvg){
+        var tableHTML='<div class="table-scroll"><table><caption style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">每日明细</caption><thead><tr>';
+        var cols=['日期','班次','美团','网费','售货','支出','退款','支出明细','退款明细'];
+        for(var ci=0;ci<cols.length;ci++){ var ac=(ci>=2&&ci<=6)?' align-right':''; tableHTML+='<th class="'+ac+'">'+cols[ci]+'</th>'; }
+        tableHTML+='</tr></thead><tbody id="dailyBody">';
+        var filtered=[];
+        for(var i=0;i<dailyData.length;i++){ if(hasData(dailyData[i])) filtered.push(dailyData[i]); }
+        var lastDay='';
+        for(var i=0;i<filtered.length;i++){
+          var r=filtered[i];
+          var day=r['日期']||'';
+          var divider=day!==lastDay&&i>0?' day-divider':'';
+          var showDay=day!==lastDay?day:'';
+          lastDay=day;
+          var shift=r['班次']||'';
+          tableHTML+='<tr class="'+divider+'">';
+          tableHTML+='<td class="cell-date">'+showDay+'</td>';
+          tableHTML+='<td class="cell-shift '+(shift==='白班'?'shift-day':'shift-night')+'">'+shift+'</td>';
+          tableHTML+='<td class="cell-mt align-right">'+fmOrBlank(r['美团'])+'</td>';
+          tableHTML+='<td class="cell-wf align-right">'+fmOrBlank(r['网费'])+'</td>';
+          tableHTML+='<td class="cell-sl align-right">'+fmOrBlank(r['售货'])+'</td>';
+          tableHTML+='<td class="cell-ex align-right">'+fmOrBlank(r['支出'])+'</td>';
+          tableHTML+='<td class="cell-rf align-right">'+fmOrBlank(getV(r,'退款'))+'</td>';
+          tableHTML+='<td class="cell-memo" title="'+(r['支出明细']||'')+'">'+txtOrBlank(r['支出明细'])+'</td>';
+          tableHTML+='<td class="cell-memo" title="'+(r['退款明细']||'')+'">'+txtOrBlank(r['退款明细'])+'</td>';
+          tableHTML+='</tr>';
+        }
+        tableHTML+='</tbody></table></div>';
+        chartSvg.insertAdjacentHTML('afterend', tableHTML);
+      }
     }
     /* --- Rebuild card backs (flip side) --- */
     var tkeysAll=Object.keys(data.trends||{}).sort();
