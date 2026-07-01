@@ -328,7 +328,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 pass
             json_response(self, {"ok": True})
             return
-        serve_static(self.path, self)
+        serve_static(path, self)
 
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -494,7 +494,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             json_response(self, {"ts": time.time(), "cached": list(_data_cache.keys()), "timestamps": ts_map, "priming": is_priming})
             return
 
-        serve_static(self.path, self)
+        serve_static(path, self)
 
     def log_message(self, format, *args):
         pass

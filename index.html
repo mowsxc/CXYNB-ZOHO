@@ -1420,6 +1420,7 @@ function render(data) {
 
 
   document.getElementById('syncLabel').textContent='SYNC ' + new Date().toLocaleString('zh-CN');
+  var contentEl=document.getElementById('content');
   var newHash=data._data_hash||'';
   var curPeriod=data.period||'';
 
