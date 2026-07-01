@@ -247,7 +247,7 @@ def serve_static(path, handler):
             ".html": "text/html; charset=utf-8",
             ".js": "application/javascript; charset=utf-8",
             ".css": "text/css; charset=utf-8",
-            ".json": "application/json",
+            ".json": "application/json; charset=utf-8",
             ".png": "image/png",
             ".svg": "image/svg+xml",
         }.get(ext, "application/octet-stream")
@@ -263,7 +263,7 @@ def serve_static(path, handler):
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data:; "
-            "connect-src 'self'"
+            "connect-src 'self' https://sheet.zohopublic.com.cn https://*.zoho.com https://*.zoho.com.cn; "
         )
         handler.end_headers()
         handler.wfile.write(content)

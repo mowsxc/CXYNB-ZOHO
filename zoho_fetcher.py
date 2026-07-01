@@ -6,19 +6,16 @@
 """
 
 import re
-import time
 import urllib.request
 import urllib.error
 
 
-def fetch_sheet(url, timeout=15, retries=3, backoff=2):
+def fetch_sheet(url, timeout=15):
     """从 Zoho 发布的 HTML 表格抓取数据，返回结构化 dict。
 
     参数:
         url: Zoho Sheet publishedrange 链接 (去掉 ?type=grid 等参数)
         timeout: 请求超时秒数
-        retries: 最大重试次数
-        backoff: 退避基数秒数
 
     返回:
         {
@@ -28,20 +25,12 @@ def fetch_sheet(url, timeout=15, retries=3, backoff=2):
             "daily": [{"日期": "30", "班次": "白班", ...}, ...]
         }
     """
-    last_err = None
-    for attempt in range(retries):
-        try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=timeout) as resp:
-                html = resp.read().decode("utf-8", errors="replace")
-            rows = _parse_grid(html)
-            return _build_data(rows)
-        except (urllib.error.URLError, urllib.error.HTTPError, OSError) as e:
-            last_err = e
-            if attempt < retries - 1:
-                delay = backoff * (2 ** attempt)
-                time.sleep(delay)
-    raise last_err
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        html = resp.read().decode("utf-8", errors="replace")
+
+    rows = _parse_grid(html)
+    return _build_data(rows)
 
 
 def _parse_grid(html):
